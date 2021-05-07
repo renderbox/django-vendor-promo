@@ -1,6 +1,6 @@
-from rest_framework import generics
+# from rest_framework import generics
 
-# from vendorpromo.models import SampleModel 
+# from vendorpromo.models import SampleModel
 # from vendorpromo.api.serializers import SampleModelSerializer
 
 

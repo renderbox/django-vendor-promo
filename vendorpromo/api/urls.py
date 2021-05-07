@@ -1,7 +1,7 @@
-from django.urls import path
+# from django.urls import path
 
-from vendorpromo.api import views
+# from vendorpromo.api import views
 
-urlpatterns = [
-    # path('samplemodel/list/', views.SampleModelListAPIView.as_view(), name='sample-model-list'),
-]
+# urlpatterns = [
+#     # path('samplemodel/list/', views.SampleModelListAPIView.as_view(), name='sample-model-list'),
+# ]
