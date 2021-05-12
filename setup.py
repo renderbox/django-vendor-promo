@@ -47,7 +47,7 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "Django>=3.0,<3.2",
-        # 'djangorestframework',
+        'django-autoslug',
         "django-vendor",
     ],
     extras_require={
