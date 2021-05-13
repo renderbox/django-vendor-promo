@@ -15,6 +15,9 @@ class PromoCreateView(LoginRequiredMixin, CreateView):
     model = Promo
     fields = ('__all__')
 
+    def get_initial(self):
+        return {'offer': Offer.objects.filter(site=self.request.site)}
+
 
 class PromoUpdateView(LoginRequiredMixin, UpdateView):
     model = Promo
