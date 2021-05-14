@@ -40,7 +40,7 @@ class PromoProcessorBase(object):
         Override if you need to do additional steps when deleting a Promo instance,
         such as editing the promo code in an external service if needed.
         '''
-        Promo.objects.delete(promo)
+        Promo.delete(promo)
 
     ################
     # Processor Functions

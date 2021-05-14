@@ -29,7 +29,10 @@
                     <th>{{ promo.slug }}</th>
                     <th>
                         <a href="{% url 'vendorpromo-update' promo.uuid %}" class="btn btn-sm btn-warning">{% trans 'edit' %}</a>
-                        <a href="{% url 'vendorpromo-update' promo.uuid %}" class="btn btn-sm btn-danger">{% trans 'delete' %}</a>
+                        <form action="{% url 'vendorpromo-delete' promo.uuid %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">{% trans 'delete' %}</button>
+                        </form>
                     </th>
                 </tr>
                 {% endfor %}

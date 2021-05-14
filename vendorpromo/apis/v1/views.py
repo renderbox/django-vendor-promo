@@ -1,10 +1,15 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ObjectDoesNotExist
+from django.http.response import HttpResponseNotFound
 from django.shortcuts import redirect
+from django.utils.translation import ugettext as _
 from django.views import View
 
 from vendorpromo.processors import PromoProcessor
+from vendorpromo.models import Promo
 
 promo_processor = PromoProcessor
+
 
 class ValidateCodeCheckoutProcess(LoginRequiredMixin, View):
     """
@@ -42,10 +47,15 @@ class ValidateLinkCode(View):
     redirect to cart.
     """
     def post(self, request, *args, **kwargs):
+        # Should code be unique to sites, I am guessing yes. 
+        try:
+            promo = Promo.objects.get(code=request.POST.get('code'))
+        except ObjectDoesNotExist:
+            return HttpResponseNotFound(_("Invalid Promo Code"))
         # get Promo instance
         # check if site and promo.offer.site are the same
         # initialize configured PromoProcessor
         # validate code and redeem code through processor
         ## if invalid return msg error.
         # call redirect to vendor.views.vendor.AddToCartView (Which will redirect to the cart view)
-        return redirect("vendor:add-to-cart")
+        return redirect('vendor:cart')
