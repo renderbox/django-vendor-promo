@@ -2,12 +2,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.views import View
 
+from vendorpromo.processors import PromoProcessor
+
+promo_processor = PromoProcessor
 
 class ValidateCodeCheckoutProcess(LoginRequiredMixin, View):
     """
     When a customer is applying a code during the checkout process
     the function will check if the entered code is valid to the items
-    in the cart. If valid it will swap the Offer with the Offer that
+    in the cart. If valsid it will swap the Offer with the Offer that
     has that promo code. If not it will display an error message.
     In both cases it will redirect to the view that called the
     endpoint.
