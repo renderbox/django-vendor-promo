@@ -1,5 +1,3 @@
-from django.utils import timezone
-
 from vendorpromo.models import Promo
 
 
@@ -10,6 +8,8 @@ class PromoProcessorBase(object):
     promo = None
     invoice = None
     redeemed = False
+
+    response_error = None
     redeem_response = None
     confirm_response = None
 
