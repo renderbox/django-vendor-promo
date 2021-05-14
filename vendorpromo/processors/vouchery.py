@@ -20,25 +20,29 @@ class VoucheryProcessor(PromoProcessorBase):
         # if response ok return True
         # else self.response_error = error from response return False
         raise NotImplementedError
+    
+    def get_headers(self):
+        return {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.BARRER_KEY}"
+        }
 
     ############################
     # VOUCHERY API CALLS
 
     #############
     # Campaigns
-    def create_campaign(self):
-        # Voucher Example
-        # url = self.BASE_URL + self.CAMPAIGN_URL
-        # payload = {"type": "MainCampaign"}
-        # headers = {
-        #     "Accept": "application/json",
-        #     "Content-Type": "application/json"
-        # }
-        # response = requests.request("POST", url, json=payload, headers=headers)
-        # print(response.text)
-        raise NotImplementedError
+    def create_campaign(self, name, description):
+        url = self.BASE_URL + self.CAMPAIGN_URL
+        payload = {
+            "type": "MainCampaign",
+            "name": name,
+            "description": description
+        }
+        return requests.request("POST", url, json=payload, headers=self.get_headers())
 
-    def get_campaign(self):
+    def get_campaign(self, id):
         raise NotImplementedError
 
     def update_campaign(self):
