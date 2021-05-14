@@ -1,7 +1,7 @@
 from django.urls import path
 
-from core import views
+from . import views
 
 urlpatterns = [
-    path("", views.DjangoVendorPromoIndexView.as_view(), name="vendor_index"),
+    path("", views.EnterPromoCode.as_view(), name="vendorpromo-index"),
 ]

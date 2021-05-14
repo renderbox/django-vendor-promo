@@ -6,7 +6,17 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from vendor.models import Offer
-from vendor.models.base import CreateUpdateModelBase
+
+
+class CreateUpdateModelBase(models.Model):
+    '''
+    This is a shared models base that provides created & updated timestamp fields
+    '''
+    created = models.DateTimeField("date created", auto_now_add=True)
+    updated = models.DateTimeField("last updated", auto_now=True)
+
+    class Meta:
+        abstract = True
 
 
 class Promo(CreateUpdateModelBase):
@@ -21,9 +31,9 @@ class Promo(CreateUpdateModelBase):
     campaign_id = models.CharField(_("Campaign Identifier"), max_length=80, blank=True, null=True)
     campaign_name = models.CharField(_("Campaign Name"), max_length=100, blank=True, null=True)
     campaign_description = models.TextField(_("Campaign Description"), blank=True, null=True)
-    meta = models.JSONField(_("Meta"), default=dict)
-    slug = AutoSlugField(populate_from='name', unique_with='site__id')
+    meta = models.JSONField(_("Meta"), default=dict, blank=True, null=True)
     offer = models.ForeignKey(Offer, blank=False, null=False, related_name="promo", on_delete=models.CASCADE)
+    slug = AutoSlugField(populate_from='name', unique_with='offer__site__id')
 
     objects = models.Manager()
 
