@@ -61,4 +61,5 @@ class ValidateLinkCode(AddToCartView):
         # validate code and redeem code through processor
         ## if invalid return msg error.
         # call redirect to vendor.views.vendor.AddToCartView (Which will redirect to the cart view)
-        return super().post(request, *args, kwargs={"slug": promo.offer.slug})
+        self.kwargs['slug'] = promo.offer.slug
+        return super().post(request, args, kwargs)
