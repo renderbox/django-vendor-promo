@@ -1,7 +1,18 @@
+
+from django.contrib.auth import get_user_model
 from django.test import TestCase
+
+from unittest import skipIf
+
+from vendorpromo.processors.vouchery import VoucheryProcessor
+from vendorpromo.config import VENDOR_PROMO_PROCESSOR
+
+User = get_user_model()
 
 
 class BaseProcessorTests(TestCase):
+
+    fixtures = ['user', 'unit_test']
 
     def setUp(self):
         pass
@@ -49,10 +60,13 @@ class BaseProcessorTests(TestCase):
         raise NotImplementedError
 
 
+@skipIf(VENDOR_PROMO_PROCESSOR != "vouchery.VoucheryProcessor", "VoucheryPromoProcessor not set")
 class VoucherProcessorTests(TestCase):
 
+    fixtures = ['user', 'unit_test']
+
     def setUp(self):
-        pass
+        self.promo_processor = VoucheryProcessor
 
     # Utils
     def test_check_response_success(self, response):
@@ -72,8 +86,12 @@ class VoucherProcessorTests(TestCase):
 
     #############
     # Campaigns
-    def test_create_campaign_success(self, name, description):
-        raise NotImplementedError
+    def test_create_campaign_success(self):
+        campaign_name = "Django Vendor Promo Campaign"
+        processor = self.promo_processor()
+        processor.create_campaign(campaign_name)
+        self.assertTrue(processor.is_request_success)
+        self.assertIn("id", processor.response)
 
     def test_create_campaign_fail(self, name, description):
         raise NotImplementedError
