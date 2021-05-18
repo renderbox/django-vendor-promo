@@ -47,15 +47,17 @@ setup(
     python_requires=">=3.6",
     install_requires=[
         "Django>=3.0,<3.2",
-        # 'djangorestframework',
+        'django-autoslug',
+        'django-extensions',
         "django-vendor",
+        'iso4217',
     ],
     extras_require={
         "dev": [  # Packages needed by developers
+            'dj-database-url',
+            'psycopg2-binary',
             "django-crispy-forms",
             "django-allauth",
-            "django-extensions",
-            "ipython",
         ],
         "test": [],  # Packages needed to run tests
         "prod": [],  # Packages needed to run in the deployment
