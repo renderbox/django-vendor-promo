@@ -5,8 +5,11 @@ from django.shortcuts import redirect
 from django.utils.translation import ugettext as _
 from django.views import View
 
+from vendor.views.vendor import AddToCartView
+
 from vendorpromo.processors import PromoProcessor
 from vendorpromo.models import Promo
+
 
 promo_processor = PromoProcessor
 
@@ -33,7 +36,7 @@ class ValidateCodeCheckoutProcess(LoginRequiredMixin, View):
         return redirect(request.META.get('HTTP_REFERER', "vendor:cart"))
 
 
-class ValidateLinkCode(View):
+class ValidateLinkCode(AddToCartView):
     """
     Endpoint used when a customer clicks on a link that has a promo code.
     The endpoint will validate the promo code and if valid it will add the
@@ -58,4 +61,5 @@ class ValidateLinkCode(View):
         # validate code and redeem code through processor
         ## if invalid return msg error.
         # call redirect to vendor.views.vendor.AddToCartView (Which will redirect to the cart view)
-        return redirect('vendor:cart')
+        self.kwargs['slug'] = promo.offer.slug
+        return super().post(request, args, kwargs)

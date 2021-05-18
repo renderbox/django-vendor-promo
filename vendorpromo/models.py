@@ -2,12 +2,15 @@ import uuid
 
 from autoslug import AutoSlugField
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from vendor.models import Offer
 
 
+#######################################
+# ABSTRACT MODELS
 class CreateUpdateModelBase(models.Model):
     '''
     This is a shared models base that provides created & updated timestamp fields
@@ -19,6 +22,8 @@ class CreateUpdateModelBase(models.Model):
         abstract = True
 
 
+#######################################
+# MODELS
 class Promo(CreateUpdateModelBase):
     '''
     This is the base class that all Promo should inherit from.
@@ -40,3 +45,11 @@ class Promo(CreateUpdateModelBase):
     class Meta:
         verbose_name = "Promo"
         verbose_name_plural = "Promos"
+
+    def clean(self):
+        if Promo.objects.filter(code=self.code, offer__site=self.offer.site).exists():
+            raise ValidationError(_("Code already exists"))
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)

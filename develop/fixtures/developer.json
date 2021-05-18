@@ -19,7 +19,7 @@
         "site": 1,
         "slug": "mouse-t-shirt",
         "available": true,
-        "description": "Powerful T-Shirt",
+        "description": {},
         "meta": { "msrp": { "default": "usd", "usd":19.99 }},
         "classification": [],
         "offers": [
@@ -40,7 +40,7 @@
         "site": 1,
         "slug": "wheel-of-cheddar",
         "available": true,
-        "description": "This is a food item",
+        "description": {},
         "meta": { "msrp": { "default": "usd", "usd":19.99 }},
         "classification": [],
         "offers": [
@@ -61,7 +61,7 @@
         "site": 1,
         "slug": "hamster-wheel",
         "available": true,
-        "description": "",
+        "description": {},
         "meta": { "msrp": { "default": "usd", "usd":19.99 }},
         "classification": [],
         "offers": [
@@ -82,7 +82,7 @@
         "site": 1,
         "slug": "vendor-licence",
         "available": true,
-        "description": "",
+        "description": {},
         "meta": { "msrp": { "default": "usd", "usd":112.99 }},
         "classification": [],
         "offers": [
@@ -103,11 +103,12 @@
         "site": 1,
         "slug": "python-licence",
         "available": true,
-        "description": "",
+        "description": {},
         "meta": { "msrp": { "default": "usd", "usd":1.99 }},
         "classification": [],
         "offers": [
-            5
+            5,
+            6
         ],
         "receipts": []
     }
@@ -188,6 +189,7 @@
         "slug": "mouse-t-shirt",
         "site": 1,
         "name": "Mouse T-Shirt",
+        "offer_description": "",
         "start_date": "2020-06-30T00:53:23Z",
         "end_date": null,
         "terms": 200,
@@ -208,6 +210,7 @@
         "slug": "wheel-of-wensleydale",
         "site": 1,
         "name": "Wheel of Wensleydale",
+        "offer_description": "",
         "start_date": "2020-06-30T02:34:32Z",
         "end_date": null,
         "terms": 200,
@@ -228,6 +231,7 @@
         "slug": "hamster-wheel",
         "site": 1,
         "name": "Hamster Wheel",
+        "offer_description": "",
         "start_date": "2020-06-30T02:38:16Z",
         "end_date": null,
         "terms": 200,
@@ -248,6 +252,7 @@
         "slug": "vendor-month",
         "site": 1,
         "name": "Vendor Month Subscription",
+        "offer_description": "",
         "start_date": "2020-06-30T02:38:16Z",
         "end_date": null,
         "terms": 101,
@@ -270,6 +275,7 @@
         "slug": "python-year",
         "site": 1,
         "name": "Python Year Subscription",
+        "offer_description": "",
         "start_date": "2020-06-30T02:38:16Z",
         "end_date": null,
         "terms": 112,
@@ -292,6 +298,7 @@
         "slug": "python-year-10-off",
         "site": 1,
         "name": "Python Year Subscription - 10% off",
+        "offer_description": "",
         "start_date": "2020-06-30T02:38:16Z",
         "end_date": null,
         "terms": 112,
