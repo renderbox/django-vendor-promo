@@ -13,99 +13,9 @@ class VoucheryProcessor(PromoProcessorBase):
     BASE_URL = VENDOR_PROMO_PROCESSOR_URL
     BARRER_KEY = VENDOR_PROMO_PROCESSOR_BARRER_KEY
 
-    CAMPAIGN_URL = 'campaigns/'
-    VOUCHER_URL = 'vouchers/'
-    REDEMPTION_URL = 'redemptions/'
-
-    ############################
-    # Utils
-    def process_response(self):
-        self.response_content = json.loads(self.response.content)
-        self.response_message = self.response_content.get('message')
-        if "error" in self.response_content or self.response_content.get('type') == "Error":
-            self.response_errors = self.response_content.get("errors")
-            self.is_request_success = False
-        else:
-            self.is_request_success = True
-
-    def get_headers(self):
-        return {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.BARRER_KEY}"
-        }
-
-    def get_url(self, path_route):
-        """
-        Function returns the full url to make the api call to vouchery's
-        endpoint. It recieves a list of headeres that will be appended
-        to the BASE_URLS.
-        params:
-        path_route: List of string path_route
-        returns:
-        full_url: string with the appended path_route
-        """
-        path_route.insert(0, self.BASE_URL)
-        return "/".join(path_route)
-
-    ############################
-    # VOUCHERY API CALLS
-    #############
-    # Campaigns
-    def create_campaign(self, name, description=""):
-        url = self.get_url([self.CAMPAIGN_URL])
-        if not name:
-            raise ValueError(_("name is required to create a campaign"))
-        payload = {
-            "type": "MainCampaign",
-            "name": name,
-            # TODO: Add ability to choose from [discount, loyalty, gift_card]
-            "template": "discount",
-            "description": description
-        }
-
-        self.response = requests.request("POST", url, json=payload, headers=self.get_headers())
-        self.process_response()
-
-    def get_campaign(self, id):
-        raise NotImplementedError
-
-    def update_campaign(self):
-        raise NotImplementedError
-
-    def delete_campaign(self):
-        raise NotImplementedError
-
-    #############
-    # Redeem
-    def create_redeem(self):
-        raise NotImplementedError
-
-    def get_redeem(self):
-        raise NotImplementedError
-
-    def update_redeem(self):
-        raise NotImplementedError
-
-    def delete_redeem(self):
-        raise NotImplementedError
-
-    def confirm_redeem(self):
-        raise NotImplementedError
-
-    #############
-    # Voucher
-    def create_voucher(self):
-        raise NotImplementedError
-
-    def get_voucher(self):
-        raise NotImplementedError
-
-    def update_voucher(self):
-        raise NotImplementedError
-
-    def delete_voucher(self):
-        raise NotImplementedError
+    CAMPAIGN_URL = 'campaigns'
+    VOUCHER_URL = 'vouchers'
+    REDEMPTION_URL = 'redemptions'
 
     ################
     # Promotion Management
@@ -142,6 +52,124 @@ class VoucheryProcessor(PromoProcessorBase):
         if not self.process_response(response):
             return None
         Promo.objects.delete(promo)
+
+    ############################
+    # Utils
+    def process_response(self):
+        if (b'[]' == self.response.content or b'' == self.response.content) and (self.response.status_code >= 200 and self.response.status_code < 300):
+            self.is_request_success = True
+            return None
+        self.response_content = json.loads(self.response.content)
+        if not isinstance(self.response_content, list):
+            self.response_message = self.response_content.get('message')
+            if self.response_content.get('type') == "Error":
+                if "error" in self.response_content:
+                    self.response_errors = self.response_content.get("error")
+                else:
+                    self.response_errors = self.response_content.get("errors")
+                self.is_request_success = False
+            else:
+                self.is_request_success = True
+        else:
+            if self.response.status_code == 200:
+                self.is_request_success = True
+
+    def get_headers(self):
+        return {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.BARRER_KEY}"
+        }
+
+    def get_url(self, path_route):
+        """
+        Function returns the full url to make the api call to vouchery's
+        endpoint. It recieves a list of headeres that will be appended
+        to the BASE_URLS.
+        params:
+        path_route: List of string path_route
+        returns:
+        full_url: string with the appended path_route
+        """
+        path_route.insert(0, self.BASE_URL)
+        return "/".join(path_route)
+
+    ############################
+    # VOUCHERY API CALLS
+    #############
+    # Campaigns
+    def create_campaign(self, name, **kwargs):
+        url = self.get_url([self.CAMPAIGN_URL])
+
+        if not name:
+            raise ValueError(_("name is required to create a campaign"))
+
+        base_payload = {
+            "type": "MainCampaign",
+            "name": name,
+            "template": "discount",
+        }
+        payload = {**base_payload, **kwargs}
+
+        self.response = requests.request("POST", url, json=payload, headers=self.get_headers())
+        self.process_response()
+
+    def get_campaigns(self, **kwargs):
+        url = self.get_url([self.CAMPAIGN_URL])
+
+        if kwargs:
+            querystring = {**kwargs}
+        self.response = requests.request("GET", url, headers=self.get_headers(), params=querystring)
+        self.process_response()
+
+    def get_campaign(self, campaign_id):
+        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+
+        self.response = requests.request("GET", url, headers=self.get_headers())
+        self.process_response()
+
+    def update_campaign(self):
+        raise NotImplementedError
+
+    def delete_campaign(self, campaign_id):
+        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+
+        if not campaign_id:
+            raise ValueError(_("campaign_id is required to delete a campaign"))
+
+        self.response = requests.request("DELETE", url, headers=self.get_headers())
+        self.process_response()
+
+    #############
+    # Redeem
+    def create_redeem(self):
+        raise NotImplementedError
+
+    def get_redeem(self):
+        raise NotImplementedError
+
+    def update_redeem(self):
+        raise NotImplementedError
+
+    def delete_redeem(self):
+        raise NotImplementedError
+
+    def confirm_redeem(self):
+        raise NotImplementedError
+
+    #############
+    # Voucher
+    def create_voucher(self):
+        raise NotImplementedError
+
+    def get_voucher(self):
+        raise NotImplementedError
+
+    def update_voucher(self):
+        raise NotImplementedError
+
+    def delete_voucher(self):
+        raise NotImplementedError
 
     ################
     # Processor Functions
