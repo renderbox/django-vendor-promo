@@ -176,8 +176,11 @@ class VoucheryProcessor(PromoProcessorBase):
         self.response = requests.request("POST", url, json=reward_params, headers=self.get_headers())
         self.process_response()
 
-    def get_reward(self):
-        raise NotImplementedError
+    def get_reward(self, reward_id):
+        url = self.get_url([self.REWARDS_URL, str(reward_id)])
+
+        self.response = requests.request('GET', url, headers=self.get_headers())
+        self.process_response()
 
     def update_reward(self):
         raise NotImplementedError
@@ -229,8 +232,8 @@ class VoucheryProcessor(PromoProcessorBase):
 
     #############
     # Redeem
-    def create_redeem(self, voucher_id, transaction_id, total_cost):
-        url = self.get_url([self.VOUCHER_URL, str(voucher_id), self.REDEMPTION_URL])
+    def create_redeem(self, voucher_code, transaction_id, total_cost):
+        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
         payload = {
             "transaction_id": transaction_id,
@@ -240,17 +243,41 @@ class VoucheryProcessor(PromoProcessorBase):
         self.response = requests.request("POST", url, json=payload, headers=self.get_headers())
         self.process_response()
 
-    def get_redeem(self):
-        raise NotImplementedError
+    def get_redeems(self, campaign_id):
+        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id), self.REDEMPTION_URL])
 
-    def update_redeem(self):
-        raise NotImplementedError
+        self.response = requests.request("GET", url, headers=self.get_headers())
+        self.process_response()
 
-    def delete_redeem(self):
-        raise NotImplementedError
+    def get_redeem(self, voucher_code, transaction_id):
+        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
-    def confirm_redeem(self):
-        raise NotImplementedError
+        querystring = {
+            "transaction_id": transaction_id
+        }
+
+        self.response = requests.request("GET", url, params=querystring, headers=self.get_headers())
+        self.process_response()
+
+    def delete_redeem(self, voucher_code, transaction_id):
+        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+
+        querystring = {
+            "transaction_id": transaction_id
+        }
+
+        self.response = requests.request("DELETE", url, params=querystring, headers=self.get_headers())
+        self.process_response()
+
+    def confirm_redeem(self, voucher_code, transaction_id):
+        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+
+        querystring = {
+            "transaction_id": transaction_id
+        }
+
+        self.response = requests.request("PATCH", url, params=querystring, headers=self.get_headers())
+        self.process_response()
 
     ################
     # Processor Functions
