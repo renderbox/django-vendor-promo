@@ -9,9 +9,11 @@ class PromoProcessorBase(object):
     invoice = None
     redeemed = False
 
+    response = None
+    response_message = None
+    response_content = None
     response_error = None
-    redeem_response = None
-    confirm_response = None
+    is_request_success = False
 
     def __init__(self, invoice=None):
         if invoice is not None:

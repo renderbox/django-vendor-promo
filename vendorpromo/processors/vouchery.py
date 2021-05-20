@@ -1,8 +1,11 @@
 import requests
+import json
+
+from django.utils.translation import ugettext_lazy as _
 
 from vendorpromo.config import VENDOR_PROMO_PROCESSOR_URL, VENDOR_PROMO_PROCESSOR_BARRER_KEY
 from vendorpromo.models import Promo
-from vendorpromo.processors import PromoProcessorBase
+from vendorpromo.processors.base import PromoProcessorBase
 
 
 class VoucheryProcessor(PromoProcessorBase):
@@ -10,42 +13,132 @@ class VoucheryProcessor(PromoProcessorBase):
     BASE_URL = VENDOR_PROMO_PROCESSOR_URL
     BARRER_KEY = VENDOR_PROMO_PROCESSOR_BARRER_KEY
 
-    CAMPAIGN_URL = 'campaigns/'
-    VOUCHER_URL = 'vouchers/'
-    REDEMPTION_URL = 'redemptions/'
+    CAMPAIGN_URL = 'campaigns'
+    VOUCHER_URL = 'vouchers'
+    REDEMPTION_URL = 'redemptions'
+
+    ################
+    # Promotion Management
+    def create_promo(self, promo_form):
+        '''
+        Before saving the promo model instance form the form it calls
+        Vouchery.io API to create it and checks if it was successful. If
+        it was it will save the promo instance record. 
+        '''
+        promo = promo_form.save(commit=False)
+        response = self.create_campaign(promo.campaign_name)
+        if not self.process_response(response):
+            return None
+        promo.save()
+
+    def update_promo(self, promo_form):
+        '''
+        Before updateing the promo record it calls Vouchery.io API to
+        update the voucher on their end. If successful it saves the
+        updated promo instance.
+        '''
+        promo = promo_form.save(commit=False)
+        response = self.update_voucher(promo)
+        if not self.process_response(response):
+            return None
+        promo.save()
+
+    def delete_promo(self, promo):
+        '''
+        Override if you need to do additional steps when deleting a Promo instance,
+        such as editing the promo code in an external service if needed.
+        '''
+        response = self.delete_voucher(promo)
+        if not self.process_response(response):
+            return None
+        Promo.objects.delete(promo)
 
     ############################
     # Utils
-    def check_response(self, response):
-        # if response ok return True
-        # else self.response_error = error from response return False
-        raise NotImplementedError
+    def process_response(self):
+        if (b'[]' == self.response.content or b'' == self.response.content) and (self.response.status_code >= 200 and self.response.status_code < 300):
+            self.is_request_success = True
+            return None
+        self.response_content = json.loads(self.response.content)
+        if not isinstance(self.response_content, list):
+            self.response_message = self.response_content.get('message')
+            if self.response_content.get('type') == "Error":
+                if "error" in self.response_content:
+                    self.response_errors = self.response_content.get("error")
+                else:
+                    self.response_errors = self.response_content.get("errors")
+                self.is_request_success = False
+            else:
+                self.is_request_success = True
+        else:
+            if self.response.status_code == 200:
+                self.is_request_success = True
+
+    def get_headers(self):
+        return {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.BARRER_KEY}"
+        }
+
+    def get_url(self, path_route):
+        """
+        Function returns the full url to make the api call to vouchery's
+        endpoint. It recieves a list of headeres that will be appended
+        to the BASE_URLS.
+        params:
+        path_route: List of string path_route
+        returns:
+        full_url: string with the appended path_route
+        """
+        path_route.insert(0, self.BASE_URL)
+        return "/".join(path_route)
 
     ############################
     # VOUCHERY API CALLS
-
     #############
     # Campaigns
-    def create_campaign(self):
-        # Voucher Example
-        # url = self.BASE_URL + self.CAMPAIGN_URL
-        # payload = {"type": "MainCampaign"}
-        # headers = {
-        #     "Accept": "application/json",
-        #     "Content-Type": "application/json"
-        # }
-        # response = requests.request("POST", url, json=payload, headers=headers)
-        # print(response.text)
-        raise NotImplementedError
+    def create_campaign(self, name, **kwargs):
+        url = self.get_url([self.CAMPAIGN_URL])
 
-    def get_campaign(self):
-        raise NotImplementedError
+        if not name:
+            raise ValueError(_("name is required to create a campaign"))
+
+        base_payload = {
+            "type": "MainCampaign",
+            "name": name,
+            "template": "discount",
+        }
+        payload = {**base_payload, **kwargs}
+
+        self.response = requests.request("POST", url, json=payload, headers=self.get_headers())
+        self.process_response()
+
+    def get_campaigns(self, **kwargs):
+        url = self.get_url([self.CAMPAIGN_URL])
+
+        if kwargs:
+            querystring = {**kwargs}
+        self.response = requests.request("GET", url, headers=self.get_headers(), params=querystring)
+        self.process_response()
+
+    def get_campaign(self, campaign_id):
+        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+
+        self.response = requests.request("GET", url, headers=self.get_headers())
+        self.process_response()
 
     def update_campaign(self):
         raise NotImplementedError
 
-    def delete_campaign(self):
-        raise NotImplementedError
+    def delete_campaign(self, campaign_id):
+        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+
+        if not campaign_id:
+            raise ValueError(_("campaign_id is required to delete a campaign"))
+
+        self.response = requests.request("DELETE", url, headers=self.get_headers())
+        self.process_response()
 
     #############
     # Redeem
@@ -79,42 +172,6 @@ class VoucheryProcessor(PromoProcessorBase):
         raise NotImplementedError
 
     ################
-    # Promotion Management
-    def create_promo(self, promo_form):
-        '''
-        Before saving the promo model instance form the form it calls
-        Vouchery.io API to create it and checks if it was successful. If
-        it was it will save the promo instance record. 
-        '''
-        promo = promo_form.save(commit=False)
-        response = self.create_campaign(promo.campaign_name)
-        if not self.check_response(response):
-            return None
-        promo.save()
-
-    def update_promo(self, promo_form):
-        '''
-        Before updateing the promo record it calls Vouchery.io API to
-        update the voucher on their end. If successful it saves the
-        updated promo instance.
-        '''
-        promo = promo_form.save(commit=False)
-        response = self.update_voucher(promo)
-        if not self.check_response(response):
-            return None
-        promo.save()
-
-    def delete_promo(self, promo):
-        '''
-        Override if you need to do additional steps when deleting a Promo instance,
-        such as editing the promo code in an external service if needed.
-        '''
-        response = self.delete_voucher(promo)
-        if not self.check_response(response):
-            return None
-        Promo.objects.delete(promo)
-
-    ################
     # Processor Functions
     def is_code_valid(self, code):
         """
@@ -122,7 +179,7 @@ class VoucheryProcessor(PromoProcessorBase):
         it will create a redemption recode to be confirmed after payment.
         """
         response = self.create_redeem(code)
-        if self.check_response(response):
+        if self.process_response(response):
             return True
         return False
 
@@ -139,7 +196,7 @@ class VoucheryProcessor(PromoProcessorBase):
         confirm that the promo code was used.
         """
         response = self.confirm_redeem(code)
-        self.check_response(response)
+        self.process_response(response)
 
     def process_promo(self, offer, promo_code):
         '''
