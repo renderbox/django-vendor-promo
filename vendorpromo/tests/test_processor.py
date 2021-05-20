@@ -214,15 +214,17 @@ class VoucheryProcessorTests(TestCase):
         self.assertFalse(processor.is_request_success)
 
     def test_delete_campaign_success(self):
-        if not self.existing_campaigns:
-            create_processor = self.promo_processor()
-            create_processor.create_campaign("Test Get Campaign", **{'team': self.TEAM})
-            id = create_processor.response_content['id']
-        else:
-            id = self.existing_campaigns[0]['id']
+        campaign_params = {
+            "type": "MainCampaign",
+            "template": "discount",
+            'team': self.TEAM
+        }
+        create_processor = self.promo_processor()
+        create_processor.create_campaign(random_string(), **campaign_params)
+        campaign_id = create_processor.response_content['id']
 
         processor = self.promo_processor()
-        processor.delete_campaign(id)
+        processor.delete_campaign(campaign_id)
         self.assertTrue(processor.is_request_success)
 
     def test_delete_campaign_fail(self):
@@ -321,7 +323,7 @@ class VoucheryProcessorTests(TestCase):
         processor.create_voucher(voucher_code, campaign_id)
         processor.clear_response_variables()
 
-        processor.get_reward(sub_campaign_id)
+        processor.get_reward(reward_id)
         self.assertTrue(processor.is_request_success)
         self.assertGreater(len(processor.response_content), 0)
 
@@ -389,7 +391,7 @@ class VoucheryProcessorTests(TestCase):
         processor.create_voucher(voucher_code, campaign_id)
 
         self.assertTrue(processor.is_request_success)
-        self.assertIn('id' in processor.response_content)
+        self.assertIn('id', processor.response_content)
 
         processor.delete_voucher(voucher_code)
         processor.delete_reward(reward_id)
@@ -398,7 +400,7 @@ class VoucheryProcessorTests(TestCase):
 
     def test_create_voucher_fail(self):
         processor = self.promo_processor()
-        processor.create_voucher(-2)
+        processor.create_voucher(random_string(), -2)
         self.assertFalse(processor.is_request_success)
 
     def test_get_vouchers_success(self):
