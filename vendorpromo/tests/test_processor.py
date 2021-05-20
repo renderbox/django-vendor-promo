@@ -95,11 +95,14 @@ class VoucherProcessorTests(TestCase):
     # Campaigns
     def test_create_campaign_success(self):
         campaign_name = "Django Vendor Promo Campaign"
+        processor = self.promo_processor()
+
         if self.existing_campaigns:
             if campaign_name in [campaign['name'] for campaign in self.existing_campaigns]:
-                print(f"SKIPPING TEST: {campaign_name} already exists")
-                return None
-        processor = self.promo_processor()
+                campaign_id = next([campaign['id'] for campaign in self.existing_campaigns if campaign['name'] == campaign_name], None)
+                processor.delete_campaign(campaign_id)
+                processor.clear_response_variables()
+
         processor.create_campaign(campaign_name, **{'team': self.TEAM})
         self.assertTrue(processor.is_request_success)
         self.assertIn("id", processor.response_content)
@@ -108,11 +111,14 @@ class VoucherProcessorTests(TestCase):
     def test_create_campaign_additional_params_success(self):
         campaign_name = "Django Vendor Promo Campaign Description"
         description = 'Testing adding params'
+        processor = self.promo_processor()
+
         if self.existing_campaigns:
             if campaign_name in [campaign['name'] for campaign in self.existing_campaigns]:
-                print(f"SKIPPING TEST: {campaign_name} already exists")
-                return None
-        processor = self.promo_processor()
+                campaign_id = next([campaign['id'] for campaign in self.existing_campaigns if campaign['name'] == campaign_name])
+                processor.delete_campaign(campaign_id)
+                processor.clear_response_variables()
+
         processor.create_campaign(campaign_name, **{'description': description, 'team': self.TEAM})
         self.assertTrue(processor.is_request_success)
         self.assertIn("id", processor.response_content)
@@ -120,26 +126,29 @@ class VoucherProcessorTests(TestCase):
         processor.delete_campaign(processor.response_content['id'])
 
     def test_create_campaign_existing_name_fail(self):
+        processor = self.promo_processor()
         if not self.existing_campaigns:
             campaign_name = "Django Vendor Promo Campaign"
+            processor.create_campaign(campaign_name, **{'team': self.TEAM})
+            processor.clear_response_variables()
         else:
             campaign_name = self.existing_campaigns[0]['name']
 
-        processor = self.promo_processor()
         processor.create_campaign(campaign_name, **{'team': self.TEAM})
         self.assertFalse(processor.is_request_success)
 
     def test_get_campaign_success(self):
         campaign_name = "Test Get Campaign"
+        campaign_id = None
         if not self.existing_campaigns:
             create_processor = self.promo_processor()
-            create_processor.create_campaign(campaign_name)
-            id = create_processor.response_content['id']
+            create_processor.create_campaign(campaign_name, **{'team': self.TEAM})
+            campaign_id = create_processor.response_content['id']
         else:
-            id = self.existing_campaigns[0]['id']
+            campaign_id = self.existing_campaigns[0]['id']
             campaign_name = self.existing_campaigns[0]['name']
         processor = self.promo_processor()
-        processor.get_campaign(id)
+        processor.get_campaign(campaign_id)
         self.assertTrue(processor.is_request_success)
         self.assertEquals(campaign_name, processor.response_content['name'])
 
@@ -148,11 +157,28 @@ class VoucherProcessorTests(TestCase):
         processor.get_campaign(-2)
         self.assertFalse(processor.is_request_success)
 
-    # def test_update_campaign_success(self):
-    #     raise NotImplementedError
+    def test_update_campaign_success(self):
+        campaign_name = "Test Updateing Campaign"
+        campaign_id = None
+        update_value = {"description": "Update campaign works"}
+        if not self.existing_campaigns:
+            create_processor = self.promo_processor()
+            create_processor.create_campaign(campaign_name, **{"team": self.TEAM})
+            campaign_id = create_processor.response_content['id']
+        else:
+            campaign_name = self.existing_campaigns[0]['name']
+            campaign_id = self.existing_campaigns[0]['id']
+        processor = self.promo_processor()
+        processor.update_campaign(campaign_id, campaign_name, **update_value)
+        self.assertTrue(processor.is_request_success)
+        processor.clear_response_variables()
+        processor.get_campaign(campaign_id)
+        self.assertEquals(update_value['description'], processor.response_content['description'])
 
-    # def test_update_campaign_fail(self):
-    #     raise NotImplementedError
+    def test_update_campaign_fail(self):
+        processor = self.promo_processor()
+        processor.update_campaign(-2, "Campaign Does Not Exist")
+        self.assertFalse(processor.is_request_success)
 
     def test_delete_campaign_success(self):
         if not self.existing_campaigns:

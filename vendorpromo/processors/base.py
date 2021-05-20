@@ -10,14 +10,23 @@ class PromoProcessorBase(object):
     redeemed = False
 
     response = None
-    response_message = None
     response_content = None
     response_error = None
+    response_message = None
     is_request_success = False
 
     def __init__(self, invoice=None):
         if invoice is not None:
             self.invoice = invoice
+    
+    ################
+    # Promotion Management
+    def clear_response_variables(self):
+        self.response = None
+        self.response_content = None
+        self.response_error = None
+        self.response_message = None
+        self.is_request_success = False
 
     ################
     # Promotion Management
