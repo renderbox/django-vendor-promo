@@ -35,8 +35,69 @@ class VoucheryProcessor(PromoProcessorBase):
     VOUCHER_URL = 'vouchers'
     REDEMPTION_URL = 'redemptions'
 
+    CAMPAIGN_PARAMS = {
+        "type": "MainCampaign",
+        "template": "discount",
+        "status": "active"
+    }
+    SUBCAMPAIGN_PARAMS = {
+        "type": "SubCampaign",
+        "template": "sub_redemption",
+        "voucher_type": "generic",
+        "triggers_on": "redemption",
+        "status": "active"
+    }
+    REWARD_PARAMS = {
+        "type": "SetDiscount",
+        "discount_type": "percentage",
+        "discount_value": 0  # The actual discount is set in the Offer instance.
+    }
+
     ################
     # Promotion Management
+    def create_promo_automate(self, promo_form):
+        '''
+        This function automates the steps required to create a voucher/promo-code
+        in Vouchery. This means that it will create a campaign named affter the
+        offer's product name, a sub-campaign named after the offer's a percentage reward
+        and finally the voucher.
+        After creation, a user can login to Vouchery and change the campaigns, and
+        sub-campaigns name if desired. They should not change the promo code as it
+        needs to be sent form vendor-promo
+        '''
+        promo = promo_form.save(commit=False)
+        promo.name = f"{promo.offer.name}-{promo.code}"
+        promo.campaign_name = promo.offer.products.first().name
+
+        self.create_campaign(promo.campaign_name, **self.CAMPAIGN_PARAMS)
+
+        if not self.is_request_success:
+            raise Exception(_("Create Campaing Failed"))
+
+        promo.campaign_id = self.response_content['id']
+        self.SUBCAMPAIGN_PARAMS['parent_id'] = promo.campaign_id
+        self.clear_response_variables()
+        self.create_campaign(promo.offer.name, **self.SUBCAMPAIGN_PARAMS)
+        del(self.SUBCAMPAIGN_PARAMS['parent_id'])
+
+        if not self.is_request_success:
+            raise Exception(_("Create Sub-Campaing Failed"))
+
+        subcampaign_id = self.response_content['id']
+        self.clear_response_variables()
+        self.create_reward(subcampaign_id, **self.REWARD_PARAMS)
+
+        if not self.is_request_success:
+            raise Exception(_("Create Reward Failed"))
+
+        self.clear_response_variables()
+        self.create_voucher(promo.code, promo.campaign_id)
+
+        if not self.is_request_success:
+            raise Exception(_("Create Voucher Failed"))
+
+        promo.save()
+
     def create_promo(self, promo_form):
         '''
         Before saving the promo model instance form the form it calls
@@ -44,8 +105,8 @@ class VoucheryProcessor(PromoProcessorBase):
         it was it will save the promo instance record.
         '''
         promo = promo_form.save(commit=False)
-        response = self.create_campaign(promo.campaign_name)
-        if not self.process_response(response):
+        self.create_campaign(promo.campaign_name)
+        if not self.process_response(self.response):
             return None
         promo.save()
 
