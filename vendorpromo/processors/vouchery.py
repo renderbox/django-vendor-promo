@@ -41,7 +41,7 @@ class VoucheryProcessor(PromoProcessorBase):
         '''
         Before saving the promo model instance form the form it calls
         Vouchery.io API to create it and checks if it was successful. If
-        it was it will save the promo instance record. 
+        it was it will save the promo instance record.
         '''
         promo = promo_form.save(commit=False)
         response = self.create_campaign(promo.campaign_name)
@@ -100,7 +100,7 @@ class VoucheryProcessor(PromoProcessorBase):
             "Authorization": f"Bearer {self.BARRER_KEY}"
         }
 
-    def get_url(self, path_route):
+    def assemble_url(self, path_route):
         """
         Function returns the full url to make the api call to vouchery's
         endpoint. It recieves a list of headeres that will be appended
@@ -118,7 +118,7 @@ class VoucheryProcessor(PromoProcessorBase):
     #############
     # Campaigns
     def create_campaign(self, name, **optional_params):
-        url = self.get_url([self.CAMPAIGN_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL])
 
         if not name:
             raise ValueError(_("name is required to create a campaign"))
@@ -131,7 +131,7 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def get_campaigns(self, **querystring):
-        url = self.get_url([self.CAMPAIGN_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL])
 
         if not querystring:
             querystring = None
@@ -140,13 +140,13 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def get_campaign(self, campaign_id):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id)])
 
         self.response = requests.request("GET", url, headers=self.get_headers())
         self.process_response()
 
     def update_campaign(self, campaign_id, name, **optional_params):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id)])
 
         # TODO: Need to remove hard coded type and template
         base_payload = {
@@ -160,7 +160,7 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def delete_campaign(self, campaign_id):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id)])
 
         if not campaign_id:
             raise ValueError(_("campaign_id is required to delete a campaign"))
@@ -171,13 +171,13 @@ class VoucheryProcessor(PromoProcessorBase):
     #############
     # Reward
     def create_reward(self, campaign_id, **reward_params):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id), self.REWARDS_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id), self.REWARDS_URL])
 
         self.response = requests.request("POST", url, json=reward_params, headers=self.get_headers())
         self.process_response()
 
     def get_reward(self, reward_id):
-        url = self.get_url([self.REWARDS_URL, str(reward_id)])
+        url = self.assemble_url([self.REWARDS_URL, str(reward_id)])
 
         self.response = requests.request('GET', url, headers=self.get_headers())
         self.process_response()
@@ -186,7 +186,7 @@ class VoucheryProcessor(PromoProcessorBase):
         raise NotImplementedError
 
     def delete_reward(self, reward_id):
-        url = self.get_url([self.REWARDS_URL, str(reward_id)])
+        url = self.assemble_url([self.REWARDS_URL, str(reward_id)])
 
         self.response = requests.request("DELETE", url, headers=self.get_headers())
         self.process_response()
@@ -194,7 +194,7 @@ class VoucheryProcessor(PromoProcessorBase):
     #############
     # Voucher
     def create_voucher(self, code, campaign_id):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id), self.VOUCHER_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id), self.VOUCHER_URL])
 
         payload = {
             "type": "Voucher",
@@ -207,13 +207,13 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def get_vouchers(self, campaign_id, **kwargs):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id), self.VOUCHER_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id), self.VOUCHER_URL])
 
         self.response = requests.request("GET", url, headers=self.get_headers())
         self.process_response()
 
     def get_voucher(self, code, **querystring):
-        url = self.get_url([self.VOUCHER_URL, str(code)])
+        url = self.assemble_url([self.VOUCHER_URL, str(code)])
 
         if not querystring:
             querystring = None
@@ -225,7 +225,7 @@ class VoucheryProcessor(PromoProcessorBase):
         raise NotImplementedError
 
     def delete_voucher(self, code):
-        url = self.get_url([self.VOUCHER_URL, code])
+        url = self.assemble_url([self.VOUCHER_URL, code])
 
         self.response = requests.request("DELETE", url, headers=self.get_headers())
         self.process_response()
@@ -233,7 +233,7 @@ class VoucheryProcessor(PromoProcessorBase):
     #############
     # Redeem
     def create_redeem(self, voucher_code, transaction_id, total_cost):
-        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+        url = self.assemble_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
         payload = {
             "transaction_id": transaction_id,
@@ -244,13 +244,13 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def get_redeems(self, campaign_id):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id), self.REDEMPTION_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id), self.REDEMPTION_URL])
 
         self.response = requests.request("GET", url, headers=self.get_headers())
         self.process_response()
 
     def get_redeem(self, voucher_code, transaction_id):
-        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+        url = self.assemble_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
         querystring = {
             "transaction_id": transaction_id
@@ -260,7 +260,7 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def delete_redeem(self, voucher_code, transaction_id):
-        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+        url = self.assemble_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
         querystring = {
             "transaction_id": transaction_id
@@ -270,7 +270,7 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def confirm_redeem(self, voucher_code, transaction_id):
-        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+        url = self.assemble_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
         querystring = {
             "transaction_id": transaction_id
