@@ -66,9 +66,8 @@ class VoucheryProcessor(PromoProcessorBase):
         needs to be sent form vendor-promo
         '''
         promo = promo_form.save(commit=False)
-        promo.name = f"{promo.offer.name}-{promo.code}"
         promo.campaign_name = promo.offer.products.first().name
-
+        self.CAMPAIGN_PARAMS['team'] = promo.offer.site.name
         self.create_campaign(promo.campaign_name, **self.CAMPAIGN_PARAMS)
 
         if not self.is_request_success:
@@ -221,6 +220,15 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def delete_campaign(self, campaign_id):
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id)])
+
+        if not campaign_id:
+            raise ValueError(_("campaign_id is required to delete a campaign"))
+
+        self.response = requests.request("DELETE", url, headers=self.get_headers())
+        self.process_response()
+
+    def delete_full_campaign(self, campaign_id):
         url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id)])
 
         if not campaign_id:

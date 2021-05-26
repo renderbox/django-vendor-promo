@@ -4,9 +4,13 @@ from django.test import TestCase
 
 from unittest import skipIf
 
-from vendorpromo.processors.vouchery import VoucheryProcessor
-from vendorpromo.config import VENDOR_PROMO_PROCESSOR
+from vendor.models import Offer
 from vendor.models.utils import random_string
+
+from vendorpromo.config import VENDOR_PROMO_PROCESSOR
+from vendorpromo.forms import PromoFrom
+from vendorpromo.models import Promo
+from vendorpromo.processors.vouchery import VoucheryProcessor
 
 User = get_user_model()
 
@@ -509,6 +513,33 @@ class VoucheryProcessorTests(TestCase):
 
     ################
     # Promotion Management
+    def create_promo_automate_success(self):
+        promo_code = 'PROMO-TEST'
+        promo_offer = Offer.objects.get(pk=1)
+        promo_name = f"{promo_offer.name}-{promo_code}"
+        promo_form = PromoFrom({
+            'name': promo_name,
+            'code': promo_code,
+            'offer': promo_offer})
+        promo_form.is_bound = True
+        processor = self.promo_processor()
+
+        processor.create_promo_automate(promo_form)
+        self.assertTrue(processor.is_request_success)
+        self.assertEquals(Promo.objects.all().last().code, promo_code)
+
+        promo = Promo.objects.get(name=promo_name)
+        processor.get_campaign(promo.campaign_id)
+        campaign_detials = processor.response_content
+        reward_id = campaign_detials['children'][0]['rewards'][0]['id']
+        subcampaign_id = campaign_detials['children'][0]['id']
+
+        processor.delete_voucher(promo.code)
+        processor.delete_reward(reward_id)
+        processor.delete_campaign(subcampaign_id)
+        processor.delete_campaign(campaign_detials['id'])
+
+
     # def test_create_promo_success(self, promo_form):
     #     raise NotImplementedError
 
