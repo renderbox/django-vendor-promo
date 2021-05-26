@@ -104,7 +104,7 @@ class VoucheryProcessor(PromoProcessorBase):
         it was it will save the promo instance record.
         '''
         promo = promo_form.save(commit=False)
-        self.create_campaign(promo.campaign_name)
+        self.create_voucher(promo.code, promo.campaign_id)
         if not self.process_response(self.response):
             return None
         promo.save()
@@ -229,13 +229,7 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def delete_full_campaign(self, campaign_id):
-        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id)])
-
-        if not campaign_id:
-            raise ValueError(_("campaign_id is required to delete a campaign"))
-
-        self.response = requests.request("DELETE", url, headers=self.get_headers())
-        self.process_response()
+        raise NotImplementedError
 
     #############
     # Reward

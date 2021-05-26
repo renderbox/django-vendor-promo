@@ -2,12 +2,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.views.generic import CreateView, ListView
 from django.views.generic.edit import DeleteView, UpdateView
-
 from vendor.models import Offer
 from vendorpromo.models import Promo
-from vendorpromo.processors import PromoProcessor
+from vendorpromo.config import VENDOR_PROMO_PROCESSOR
 
-promo_processor = PromoProcessor
+promo_processor = VENDOR_PROMO_PROCESSOR
 
 
 class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
@@ -43,7 +42,7 @@ class PromoUpdateView(LoginRequiredMixin, UpdateView):
         return redirect('vendorpromo-list')
 
 
-class PromoDeleteView(DeleteView):
+class PromoDeleteView(LoginRequiredMixin, DeleteView):
     model = Promo
     slug_field = 'uuid'
     slug_url_kwarg = 'uuid'
@@ -52,3 +51,5 @@ class PromoDeleteView(DeleteView):
         processor = promo_processor()
         processor.delete_promo(self.get_object())
         return redirect('vendorpromo-list')
+
+
