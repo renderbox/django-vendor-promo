@@ -2,7 +2,7 @@ from django import forms
 from vendorpromo.models import Promo
 
 
-class PromoFrom(forms.ModelForm):
+class PromoForm(forms.ModelForm):
     class Meta:
         model = Promo
         fields = [

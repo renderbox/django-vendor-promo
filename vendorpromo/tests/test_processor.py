@@ -8,7 +8,7 @@ from vendor.models import Offer
 from vendor.models.utils import random_string
 
 from vendorpromo.config import VENDOR_PROMO_PROCESSOR
-from vendorpromo.forms import PromoFrom
+from vendorpromo.forms import PromoForm
 from vendorpromo.models import Promo
 from vendorpromo.processors.vouchery import VoucheryProcessor
 
@@ -517,7 +517,7 @@ class VoucheryProcessorTests(TestCase):
         promo_code = 'PROMO-TEST'
         promo_offer = Offer.objects.get(pk=1)
         promo_name = f"{promo_offer.name}-{promo_code}"
-        promo_form = PromoFrom({
+        promo_form = PromoForm({
             'name': promo_name,
             'code': promo_code,
             'offer': promo_offer})
@@ -538,7 +538,6 @@ class VoucheryProcessorTests(TestCase):
         processor.delete_reward(reward_id)
         processor.delete_campaign(subcampaign_id)
         processor.delete_campaign(campaign_detials['id'])
-
 
     # def test_create_promo_success(self, promo_form):
     #     raise NotImplementedError

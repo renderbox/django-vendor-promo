@@ -14,7 +14,7 @@ from vendorpromo.models import Promo
 promo_processor = PromoProcessor
 
 
-class ValidateCodeCheckoutProcess(LoginRequiredMixin, View):
+class ValidateCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
     """
     When a customer is applying a code during the checkout process
     the function will check if the entered code is valid to the items
@@ -36,7 +36,7 @@ class ValidateCodeCheckoutProcess(LoginRequiredMixin, View):
         return redirect(request.META.get('HTTP_REFERER', "vendor:cart"))
 
 
-class ValidateLinkCode(AddToCartView):
+class ValidateLinkCodeAPIView(AddToCartView):
     """
     Endpoint used when a customer clicks on a link that has a promo code.
     The endpoint will validate the promo code and if valid it will add the
@@ -63,3 +63,6 @@ class ValidateLinkCode(AddToCartView):
         # call redirect to vendor.views.vendor.AddToCartView (Which will redirect to the cart view)
         self.kwargs['slug'] = promo.offer.slug
         return super().post(request, args, kwargs)
+
+
+

@@ -1,16 +1,48 @@
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http.response import HttpResponseBadRequest
-from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.http.response import HttpResponseBadRequest, HttpResponseServerError
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic import TemplateView, FormView
 from django.utils.translation import ugettext as _
 
+from vendor.models import Offer
+
+from vendorpromo.models import Promo
 from vendorpromo.processors import PromoProcessor
-from vendorpromo.forms import VoucherySearchForm
+from vendorpromo.forms import VoucherySearchForm, PromoForm
 
 promo_processor = PromoProcessor
 
+
+class VoucheryCreateOfferPromoAPIView(LoginRequiredMixin, FormView):
+    form_class = PromoForm
+
+    def post(self, request, *args, **kwargs):
+        # offer_uuid = request.POST.get('offer_uuid')
+        # promo_code = request.POST.get('promo_code')
+
+        # offer = get_object_or_404(Offer, uuid=offer_uuid)
+        # if not (offer_uuid or promo_code):
+        #     raise HttpResponseBadRequest(_("Request is missing offer_uuid and promo_code"))
+
+        # promo_form = PromoForm({
+        #     'offer': offer,
+        #     'name': f'{offer.name}-{promo_code}',
+        #     'code': promo_code
+        # })
+        promo_form = PromoForm(request.POST)
+        if not promo_form.is_valid():
+            raise HttpResponseBadRequest()
+
+        processor = promo_processor()
+
+        processor.create_promo_automate(promo_form)
+
+        if not (processor.is_request_success):
+            raise HttpResponseServerError(_(f"Createing Promo Failed: {processor.response_message}-{processor.response_errors}"))
+
+        return redirect(request.META.get('HTTP_REFERER'))
 
 # The following views are intended for Sys Admins to quickly and easy monitor
 # the state of there vouchery account. It is not recommended that this tools
