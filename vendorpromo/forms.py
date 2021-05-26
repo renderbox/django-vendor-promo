@@ -6,7 +6,6 @@ class PromoForm(forms.ModelForm):
     class Meta:
         model = Promo
         fields = [
-            'name',
             'description',
             'code',
             'campaign_name',
