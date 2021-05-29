@@ -14,4 +14,3 @@ class EnterPromoCode(TemplateView):
 class VoucheryCreatePromoOffer(FormView, TemplateView):
     template_name = "core/offer_promo_create.html"
     form_class = PromoForm
-

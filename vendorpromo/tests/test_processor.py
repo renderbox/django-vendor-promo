@@ -236,6 +236,15 @@ class VoucheryProcessorTests(TestCase):
         processor.delete_campaign(-2)
         self.assertFalse(processor.is_request_success)
 
+    def test_delete_full_campaign_success(self):
+        campaing_ids = [736, 742]
+        processor = self.promo_processor()
+
+        for campaign_id in campaing_ids:
+            processor.delete_full_campaign(campaign_id)
+
+        self.assertTrue(processor.is_request_success)
+
     #############
     # Reward
     def test_create_reward_success(self):
@@ -392,7 +401,7 @@ class VoucheryProcessorTests(TestCase):
         processor.create_reward(sub_campaign_id, **reward_params)
         reward_id = processor.response_content['id']
         processor.clear_response_variables()
-        processor.create_voucher(voucher_code, campaign_id)
+        processor.create_voucher(voucher_code, sub_campaign_id)
 
         self.assertTrue(processor.is_request_success)
         self.assertIn('id', processor.response_content)
@@ -444,7 +453,7 @@ class VoucheryProcessorTests(TestCase):
         processor.create_reward(sub_campaign_id, **reward_params)
         reward_id = processor.response_content['id']
         processor.clear_response_variables()
-        processor.create_voucher(voucher_code, campaign_id)
+        processor.create_voucher(voucher_code, sub_campaign_id)
         processor.clear_response_variables()
 
         processor.get_vouchers(sub_campaign_id)

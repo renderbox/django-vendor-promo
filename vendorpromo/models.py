@@ -36,7 +36,7 @@ class Promo(CreateUpdateModelBase):
     campaign_description = models.TextField(_("Campaign Description"), blank=True, null=True)
     meta = models.JSONField(_("Meta"), default=dict, blank=True, null=True)
     offer = models.ForeignKey(Offer, blank=False, null=False, related_name="promo", on_delete=models.CASCADE)
-    slug = AutoSlugField(populate_from='name', unique_with='offer__site__id')
+    slug = AutoSlugField(populate_from='code', unique_with='offer__site__id')
 
     objects = models.Manager()
 
