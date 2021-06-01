@@ -1,0 +1,31 @@
+{% extends "vendorpromo/base.html" %}
+{% load i18n %}
+
+{% block title %}Django Vendor Promo - Home{% endblock %}
+
+{% block content %}
+<h1>Django Vendor Promo Base HTML Template</h1>
+
+<div class='card'>
+    <div class='card-header'>
+        <h5>{{request.resolver_match.view_name}}</h5>
+    </div>
+    <div class='card-body'>
+        <ul>
+            {% for dict_value in object.items %}
+            <li>
+                <div class='d-flex flex-row'>
+                    <div class='font-weight-bolder'>
+                        {{dict_value.0}}:
+                    </div>
+                    <div class='font-weight-lighter'>
+                        {{dict_value.1}}
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

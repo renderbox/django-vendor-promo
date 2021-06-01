@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block content %}
-<h2>Items</h2>
+<h2>{% trans 'Items' %}</h2>
 
 <div class="card-deck mb-3 text-center">
 
@@ -12,7 +12,7 @@
       <h4 class="my-0 font-weight-normal">{{ item.name }}</h4>
     </div>
     <div class="card-body">
-      Product Description
+      {% trans 'Product Description' %}
       <form action="{{ item.add_to_cart_link }}" method="post">
         {% csrf_token %}
         <button class="btn btn-lg btn-block btn-outline-primary" type="submit"> {% trans 'Add to Cart' %}</button>
