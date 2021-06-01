@@ -18,7 +18,7 @@ class PromoProcessorBase(object):
     def __init__(self, invoice=None):
         if invoice is not None:
             self.invoice = invoice
-    
+
     ################
     # Promotion Management
     def clear_response_variables(self):

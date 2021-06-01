@@ -74,11 +74,13 @@ class VoucheryProcessor(PromoProcessorBase):
             self.create_campaign(promo.campaign_name, **self.CAMPAIGN_PARAMS)
             if not self.is_request_success:
                 raise Exception(_("Create Campaing Failed"))
-
-        promo.campaign_id = str(self.response_content[0]['id'])
+            promo.campaign_id = str(self.response_content['id'])
+        else:
+            promo.campaign_id = str(self.response_content[0]['id'])
 
         self.clear_response_variables()
         self.get_sub_campaigns(**{'name_cont': promo.offer.name})
+
         # Checks if a SubCampaign already exists.
         if not self.response_content:
             self.SUBCAMPAIGN_PARAMS['parent_id'] = promo.campaign_id
@@ -88,10 +90,13 @@ class VoucheryProcessor(PromoProcessorBase):
             if not self.is_request_success:
                 raise Exception(_("Create Sub-Campaing Failed"))
             subcampaign_id = str(self.response_content['id'])
+            parent_id = str(self.response_content['parent_id'])
         else:
+            parent_id = str(self.response_content[0]['parent_id'])
             subcampaign_id = str(self.response_content[0]['id'])
+
         # Check that the SubCampaign is has the correct MainCampaing (Parent Campaign)
-        if str(self.response_content[0]['parent_id']) != promo.campaign_id:
+        if parent_id != promo.campaign_id:
             self.update_campaign(self.response_content[0]['id'], **{'parent_id': promo.campaign_id})
 
         self.get_campaign(subcampaign_id)
@@ -117,7 +122,7 @@ class VoucheryProcessor(PromoProcessorBase):
         '''
         promo = promo_form.save(commit=False)
         self.create_voucher(promo.code, promo.campaign_id)
-        if not self.process_response(self.response):
+        if not self.is_request_success:
             return None
         promo.save()
 
@@ -128,8 +133,10 @@ class VoucheryProcessor(PromoProcessorBase):
         updated promo instance.
         '''
         promo = promo_form.save(commit=False)
-        response = self.update_voucher(promo)
-        if not self.process_response(response):
+        if 'code' in promo_form.changed_data:
+            return None
+        self.update_voucher(promo.code)
+        if not self.is_request_success:
             return None
         promo.save()
 
@@ -138,10 +145,10 @@ class VoucheryProcessor(PromoProcessorBase):
         Override if you need to do additional steps when deleting a Promo instance,
         such as editing the promo code in an external service if needed.
         '''
-        response = self.delete_voucher(promo)
-        if not self.process_response(response):
+        self.delete_voucher(promo.code)
+        if not self.is_request_success and (self.response.status_code != 404 or self.response.status_code < 300):
             return None
-        Promo.objects.delete(promo)
+        promo.delete()
 
     ############################
     # Utils
@@ -317,7 +324,10 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def update_voucher(self):
-        raise NotImplementedError
+        '''
+        In vouchery you cannot update a voucher.
+        '''
+        pass
 
     def delete_voucher(self, code):
         url = self.assemble_url([self.VOUCHER_URL, code])
@@ -382,6 +392,21 @@ class VoucheryProcessor(PromoProcessorBase):
         it will create a redemption recode to be confirmed after payment.
         """
         self.create_redeem(code)
+        if self.is_request_success:
+            return True
+        return False
+
+    def is_code_valid_on_checkout(self, code, offer_cost):
+        """
+        Vouchery.io create_redeem validates the code. If it is valid
+        it will create a redemption recode to be confirmed after payment.
+        """
+        # Checks to see if there is already a redemption that has not been confirmed. 
+        self.get_redeem(code, str(self.invoice.uuid))
+        if self.is_request_success:
+            return True
+
+        self.create_redeem(code, str(self.invoice.uuid), offer_cost)
         if self.is_request_success:
             return True
         return False

@@ -237,7 +237,7 @@ class VoucheryProcessorTests(TestCase):
         self.assertFalse(processor.is_request_success)
 
     def test_delete_full_campaign_success(self):
-        campaing_ids = [736, 742]
+        campaing_ids = [875, 736, 742]
         processor = self.promo_processor()
 
         for campaign_id in campaing_ids:
