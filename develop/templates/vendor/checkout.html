@@ -1,0 +1,293 @@
+{% extends "vendor/base.html" %}
+{% load i18n %}
+
+{% block vendor_content %}
+<div class='row mx-md-5 px-md-3 mt-2'>
+  <div class="d-flex flex-row w-100 m-3 align-items-center">
+    <h2><iconify-icon data-icon="ic-baseline-lock" class="text-black"></iconify-icon></h2>
+    <h1>{% trans 'Secure Checkout' %}</h1>
+  </div>
+  <div class='col-md-8'>
+    <div class="card border-0">
+      <div class="card-header mb-0 text-white p-0 border-0 mb-3 rounded" id="account_info">
+        <div
+          class="btn-group w-100 rounded {% if request.resolver_match.url_name == 'checkout-account' %}bg-accenthover{% else %}bg-accent{% endif %}">
+          <div class="bg-white font-weight-bold text-dark border-0 px-3 py-2 m-0" style="opacity: .5;">
+            1
+          </div>
+          <div class="font-weight-bold text-left text-white border-0 py-2 ml-3">
+            {% trans "Info" %}
+          </div>
+          {% if request.resolver_match.url_name != 'checkout-account' %}
+          <div class='d-flex ml-auto mr-3 align-items-center'>
+            <iconify-icon data-icon="ic-baseline-check" class="check"></iconify-icon>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if request.resolver_match.url_name == 'checkout-account' %}
+      <div id="collapseOne" class="collapse show" aria-labelledby="account_info" data-parent="#checkout_accordion">
+        <div class="card-body px-0">
+          <form method="post">
+            {% csrf_token %}
+            <h3 class='card-title'>
+              {% trans 'Shipping Address' %}
+            </h3>
+            {% include "./includes/account_info_form.html" with account_information_form=form %}
+            <button class="btn btn-primary" type="submit">{% trans 'Continue' %}</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="card border-0">
+      <div class="card-header mb-0 text-white p-0 border-0 mb-3 rounded" id="billing_info">
+        <div
+          class="btn-group w-100 rounded {% if request.resolver_match.url_name == 'checkout-payment' %}bg-accenthover{% else %}bg-accent{% endif %}">
+          <div class="bg-white font-weight-bold text-dark border-0 px-3 py-2 m-0" style="opacity: .5;">
+            2
+          </div>
+          <div class="font-weight-bold text-left text-white border-0 py-2 ml-3">
+            {% trans "Billing" %}
+          </div>
+          {% if request.resolver_match.url_name == 'checkout-review' %}
+          <div class='d-flex ml-auto mr-3 align-items-center'>
+            <iconify-icon data-icon="ic-baseline-check" class="check"></iconify-icon>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if request.resolver_match.url_name == 'checkout-payment' %}
+      <div id="collapseTwo" class="collapse show" aria-labelledby="billing_info" data-parent="#checkout_accordion">
+        <div class="card-body px-0">
+            {% comment %}
+            <form id="promo-code-form" method="post" action="{% url 'checkout-validation' invoice.uuid %}">
+                {% csrf_token %}
+                {% include "../vendorpromo/includes/promocode_apply.html" %}
+            </form>
+            {% endcomment %}
+            <form id="payment-form" method="post">
+            {% csrf_token %}
+            <h3 class='card-title'>
+              {% trans 'Billing Address' %}
+            </h3>
+            {% include "./includes/billing_address_form.html" with billing_address_form=billing_address_form %}
+            <div id="shipping-address">
+              <p class="mb-0">{{invoice.shipping_address.address_1}},
+                {{invoice.shipping_address.address_2|default_if_none:""}}</p>
+              <p>{{invoice.shipping_address.state}},
+                {{invoice.shipping_address.get_country_display}},{{invoice.shipping_address.postal_code}}
+              </p>
+            </div>
+            <h3 class='card-title'>
+              {% trans 'Payment Method' %}
+            </h3>
+            {% include "./includes/payment_form.html" with credit_card_form=credit_card_form %}
+          </form>
+          <button form="payment-form" name='only-validate' class="btn btn-primary" type="submit">{% trans 'Continue' %}</button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="card border-0">
+      <div class="card-header mb-0 text-white p-0 border-0 mb-3 rounded" id="review">
+        <div
+          class="btn-group w-100 rounded {% if request.resolver_match.url_name == 'checkout-review' %}bg-accenthover{% else %}bg-accent{% endif %}">
+          <div class="bg-white font-weight-bold text-dark border-0 px-3 py-2 m-0" style="opacity: .5;">
+            3
+          </div>
+          <div class="font-weight-bold text-left text-white border-0 py-2 ml-3">
+            {% trans 'Review' %}
+          </div>
+        </div>
+      </div>
+
+      {% if request.resolver_match.url_name == 'checkout-review' %}
+      <div id="collapseThree" class="collapse show" aria-labelledby="review" data-parent="#checkout_accordion">
+        <div class="card-body px-0">
+          <h3 class='card-title'>
+            <div class='d-flex flex-row align-items-center'>
+              <div>{% trans 'Shipping Address' %}</div>
+              <div class="ml-auto">
+                <h5>
+                    <a href="{% url 'vendor:checkout-account' %}">
+                        <iconify-icon data-icon="ic-baseline-edit" class="text-primary">{% trans 'edit' %}</iconify-icon>
+                    </a>
+                </h5>
+            </div>
+          </h3>
+          <p id="review-account-name" class="mb-0">{{user.first_name}} {{user.last_name}}</p>
+          <p id="review-account-email" class="mb-0">{{user.email}}</p>
+          <p class="mb-0">{{invoice.shipping_address.address_1}},
+            {{invoice.shipping_address.address_2|default_if_none:""}}</p>
+          <p>{{invoice.shipping_address.state}},
+             {{invoice.shipping_address.get_country_display}}, {{invoice.shipping_address.postal_code}}
+          </p>
+          <h3 class='card-title'>
+            <div class='d-flex flex-row align-items-center'>
+              <div>{% trans 'Billing Address' %}</div>
+              <div class="ml-auto">
+                <h5>
+                    <a href="{% url 'vendor:checkout-payment' %}">
+                        <iconify-icon data-icon="ic-baseline-edit" class="text-primary">{% trans 'edit' %}</iconify-icon>
+                    </a>
+                </h5>
+              </div>
+            </div>
+          </h3>
+
+          <p class="mb-0">{{billing_address_form.data.address_1}},
+            {{billing_address_form.data.address_2|default_if_none:""}}</p>
+            <p>{{billing_address_form.data.state}},
+              {{billing_address_form.instance.get_country_display}}, {{billing_address_form.data.postal_code}}
+            </p>
+            <h3 class='card-title'>
+              {% trans 'Payment Method' %}
+            </h3>
+            <p class="mb-0">{{credit_card_form.data.full_name}}</p>
+            <p>{% trans 'Card ending in' %}
+              {{credit_card_form.data.card_number|slice:"-4:"}}</p>
+          <form method="post">
+            {% csrf_token %}
+            <button
+                class="btn btn-primary"
+                type="submit"
+                onclick="dataLayer.push({  {% comment %} Details for Google Tag Manager {% endcomment %}
+                    'event': 'purchase',
+                    'user': '{{ user.id }}',
+                    'invoice_id': '{{ invoice.uuid }}',
+                    'num_items': '{{ invoice.order_items.all|length }}',
+                    {% for item in invoice.order_items.all %}
+                    'item_{{ forloop.counter }}': '{{ item.name }}',
+                    'item_{{ forloop.counter }}_price': '{{ item.total|default_if_none:"0.00"|floatformat:2 }}',
+                    {% endfor %}
+                    'currency': '{{ invoice.get_currency_display }}',
+                    'total': '{{ invoice.total|default_if_none:"0.00"|floatformat:2 }}'
+                });"
+            >{% trans 'Place Order' %}</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+  <div class="col-md-4 order-md-2 mb-4 mt-2">
+    <div class="d-flex flex-row justify-content-between align-items-end mb-3">
+    <h3 class="m-0">
+      {% trans 'In Your Cart' %}
+    </h3>
+    <a class="text-primary" href="{% url 'vendor:cart' %}">Edit</a>
+    </div>
+    <ul class="list-group mb-3 border-0">
+      {% for item in invoice.order_items.all %}
+      <li class="px-0 d-flex justify-content-between lh-condensed mb-3">
+        <div>
+          <h6 class="my-0">{{ item.name }}</h6>
+          <small class="text-muted">{% trans 'Unit Price' %}: {{item.price|default_if_none:"0.00"|floatformat:2}}</small>
+          <small class="text-muted">{% trans 'Quantity' %}: {{item.quantity}}</small>
+        </div>
+        <span class="text-muted">${{ item.total|default_if_none:"0.00"|floatformat:2 }}</span>
+      </li>
+      {% endfor %}
+      {% include "./includes/cost_overview.html" with invoice=invoice %}
+    </ul>
+
+    {% for item in invoice.order_items.all %}
+        {% if item.offer.promo.all %}
+            {% for promo in item.offer.promo.all %}
+            <div class="input-group my-2 promo-code-applied">
+                <input type="text" class="form-control" placeholder="Promo code" value="{{promo.code}}" disabled>
+                <div class="input-group-append">
+                <button class="btn btn-success" disabled>{% trans "Applied" %}</button>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+        <form id="promo-code-form" method="post" action="{% url 'checkout-validation' invoice.uuid %}">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" class="form-control" name="promo_code" placeholder="Promo code">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">{% trans "Redeem" %}</button>
+                </div>
+            </div>
+        </form>
+  </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        {% comment %}Promo code{% endcomment %}
+        if($(".promo-code-applied").length > 0) {
+            $("#promo-code-form").addClass("d-none");
+        }
+        {% comment %}
+        $('#have_promo_code').prop("checked", false);
+        $("#promo-code-inputs").addClass("d-none");
+        $('#have_promo_code').change(function () {
+            if ($('#have_promo_code').prop('checked')) {
+                $("#promo-code-inputs").removeClass("d-none");
+            }
+            else {
+                $("#promo-code-inputs").addClass("d-none");
+            }
+        });
+        {% endcomment %}
+        $("#promo-code-form").on('submit', function(event) {
+            event.preventDefault();
+            form = $(this)
+            var url = $(form).attr('action');
+            $.ajax({
+                method: "POST",
+                url: url,
+                data: $(form).serialize(),
+            }).done(function (response) {
+                console.log("success");
+                $("#id_promo_code").removeClass('invalid')
+                $("#id_promo_code").addClass('valid')
+                $("#id_promo_code").prop('disabled', true)
+                window.location.reload(true)
+            }).fail(function (response) {
+                $("#id_promo_code").removeClass('valid')
+                $("#id_promo_code").addClass('invalid')
+                $("#id_promo_code").prop('disabled', false)
+                window.location.reload(true)
+            });
+        });
+
+        {% comment %}Billing{% endcomment %}
+        $("#id_account_info-postal_code").attr('required', "");
+        $('#id_same_as_shipping').prop("checked", true);
+        $('.billing-address-form').addClass('d-none');
+        $("#id_address_1").removeAttr('required');
+        $("#id_locality").removeAttr('required');
+        $("#id_state").removeAttr('required');
+        $("#id_postal_code").removeAttr('required');
+        $('#id_same_as_shipping').change(function () {
+            if ($('#id_same_as_shipping').val()) {
+                $('.billing-address-form').toggleClass('d-none');
+                $('#shipping-address').toggleClass('d-none');
+            }
+            // TODO: This needs to change in the future, very easy to break.
+            if ($(".billing-address-form").hasClass('d-none')) {
+                $("#id_address_1").removeAttr('required');
+                $("#id_locality").removeAttr('required');
+                $("#id_state").removeAttr('required');
+                $("#id_postal_code").removeAttr('required');
+            }
+            else {
+                $("#id_address_1").attr('required', "");
+                $("#id_locality").attr('required', "");
+                $("#id_state").attr('required', "");
+                $("#id_postal_code").attr('required', "");
+            }
+        });
+    });
+</script>
+{% endblock %}

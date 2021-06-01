@@ -35,17 +35,94 @@ class VoucheryProcessor(PromoProcessorBase):
     VOUCHER_URL = 'vouchers'
     REDEMPTION_URL = 'redemptions'
 
+    CAMPAIGN_PARAMS = {
+        "type": "MainCampaign",
+        "template": "discount",
+        "status": "active"
+    }
+    SUBCAMPAIGN_PARAMS = {
+        "type": "SubCampaign",
+        "template": "sub_redemption",
+        "voucher_type": "generic",
+        "triggers_on": "redemption",
+        "status": "active"
+    }
+    REWARD_PARAMS = {
+        "type": "SetDiscount",
+        "discount_type": "percentage",
+        "discount_value": 0  # The actual discount is set in the Offer instance.
+    }
+
     ################
     # Promotion Management
+    def create_promo_automate(self, promo_form):
+        '''
+        This function automates the steps required to create a voucher/promo-code
+        in Vouchery. This means that it will create a campaign named affter the
+        offer's product name, a sub-campaign named after the offer's a percentage reward
+        and finally the voucher.
+        After creation, a user can login to Vouchery and change the campaigns, and
+        sub-campaigns name if desired. They should not change the promo code as it
+        needs to be sent form vendor-promo
+        '''
+        promo = promo_form.save(commit=False)
+        promo.campaign_name = promo.offer.site.name
+
+        self.get_campaigns(**{'name_cont': promo.campaign_name})
+        # Checks if the Main Campaign already exists
+        if not self.response_content:
+            self.create_campaign(promo.campaign_name, **self.CAMPAIGN_PARAMS)
+            if not self.is_request_success:
+                raise Exception(_("Create Campaing Failed"))
+            promo.campaign_id = str(self.response_content['id'])
+        else:
+            promo.campaign_id = str(self.response_content[0]['id'])
+
+        self.clear_response_variables()
+        self.get_sub_campaigns(**{'name_cont': promo.offer.name})
+
+        # Checks if a SubCampaign already exists.
+        if not self.response_content:
+            self.SUBCAMPAIGN_PARAMS['parent_id'] = promo.campaign_id
+            self.clear_response_variables()
+            self.create_campaign(promo.offer.name, **self.SUBCAMPAIGN_PARAMS)
+            del(self.SUBCAMPAIGN_PARAMS['parent_id'])
+            if not self.is_request_success:
+                raise Exception(_("Create Sub-Campaing Failed"))
+            subcampaign_id = str(self.response_content['id'])
+            parent_id = str(self.response_content['parent_id'])
+        else:
+            parent_id = str(self.response_content[0]['parent_id'])
+            subcampaign_id = str(self.response_content[0]['id'])
+
+        # Check that the SubCampaign is has the correct MainCampaing (Parent Campaign)
+        if parent_id != promo.campaign_id:
+            self.update_campaign(self.response_content[0]['id'], **{'parent_id': promo.campaign_id})
+
+        self.get_campaign(subcampaign_id)
+        if not self.response_content.get('rewards'):
+            self.clear_response_variables()
+            self.create_reward(subcampaign_id, **self.REWARD_PARAMS)
+            if not self.is_request_success:
+                raise Exception(_("Create Reward Failed"))
+
+        self.clear_response_variables()
+        self.create_voucher(promo.code, subcampaign_id)
+
+        if not self.is_request_success:
+            raise Exception(_("Create Voucher Failed"))
+
+        promo.save()
+
     def create_promo(self, promo_form):
         '''
         Before saving the promo model instance form the form it calls
         Vouchery.io API to create it and checks if it was successful. If
-        it was it will save the promo instance record. 
+        it was it will save the promo instance record.
         '''
         promo = promo_form.save(commit=False)
-        response = self.create_campaign(promo.campaign_name)
-        if not self.process_response(response):
+        self.create_voucher(promo.code, promo.campaign_id)
+        if not self.is_request_success:
             return None
         promo.save()
 
@@ -56,8 +133,10 @@ class VoucheryProcessor(PromoProcessorBase):
         updated promo instance.
         '''
         promo = promo_form.save(commit=False)
-        response = self.update_voucher(promo)
-        if not self.process_response(response):
+        if 'code' in promo_form.changed_data:
+            return None
+        self.update_voucher(promo.code)
+        if not self.is_request_success:
             return None
         promo.save()
 
@@ -66,10 +145,10 @@ class VoucheryProcessor(PromoProcessorBase):
         Override if you need to do additional steps when deleting a Promo instance,
         such as editing the promo code in an external service if needed.
         '''
-        response = self.delete_voucher(promo)
-        if not self.process_response(response):
+        self.delete_voucher(promo.code)
+        if not self.is_request_success and (self.response.status_code != 404 or self.response.status_code < 300):
             return None
-        Promo.objects.delete(promo)
+        promo.delete()
 
     ############################
     # Utils
@@ -100,7 +179,7 @@ class VoucheryProcessor(PromoProcessorBase):
             "Authorization": f"Bearer {self.BARRER_KEY}"
         }
 
-    def get_url(self, path_route):
+    def assemble_url(self, path_route):
         """
         Function returns the full url to make the api call to vouchery's
         endpoint. It recieves a list of headeres that will be appended
@@ -118,7 +197,7 @@ class VoucheryProcessor(PromoProcessorBase):
     #############
     # Campaigns
     def create_campaign(self, name, **optional_params):
-        url = self.get_url([self.CAMPAIGN_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL])
 
         if not name:
             raise ValueError(_("name is required to create a campaign"))
@@ -131,7 +210,16 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def get_campaigns(self, **querystring):
-        url = self.get_url([self.CAMPAIGN_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL])
+
+        if not querystring:
+            querystring = None
+
+        self.response = requests.request("GET", url, headers=self.get_headers(), params=querystring)
+        self.process_response()
+
+    def get_sub_campaigns(self, **querystring):
+        url = self.assemble_url([self.CAMPAIGN_URL, 'sub'])
 
         if not querystring:
             querystring = None
@@ -140,27 +228,19 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def get_campaign(self, campaign_id):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id)])
 
         self.response = requests.request("GET", url, headers=self.get_headers())
         self.process_response()
 
-    def update_campaign(self, campaign_id, name, **optional_params):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+    def update_campaign(self, campaign_id, **optional_params):
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id)])
 
-        # TODO: Need to remove hard coded type and template
-        base_payload = {
-            "type": "MainCampaign",
-            "name": name,
-            "template": "discount"
-        }
-
-        payload = {**base_payload, **optional_params}
-        self.response = requests.request("PATCH", url, json=payload, headers=self.get_headers())
+        self.response = requests.request("PATCH", url, json=optional_params, headers=self.get_headers())
         self.process_response()
 
     def delete_campaign(self, campaign_id):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id)])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id)])
 
         if not campaign_id:
             raise ValueError(_("campaign_id is required to delete a campaign"))
@@ -168,16 +248,38 @@ class VoucheryProcessor(PromoProcessorBase):
         self.response = requests.request("DELETE", url, headers=self.get_headers())
         self.process_response()
 
+    def delete_full_campaign(self, campaign_id):
+        self.get_campaign(campaign_id)
+
+        sub_campaigns = [sub_campaign for sub_campaign in self.response_content['children'] if sub_campaign['type'] == 'SubCampaign']
+        for sub_campaign in sub_campaigns:
+            self.clear_response_variables()
+            self.get_campaign(sub_campaign['id'])
+            rewards = self.response_content['rewards']
+            self.clear_response_variables()
+            self.get_vouchers(sub_campaign['id'])
+            if self.response_content:
+                for voucher in self.response_content:
+                    self.clear_response_variables()
+                    self.delete_voucher(voucher['code'])
+            for reward in rewards:
+                self.clear_response_variables()
+                self.delete_reward(reward['id'])
+            self.delete_campaign(sub_campaign['id'])
+
+        self.clear_response_variables()
+        self.delete_campaign(campaign_id)
+
     #############
     # Reward
     def create_reward(self, campaign_id, **reward_params):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id), self.REWARDS_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id), self.REWARDS_URL])
 
         self.response = requests.request("POST", url, json=reward_params, headers=self.get_headers())
         self.process_response()
 
     def get_reward(self, reward_id):
-        url = self.get_url([self.REWARDS_URL, str(reward_id)])
+        url = self.assemble_url([self.REWARDS_URL, str(reward_id)])
 
         self.response = requests.request('GET', url, headers=self.get_headers())
         self.process_response()
@@ -186,7 +288,7 @@ class VoucheryProcessor(PromoProcessorBase):
         raise NotImplementedError
 
     def delete_reward(self, reward_id):
-        url = self.get_url([self.REWARDS_URL, str(reward_id)])
+        url = self.assemble_url([self.REWARDS_URL, str(reward_id)])
 
         self.response = requests.request("DELETE", url, headers=self.get_headers())
         self.process_response()
@@ -194,7 +296,7 @@ class VoucheryProcessor(PromoProcessorBase):
     #############
     # Voucher
     def create_voucher(self, code, campaign_id):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id), self.VOUCHER_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id), self.VOUCHER_URL])
 
         payload = {
             "type": "Voucher",
@@ -207,13 +309,13 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def get_vouchers(self, campaign_id, **kwargs):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id), self.VOUCHER_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id), self.VOUCHER_URL])
 
         self.response = requests.request("GET", url, headers=self.get_headers())
         self.process_response()
 
     def get_voucher(self, code, **querystring):
-        url = self.get_url([self.VOUCHER_URL, str(code)])
+        url = self.assemble_url([self.VOUCHER_URL, str(code)])
 
         if not querystring:
             querystring = None
@@ -222,10 +324,13 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def update_voucher(self):
-        raise NotImplementedError
+        '''
+        In vouchery you cannot update a voucher.
+        '''
+        pass
 
     def delete_voucher(self, code):
-        url = self.get_url([self.VOUCHER_URL, code])
+        url = self.assemble_url([self.VOUCHER_URL, code])
 
         self.response = requests.request("DELETE", url, headers=self.get_headers())
         self.process_response()
@@ -233,7 +338,7 @@ class VoucheryProcessor(PromoProcessorBase):
     #############
     # Redeem
     def create_redeem(self, voucher_code, transaction_id, total_cost):
-        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+        url = self.assemble_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
         payload = {
             "transaction_id": transaction_id,
@@ -244,13 +349,13 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def get_redeems(self, campaign_id):
-        url = self.get_url([self.CAMPAIGN_URL, str(campaign_id), self.REDEMPTION_URL])
+        url = self.assemble_url([self.CAMPAIGN_URL, str(campaign_id), self.REDEMPTION_URL])
 
         self.response = requests.request("GET", url, headers=self.get_headers())
         self.process_response()
 
     def get_redeem(self, voucher_code, transaction_id):
-        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+        url = self.assemble_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
         querystring = {
             "transaction_id": transaction_id
@@ -260,7 +365,7 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def delete_redeem(self, voucher_code, transaction_id):
-        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+        url = self.assemble_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
         querystring = {
             "transaction_id": transaction_id
@@ -270,7 +375,7 @@ class VoucheryProcessor(PromoProcessorBase):
         self.process_response()
 
     def confirm_redeem(self, voucher_code, transaction_id):
-        url = self.get_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
+        url = self.assemble_url([self.VOUCHER_URL, str(voucher_code), self.REDEMPTION_URL])
 
         querystring = {
             "transaction_id": transaction_id
@@ -286,8 +391,23 @@ class VoucheryProcessor(PromoProcessorBase):
         Vouchery.io create_redeem validates the code. If it is valid
         it will create a redemption recode to be confirmed after payment.
         """
-        response = self.create_redeem(code)
-        if self.process_response(response):
+        self.create_redeem(code)
+        if self.is_request_success:
+            return True
+        return False
+
+    def is_code_valid_on_checkout(self, code, offer_cost):
+        """
+        Vouchery.io create_redeem validates the code. If it is valid
+        it will create a redemption recode to be confirmed after payment.
+        """
+        # Checks to see if there is already a redemption that has not been confirmed. 
+        self.get_redeem(code, str(self.invoice.uuid))
+        if self.is_request_success:
+            return True
+
+        self.create_redeem(code, str(self.invoice.uuid), offer_cost)
+        if self.is_request_success:
             return True
         return False
 
@@ -306,7 +426,7 @@ class VoucheryProcessor(PromoProcessorBase):
         response = self.confirm_redeem(code)
         self.process_response(response)
 
-    def process_promo(self, offer, promo_code):
+    def process_promo(self, promo_code):
         '''
         Function used to check if the promo code is valid through external
         promo services such as Vouchery.io. If the code is valid it will

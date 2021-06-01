@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 
-class ValidateCodeCheckoutProcessTests(TestCase):
+class ValidateCodeCheckoutProcessAPIViewTests(TestCase):
 
     def setUp(self):
         pass
@@ -13,7 +13,7 @@ class ValidateCodeCheckoutProcessTests(TestCase):
         raise NotImplementedError
 
 
-class ValidateLinkCode(TestCase):
+class ValidateLinkCodeAPIView(TestCase):
 
     def setUp(self):
         pass

@@ -4,9 +4,13 @@ from django.test import TestCase
 
 from unittest import skipIf
 
-from vendorpromo.processors.vouchery import VoucheryProcessor
-from vendorpromo.config import VENDOR_PROMO_PROCESSOR
+from vendor.models import Offer
 from vendor.models.utils import random_string
+
+from vendorpromo.config import VENDOR_PROMO_PROCESSOR
+from vendorpromo.forms import PromoForm
+from vendorpromo.models import Promo
+from vendorpromo.processors.vouchery import VoucheryProcessor
 
 User = get_user_model()
 
@@ -232,6 +236,15 @@ class VoucheryProcessorTests(TestCase):
         processor.delete_campaign(-2)
         self.assertFalse(processor.is_request_success)
 
+    def test_delete_full_campaign_success(self):
+        campaing_ids = [875, 736, 742]
+        processor = self.promo_processor()
+
+        for campaign_id in campaing_ids:
+            processor.delete_full_campaign(campaign_id)
+
+        self.assertTrue(processor.is_request_success)
+
     #############
     # Reward
     def test_create_reward_success(self):
@@ -388,7 +401,7 @@ class VoucheryProcessorTests(TestCase):
         processor.create_reward(sub_campaign_id, **reward_params)
         reward_id = processor.response_content['id']
         processor.clear_response_variables()
-        processor.create_voucher(voucher_code, campaign_id)
+        processor.create_voucher(voucher_code, sub_campaign_id)
 
         self.assertTrue(processor.is_request_success)
         self.assertIn('id', processor.response_content)
@@ -440,7 +453,7 @@ class VoucheryProcessorTests(TestCase):
         processor.create_reward(sub_campaign_id, **reward_params)
         reward_id = processor.response_content['id']
         processor.clear_response_variables()
-        processor.create_voucher(voucher_code, campaign_id)
+        processor.create_voucher(voucher_code, sub_campaign_id)
         processor.clear_response_variables()
 
         processor.get_vouchers(sub_campaign_id)
@@ -509,6 +522,32 @@ class VoucheryProcessorTests(TestCase):
 
     ################
     # Promotion Management
+    def create_promo_automate_success(self):
+        promo_code = 'PROMO-TEST'
+        promo_offer = Offer.objects.get(pk=1)
+        promo_name = f"{promo_offer.name}-{promo_code}"
+        promo_form = PromoForm({
+            'name': promo_name,
+            'code': promo_code,
+            'offer': promo_offer})
+        promo_form.is_bound = True
+        processor = self.promo_processor()
+
+        processor.create_promo_automate(promo_form)
+        self.assertTrue(processor.is_request_success)
+        self.assertEquals(Promo.objects.all().last().code, promo_code)
+
+        promo = Promo.objects.get(name=promo_name)
+        processor.get_campaign(promo.campaign_id)
+        campaign_detials = processor.response_content
+        reward_id = campaign_detials['children'][0]['rewards'][0]['id']
+        subcampaign_id = campaign_detials['children'][0]['id']
+
+        processor.delete_voucher(promo.code)
+        processor.delete_reward(reward_id)
+        processor.delete_campaign(subcampaign_id)
+        processor.delete_campaign(campaign_detials['id'])
+
     # def test_create_promo_success(self, promo_form):
     #     raise NotImplementedError
 

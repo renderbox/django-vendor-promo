@@ -21,7 +21,6 @@ class PromoModelTests(TestCase):
     def test_promo_create_success(self):
         promo = Promo()
         code = "NEW-PROMO"
-        promo.name = "New Promo"
         promo.code = "NEW-PROMO"
         promo.offer = self.offer_site_1
         self.assertFalse(Promo.objects.filter(code=code, offer__site__pk=1).exists())
@@ -30,7 +29,6 @@ class PromoModelTests(TestCase):
 
     def test_promo_create_duplicate_code_same_site_error(self):
         promo = Promo()
-        promo.name = "New Promo with existing code"
         promo.code = self.existing_promo.code
         promo.offer = self.offer_site_1
         with self.assertRaises(ValidationError):
@@ -38,7 +36,6 @@ class PromoModelTests(TestCase):
 
     def test_promo_create_duplicate_code_same_site_success(self):
         promo = Promo()
-        promo.name = "New Promo with existing code in another site"
         promo.code = self.existing_promo.code
         promo.offer = self.offer_site_2
         self.assertFalse(Promo.objects.filter(code=self.existing_promo.code, offer__site__pk=2).exists())
