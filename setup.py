@@ -49,7 +49,7 @@ setup(
         "Django>=3.0,<3.2",
         'django-autoslug',
         'django-extensions',
-        "django-vendor",
+        "django-vendor>=0.2.0",
         'iso4217',
     ],
     extras_require={
