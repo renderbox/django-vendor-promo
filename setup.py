@@ -42,7 +42,7 @@ package_metadata = {
 setup(
     **package_metadata,
     packages=find_packages(),
-    package_data={"vendorpromo": ["*.html"]},
+    package_data={"vendorpromo": ["templates/vendorpromo/*.html", "templates/vendorpromo/*/*.html"]},
     include_package_data=True,
     python_requires=">=3.6",
     install_requires=[
