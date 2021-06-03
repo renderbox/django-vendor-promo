@@ -1,0 +1,44 @@
+{% extends "vendorpromo/base.html" %}
+{% load i18n %}
+
+{% block title %}Django Vendor Promo - Home{% endblock %}
+
+{% block content %}
+<h1>Django Vendor Promo Base HTML Template</h1>
+
+<div class='card'>
+    <div class='card-header'>
+        <h5>{% trans 'Promo List' %}</h5>
+    </div>
+    <div class='card-body'>
+        <a href="{% url 'vendorpromo-create' %}" class="btn btn-success mb-3">{% trans 'Create' %}</a>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{% trans 'Product Name' %}</th>
+                    <th>{% trans 'Code' %}</th>
+                    <th>{% trans 'Slug' %}</th>
+                    <th>{% trans 'Actions' %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for promo in object_list %}
+                <tr>
+                    <th>{{ promo.offer.name }}</th>
+                    <th>{{ promo.code }}</th>
+                    <th>{{ promo.slug }}</th>
+                    <th>
+                        <a href="{% url 'vendorpromo-update' promo.uuid %}" class="btn btn-sm btn-warning">{% trans 'edit' %}</a>
+                        <form action="{% url 'vendorpromo-delete' promo.uuid %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">{% trans 'delete' %}</button>
+                        </form>
+                    </th>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
