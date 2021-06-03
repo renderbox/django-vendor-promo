@@ -53,7 +53,7 @@ jobs:
         python manage.py test vendorpromo
       env: 
         DJANGO_DEBUG: 1
-        DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/vendorpromo
+        # DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/vendorpromo
     # Uncomment if building to PyPI
     - name: Install Build Dependencies
       run: |
