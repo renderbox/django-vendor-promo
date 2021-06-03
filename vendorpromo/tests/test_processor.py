@@ -206,7 +206,7 @@ class VoucheryProcessorTests(TestCase):
             campaign_id = self.existing_campaigns[0]['id']
 
         processor = self.promo_processor()
-        processor.update_campaign(campaign_id, campaign_name, **update_value)
+        processor.update_campaign(campaign_id, **update_value)
         self.assertTrue(processor.is_request_success)
         processor.clear_response_variables()
         processor.get_campaign(campaign_id)
@@ -214,7 +214,7 @@ class VoucheryProcessorTests(TestCase):
 
     def test_update_campaign_fail(self):
         processor = self.promo_processor()
-        processor.update_campaign(-2, "Campaign Does Not Exist")
+        processor.update_campaign(-2, **{"type": "MainCampaign"})
         self.assertFalse(processor.is_request_success)
 
     def test_delete_campaign_success(self):
@@ -236,14 +236,14 @@ class VoucheryProcessorTests(TestCase):
         processor.delete_campaign(-2)
         self.assertFalse(processor.is_request_success)
 
-    def test_delete_full_campaign_success(self):
-        campaing_ids = [875, 736, 742]
-        processor = self.promo_processor()
+    # def test_delete_full_campaign_success(self):
+    #     campaing_ids = []
+    #     processor = self.promo_processor()
 
-        for campaign_id in campaing_ids:
-            processor.delete_full_campaign(campaign_id)
+    #     for campaign_id in campaing_ids:
+    #         processor.delete_full_campaign(campaign_id)
 
-        self.assertTrue(processor.is_request_success)
+    #     self.assertTrue(processor.is_request_success)
 
     #############
     # Reward
