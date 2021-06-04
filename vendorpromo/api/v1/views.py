@@ -71,20 +71,17 @@ class ValidateCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
 
         if offer_in_cart is None:
             messages.info(request, _("Invalid Promo Code"))
-            # return redirect(request.META.get('HTTP_REFERER', "vendor:cart"))
             return HttpResponseBadRequest()
 
         processor = promo_processor(invoice=invoice)
 
         if not processor.is_code_valid_on_checkout(promo.code, promo.offer.current_price()):
             messages.info(request, _("Invalid Promo Code"))
-            # return redirect(request.META.get('HTTP_REFERER', "vendor:cart"))
             return HttpResponseBadRequest()
 
         invoice.swap_offer(offer_in_cart, promo.offer)
         messages.success(request, _("Promo Code Applied"))
         return HttpResponse(_("Promo Code Applied"))
-        # return redirect(request.META.get('HTTP_REFERER', "vendor:cart"))
 
 
 class ValidateLinkCodeAPIView(AddToCartView):

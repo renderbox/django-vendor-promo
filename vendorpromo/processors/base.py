@@ -20,13 +20,30 @@ class PromoProcessorBase(object):
             self.invoice = invoice
 
     ################
-    # Promotion Management
+    # Utils
     def clear_response_variables(self):
         self.response = None
         self.response_content = None
         self.response_error = None
         self.response_message = None
         self.is_request_success = False
+
+    def set_promo_invoice_vendor_notes(self, code):
+        if self.invoice is None:
+            # TODO: Should this raise an exception, probably.
+            return None
+
+        if not self.invoice.vendor_notes:
+            self.invoice.vendor_notes = {}
+            self.invoice.vendor_notes['promos'] = {}
+
+        if 'promos' in self.invoice.vendor_notes.keys():
+            if code not in self.invoice.vendor_notes['promos'].keys():
+                self.invoice.vendor_notes['promos'][code] = False
+        else:
+            self.invoice.vendor_notes['promos'] = {code: False}
+
+        self.invoice.save()
 
     ################
     # Promotion Management
