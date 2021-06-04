@@ -62,11 +62,11 @@ class PromoCodeFormsetView(LoginRequiredMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         offer = get_object_or_404(Offer, uuid=kwargs.get('uuid'))
-        formset = PromoCodeFormset(queryset=Promo.objects.filter(site=offer.site, offer=offer))
+        formset = PromoCodeFormset(queryset=Promo.objects.filter(offer__site=offer.site, offer=offer))
         context['formset'] = formset
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         return render(request, self.template_name, context)

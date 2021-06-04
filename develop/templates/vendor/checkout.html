@@ -194,29 +194,29 @@
       {% endfor %}
       {% include "./includes/cost_overview.html" with invoice=invoice %}
     </ul>
-
-    {% for item in invoice.order_items.all %}
+        {% for item in invoice.order_items.all %}
         {% if item.offer.promo.all %}
-            {% for promo in item.offer.promo.all %}
-            <div class="input-group my-2 promo-code-applied">
-                <input type="text" class="form-control" placeholder="Promo code" value="{{promo.code}}" disabled>
-                <div class="input-group-append">
+        {% for promo in item.offer.promo.all %}
+        <div class="input-group my-2 promo-code-applied">
+            <input type="text" class="form-control" placeholder="Promo code" value="{{promo.code}}" disabled>
+            <div class="input-group-append">
                 <button class="btn btn-success" disabled>{% trans "Applied" %}</button>
-                </div>
             </div>
-            {% endfor %}
+        </div>
+        {% endfor %}
         {% endif %}
-    {% endfor %}
+        {% endfor %}
         <form id="promo-code-form" method="post" action="{% url 'checkout-validation' invoice.uuid %}">
             {% csrf_token %}
             <div class="input-group">
                 <input type="text" class="form-control" name="promo_code" placeholder="Promo code">
                 <div class="input-group-append">
-                    <button type="submit" class="btn btn-primary">{% trans "Redeem" %}</button>
+                    <button type="submit" class="btn btn-primary">{% trans "Redeem" %}
+                    </button>
                 </div>
             </div>
         </form>
-  </div>
+    </div>
 </div>
 
 {% endblock %}

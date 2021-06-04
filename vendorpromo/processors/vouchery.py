@@ -401,12 +401,12 @@ class VoucheryProcessor(PromoProcessorBase):
         Vouchery.io create_redeem validates the code. If it is valid
         it will create a redemption recode to be confirmed after payment.
         """
-        # Checks to see if there is already a redemption that has not been confirmed. 
-        self.get_redeem(code, str(self.invoice.uuid))
+        # Checks to see if there is already a redemption that has not been confirmed.
+        transaction_id = str(self.invoice.uuid) + f"__{code}"
+        self.get_redeem(code, transaction_id)
         if self.is_request_success:
             return True
-
-        self.create_redeem(code, str(self.invoice.uuid), offer_cost)
+        self.create_redeem(code, transaction_id, offer_cost)
         if self.is_request_success:
             return True
         return False
