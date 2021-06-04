@@ -23,7 +23,7 @@ class CreatePromoAPIView(LoginRequiredMixin, View):
         promo_form = PromoForm(request.POST)
 
         if not promo_form.is_valid():
-            messages.error(request, _(f'Create Promo Failed. Errors: {promo_form.errors}'))
+            messages.info(request, _(f'Create Promo Failed. Errors: {promo_form.errors}'))
             return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
         processor = promo_processor()
         processor.create_promo(promo_form)
@@ -37,7 +37,7 @@ class DeletePromoAPIView(LoginRequiredMixin, View):
         promo_form = PromoForm(request.POST)
 
         if not promo_form.is_valid():
-            messages.error(request, f'Create Promo Failed. Errors: {promo_form.errors}')
+            messages.info(request, f'Create Promo Failed. Errors: {promo_form.errors}')
             return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
         processor = promo_processor()
         processor.create_promo(promo_form)
@@ -60,7 +60,7 @@ class ValidateCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
             invoice = get_object_or_404(Invoice, uuid=kwargs['invoice_uuid'])
             promo = get_object_or_404(Promo, code=request.POST['promo_code'], offer__site=invoice.site)
         except Http404:
-            messages.error(request, _("Invalid Promo Code"))
+            messages.info(request, _("Invalid Promo Code"))
             return HttpResponseBadRequest()
 
         # loop through offers in invoice to see if any match the product form the Promo.offer instance
@@ -70,14 +70,14 @@ class ValidateCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
                 break
 
         if offer_in_cart is None:
-            messages.error(request, _("Invalid Promo Code"))
+            messages.info(request, _("Invalid Promo Code"))
             # return redirect(request.META.get('HTTP_REFERER', "vendor:cart"))
             return HttpResponseBadRequest()
 
         processor = promo_processor(invoice=invoice)
 
         if not processor.is_code_valid_on_checkout(promo.code, promo.offer.current_price()):
-            messages.error(request, _("Invalid Promo Code"))
+            messages.info(request, _("Invalid Promo Code"))
             # return redirect(request.META.get('HTTP_REFERER', "vendor:cart"))
             return HttpResponseBadRequest()
 
