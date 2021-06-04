@@ -405,9 +405,11 @@ class VoucheryProcessor(PromoProcessorBase):
         transaction_id = str(self.invoice.uuid) + f"__{code}"
         self.get_redeem(code, transaction_id)
         if self.is_request_success:
+            self.set_promo_invoice_vendor_notes(code)
             return True
         self.create_redeem(code, transaction_id, offer_cost)
         if self.is_request_success:
+            self.set_promo_invoice_vendor_notes(code)
             return True
         return False
 
