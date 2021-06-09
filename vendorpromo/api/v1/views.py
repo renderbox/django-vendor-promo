@@ -1,10 +1,9 @@
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.http.response import HttpResponse, HttpResponseBadRequest, Http404
 from django.utils.translation import ugettext as _
-from django.views import View
+from django.views.generic import DeleteView, View
 
 from vendor.models import Invoice
 from vendor.views.vendor import AddToCartView
@@ -31,18 +30,15 @@ class CreatePromoAPIView(LoginRequiredMixin, View):
         return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
 
 
-class DeletePromoAPIView(LoginRequiredMixin, View):
+class DeletePromoAPIView(LoginRequiredMixin, DeleteView):
+    model = Promo
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
 
     def post(self, request, *args, **kwargs):
-        promo_form = PromoForm(request.POST)
-
-        if not promo_form.is_valid():
-            messages.info(request, f'Create Promo Failed. Errors: {promo_form.errors}')
-            return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
         processor = promo_processor()
-        processor.create_promo(promo_form)
-        messages.success(request, _("Promo Code Deleted"))
-        return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
+        processor.delete_promo(self.get_object())
+        return redirect(request.META.get('HTTP_REFERER'))
 
 
 class ValidateCodeCheckoutProcessAPIView(LoginRequiredMixin, View):

@@ -53,7 +53,7 @@ class PromoDeleteView(LoginRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         processor = promo_processor()
         processor.delete_promo(self.get_object())
-        return redirect('vendorpromo-list')
+        return redirect(request.META.get('HTTP_REFERER'))
 
 
 class PromoCodeFormsetView(LoginRequiredMixin, TemplateView):

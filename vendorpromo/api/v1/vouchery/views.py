@@ -24,7 +24,7 @@ class VoucheryCreateOfferPromoAPIView(LoginRequiredMixin, FormView):
 
         processor.create_promo_automate(promo_form)
 
-        if not (processor.is_request_success):
+        if not processor.is_request_success:
             raise HttpResponseServerError(_(f"Createing Promo Failed: {processor.response_message}-{processor.response_errors}"))
 
         return redirect(request.META.get('HTTP_REFERER'))
