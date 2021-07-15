@@ -56,7 +56,7 @@ class ValidateCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
             invoice = get_object_or_404(Invoice, uuid=kwargs['invoice_uuid'])
             promo = get_object_or_404(Promo, code=request.POST['promo_code'], offer__site=invoice.site)
         except Http404 as error:
-            messages.info(request, _("Invalid Promo Code"))
+            messages.success(request, _("Invalid Promo Code"))
             return HttpResponseBadRequest(f"404 error: {error}")
 
         # loop through offers in invoice to see if any match the product form the Promo.offer instance
@@ -66,14 +66,14 @@ class ValidateCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
                 break
 
         if offer_in_cart is None:
-            messages.info(request, _("Invalid Promo Code"))
+            messages.success(request, _("Invalid Promo Code"))
             return HttpResponseBadRequest(f"No related offer in cart for code: {promo.code}")
 
         processor = promo_processor(invoice=invoice)
 
         if not processor.is_code_valid_on_checkout(promo.code, promo.offer.current_price()):
-            messages.info(request, _("Invalid Promo Code"))
-            return HttpResponseBadRequest(f"Processor rejected code {promo.code}\nmsg:{processor.request_message}\nerror: {processor.request_errors}")
+            messages.success(request, _("Invalid Promo Code"))
+            return HttpResponseBadRequest(f"Processor rejected code {promo.code}\nmsg:{processor.response_message}\nerror: {processor.response_error}")
 
         invoice.swap_offer(offer_in_cart, promo.offer)
         messages.success(request, _("Promo Code Applied"))
