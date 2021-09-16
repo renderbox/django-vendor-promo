@@ -50,6 +50,7 @@ setup(
         'django-autoslug',
         'django-extensions',
         "django-vendor>=0.2.0",
+        "django-site-configs",
         'iso4217',
     ],
     extras_require={
