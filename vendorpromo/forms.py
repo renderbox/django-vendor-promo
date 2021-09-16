@@ -1,9 +1,16 @@
 from django import forms
+from django.db.models import TextChoices
 from django.forms import modelformset_factory
 from django.utils.translation import ugettext as _
 
 from vendorpromo.models import Promo
 
+class SupportedProcessor(TextChoices):
+    PROMO_CODE_BASE = ("base.PromoProcessorBase", _("Default Processor"))
+    VOUCHERY = ("vouchery.VoucheryProcessor", _("Vouchery.io"))
+
+class PromoCodeProcessorForm(forms.Form):
+    processor = forms.CharField(label=_("Processor"), widget=forms.Select(choices=SupportedProcessor.choices))
 
 class PromoForm(forms.ModelForm):
     class Meta:
