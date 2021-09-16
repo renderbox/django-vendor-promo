@@ -7,9 +7,7 @@ from vendor.models import Offer
 
 from vendorpromo.forms import PromoCodeFormset
 from vendorpromo.models import Promo
-from vendorpromo.processors import PromoProcessor
-
-promo_processor = PromoProcessor
+from vendorpromo.processors import get_site_promo_processor
 
 
 class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
@@ -27,7 +25,8 @@ class PromoCreateView(LoginRequiredMixin, CreateView):
         return {'offer': Offer.objects.filter(site=self.request.user.customer_profile.first().site)}
 
     def form_valid(self, form):
-        processor = promo_processor()
+        promo = form.save(commit=False)
+        processor = get_site_promo_processor(promo.offer.site)()
         processor.create_promo(form)
         return redirect('vendorpromo-list')
 
@@ -40,7 +39,8 @@ class PromoUpdateView(LoginRequiredMixin, UpdateView):
     fields = ('__all__')
 
     def form_valid(self, form):
-        processor = promo_processor()
+        promo = form.save(commit=False)
+        processor = get_site_promo_processor(promo.offer.site)()
         processor.update_promo(form)
         return redirect('vendorpromo-list')
 
@@ -51,7 +51,7 @@ class PromoDeleteView(LoginRequiredMixin, DeleteView):
     slug_url_kwarg = 'uuid'
 
     def post(self, request, *args, **kwargs):
-        processor = promo_processor()
+        processor = get_site_promo_processor(self.get_object().offer.site)()
         processor.delete_promo(self.get_object())
         return redirect(request.META.get('HTTP_REFERER'))
 
