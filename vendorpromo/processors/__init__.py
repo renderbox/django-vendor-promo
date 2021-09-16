@@ -1,11 +1,11 @@
 from django.utils.module_loading import import_string
 from django.core.exceptions import ObjectDoesNotExist
-from vendorpromo.config import PromoCodeProcessor, VENDOR_PROMO_PROCESSOR
+from vendorpromo.config import PromoCodeSiteConfigProcessor, VENDOR_PROMO_PROCESSOR
 from siteconfigs.models import SiteConfigModel
 
 
 def get_site_promo_processor(site):
-    site_processor = PromoCodeProcessor()
+    site_processor = PromoCodeSiteConfigProcessor()
     try:
         return import_string(f"vendorpromo.processors.{SiteConfigModel.objects.get(site=site, key=site_processor.key).value}")
     except ObjectDoesNotExist:

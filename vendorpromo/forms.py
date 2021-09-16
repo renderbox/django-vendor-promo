@@ -9,7 +9,7 @@ class SupportedProcessor(TextChoices):
     PROMO_CODE_BASE = ("base.PromoProcessorBase", _("Default Processor"))
     VOUCHERY = ("vouchery.VoucheryProcessor", _("Vouchery.io"))
 
-class PromoCodeProcessorForm(forms.Form):
+class PromoCodeSiteConfigProcessorForm(forms.Form):
     processor = forms.CharField(label=_("Processor"), widget=forms.Select(choices=SupportedProcessor.choices))
 
 class PromoForm(forms.ModelForm):

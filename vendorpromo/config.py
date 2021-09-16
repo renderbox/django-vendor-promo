@@ -4,13 +4,13 @@ from django.contrib.sites.models import Site
 from django.utils.translation import gettext_lazy as _
 
 from siteconfigs.config import SiteConfigBaseClass
-from vendorpromo.forms import PromoCodeProcessorForm
+from vendorpromo.forms import PromoCodeSiteConfigProcessorForm
 
 
-class PromoCodeProcessor(SiteConfigBaseClass):
+class PromoCodeSiteConfigProcessor(SiteConfigBaseClass):
     label = _("Promo Code Processor")
     default = {"processor": "base.PromoProcessorBase"}
-    form_class = PromoCodeProcessorForm
+    form_class = PromoCodeSiteConfigProcessorForm
 
     def __init__(self):
         site = Site.objects.get_current()
