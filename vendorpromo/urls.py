@@ -8,4 +8,7 @@ urlpatterns = [
     path("promo/<str:uuid>/update", views.PromoUpdateView.as_view(), name="vendorpromo-update"),
     path("promo/<str:uuid>/delete", views.PromoDeleteView.as_view(), name="vendorpromo-delete"),
     path("offer/<str:uuid>/promocodes/", views.PromoCodeFormsetView.as_view(), name="vendorpromo-promocode-formset"),
+    path("processors/", views.PromoCodeSiteConfigsListView.as_view(), name="vendorpromo-processor-lists"),
+    path("processor/siteconfig/", views.ProcessorFormView.as_view(), name="vendorpromo-processor"),
+    path("processor/siteconfig/<int:pk>/site/", views.ProcessorSiteSelectFormView.as_view(), name="vendorpromo-processor-site"),
 ]

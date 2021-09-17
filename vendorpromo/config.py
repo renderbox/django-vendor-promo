@@ -1,21 +1,66 @@
 # App Settings
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sites.models import Site
 from django.utils.translation import gettext_lazy as _
 
 from siteconfigs.config import SiteConfigBaseClass
-from vendorpromo.forms import PromoCodeSiteConfigProcessorForm
+from siteconfigs.models import SiteConfigModel
+from vendorpromo.forms import ProcessorForm, ProcessorSiteSelectForm, SupportedProcessor
 
 
-class PromoCodeSiteConfigProcessor(SiteConfigBaseClass):
+class ProcessorSiteConfig(SiteConfigBaseClass):
     label = _("Promo Code Processor")
     default = {"processor": "base.PromoProcessorBase"}
-    form_class = PromoCodeSiteConfigProcessorForm
+    form_class = ProcessorForm
+    instance = None
 
-    def __init__(self):
-        site = Site.objects.get_current()
+    def __init__(self, site=None):
+        if site is None:
+            site = Site.objects.get_current()
         self.key = ".".join([__name__, __class__.__name__])
+        self.set_instance(site)
         super().__init__(site, self.key)
+
+    # TODO: This should be implemented in the SiteConfigBaseClass  
+    def save(self, valid_form):
+        site_config, created = SiteConfigModel.objects.get_or_create(site=self.site, key=self.key)
+        site_config.value = {"processor": valid_form.cleaned_data['processor']}
+        site_config.site = self.site
+        site_config.save()
+
+    # TODO: This should be implemented in the SiteConfigBaseClass
+    def set_instance(self, site):
+        try:
+            self.instance = SiteConfigModel.objects.get(site=site, key=self.key)
+        except ObjectDoesNotExist:
+            self.instance = None
+
+    def get_form(self):
+        return self.form_class(initial=self.get_initials())
+
+    def get_initials(self):
+        if self.instance:
+            return {'processor': [choice for choice in SupportedProcessor.choices if choice[0] == self.instance.value['processor']][0]}
+        return {'processor': SupportedProcessor.choices[0]}
+
+    def get_selected_processor(self):
+        if self.instance:
+            return [choice for choice in SupportedProcessor.choices if choice[0] == self.instance.value['processor']][0]
+        return SupportedProcessor.choices[0]  # Return Default Processors
+
+
+class ProcessorSiteSelectSiteConfig(ProcessorSiteConfig):
+    label = _("Promo Code Processor")
+    default = {"processor": "base.PromoProcessorBase"}
+    form_class = ProcessorSiteSelectForm
+    instance = None
+
+
+    def get_initials(self):
+        initial = super().get_initials()
+        initial['site'] = (self.site.pk, self.site.domain)
+        return initial
 
 # Set up as a backup if the developer only want to set the processor through an enviornment variable
 VENDOR_PROMO_PROCESSOR = getattr(settings, "VENDOR_PROMO_PROCESSOR", "dummy.DummyProcessor")
