@@ -6,17 +6,17 @@ from django.utils.translation import ugettext as _
 
 from vendorpromo.models import Promo
 
-class SupportedProcessor(TextChoices):
+class SupportedPromoProcessor(TextChoices):
     PROMO_CODE_BASE = ("base.PromoProcessorBase", _("Default Processor"))
     VOUCHERY = ("vouchery.VoucheryProcessor", _("Vouchery.io"))
 
 class PromoProcessorForm(forms.Form):
-    processor = forms.CharField(label=_("Processor"), widget=forms.Select(choices=SupportedProcessor.choices))
+    processor = forms.CharField(label=_("Processor"), widget=forms.Select(choices=SupportedPromoProcessor.choices))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['processor'].widget = forms.Select(choices=SupportedProcessor.choices)
+        self.fields['processor'].widget = forms.Select(choices=SupportedPromoProcessor.choices)
         self.fields['processor'].label = _("Promo Processor")
 
 class PromoProcessorSiteSelectForm(PromoProcessorForm):

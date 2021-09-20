@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from siteconfigs.config import SiteConfigBaseClass
 from siteconfigs.models import SiteConfigModel
-from vendorpromo.forms import PromoProcessorForm, PromoProcessorSiteSelectForm, SupportedProcessor
+from vendorpromo.forms import PromoProcessorForm, PromoProcessorSiteSelectForm, SupportedPromoProcessor
 
 
 class PromoProcessorSiteConfig(SiteConfigBaseClass):
@@ -42,13 +42,13 @@ class PromoProcessorSiteConfig(SiteConfigBaseClass):
 
     def get_initials(self):
         if self.instance:
-            return {"promo_processor": [choice for choice in SupportedProcessor.choices if choice[0] == self.instance.value["promo_processor"]][0]}
-        return {"promo_processor": SupportedProcessor.choices[0]}
+            return {"promo_processor": [choice for choice in SupportedPromoProcessor.choices if choice[0] == self.instance.value["promo_processor"]][0]}
+        return {"promo_processor": SupportedPromoProcessor.choices[0]}
 
     def get_selected_processor(self):
         if self.instance:
-            return [choice for choice in SupportedProcessor.choices if choice[0] == self.instance.value["promo_processor"]][0]
-        return SupportedProcessor.choices[0]  # Return Default Processors
+            return [choice for choice in SupportedPromoProcessor.choices if choice[0] == self.instance.value["promo_processor"]][0]
+        return SupportedPromoProcessor.choices[0]  # Return Default Processors
 
 
 class PromoProcessorSiteSelectSiteConfig(PromoProcessorSiteConfig):
