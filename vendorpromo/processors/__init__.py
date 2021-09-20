@@ -12,4 +12,4 @@ def get_site_promo_processor(site):
         # Should it return the default if not found?
         # raise ValueError("PromoProcessor has not been configured")
         default_config = PromoProcessorSiteConfig()
-        return import_string(f"vendorpromo.processors.{default_config.default['promo_processor']}")
+        return import_string(f"vendorpromo.processors.{default_config.default[default_config.key]}")

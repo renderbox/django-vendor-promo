@@ -13,6 +13,7 @@ class PromoProcessorSiteConfig(SiteConfigBaseClass):
     label = _("Promo Code Processor")
     default = {"promo_processor": "base.PromoProcessorBase"}
     form_class = PromoProcessorForm
+    key = ""
     instance = None
 
     def __init__(self, site=None):
@@ -54,6 +55,7 @@ class PromoProcessorSiteSelectSiteConfig(PromoProcessorSiteConfig):
     label = _("Promo Code Processor")
     default = {"promo_processor": "base.PromoProcessorBase"}
     form_class = PromoProcessorSiteSelectForm
+    key = ""  # TODO: This should be in the base class in the site-configs package.
     instance = None
 
 
