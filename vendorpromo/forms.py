@@ -10,16 +10,16 @@ class SupportedProcessor(TextChoices):
     PROMO_CODE_BASE = ("base.PromoProcessorBase", _("Default Processor"))
     VOUCHERY = ("vouchery.VoucheryProcessor", _("Vouchery.io"))
 
-class ProcessorForm(forms.Form):
+class PromoProcessorForm(forms.Form):
     processor = forms.CharField(label=_("Processor"), widget=forms.Select(choices=SupportedProcessor.choices))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.fields['processor'].widget = forms.Select(choices=SupportedProcessor.choices)
-        self.fields['processor'].label = _("Processor")
+        self.fields['processor'].label = _("Promo Processor")
 
-class ProcessorSiteSelectForm(ProcessorForm):
+class PromoProcessorSiteSelectForm(PromoProcessorForm):
     site = forms.CharField(label=_("Site"), widget=forms.Select(choices=[(site.pk, site.domain) for site in Site.objects.all()]))
 
 

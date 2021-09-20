@@ -6,13 +6,13 @@ from django.utils.translation import gettext_lazy as _
 
 from siteconfigs.config import SiteConfigBaseClass
 from siteconfigs.models import SiteConfigModel
-from vendorpromo.forms import ProcessorForm, ProcessorSiteSelectForm, SupportedProcessor
+from vendorpromo.forms import PromoProcessorForm, PromoProcessorSiteSelectForm, SupportedProcessor
 
 
-class ProcessorSiteConfig(SiteConfigBaseClass):
+class PromoProcessorSiteConfig(SiteConfigBaseClass):
     label = _("Promo Code Processor")
-    default = {"processor": "base.PromoProcessorBase"}
-    form_class = ProcessorForm
+    default = {"promo_processor": "base.PromoProcessorBase"}
+    form_class = PromoProcessorForm
     instance = None
 
     def __init__(self, site=None):
@@ -25,7 +25,7 @@ class ProcessorSiteConfig(SiteConfigBaseClass):
     # TODO: This should be implemented in the SiteConfigBaseClass  
     def save(self, valid_form):
         site_config, created = SiteConfigModel.objects.get_or_create(site=self.site, key=self.key)
-        site_config.value = {"processor": valid_form.cleaned_data['processor']}
+        site_config.value = {"promo_processor": valid_form.cleaned_data["promo_processor"]}
         site_config.site = self.site
         site_config.save()
 
@@ -41,19 +41,19 @@ class ProcessorSiteConfig(SiteConfigBaseClass):
 
     def get_initials(self):
         if self.instance:
-            return {'processor': [choice for choice in SupportedProcessor.choices if choice[0] == self.instance.value['processor']][0]}
-        return {'processor': SupportedProcessor.choices[0]}
+            return {"promo_processor": [choice for choice in SupportedProcessor.choices if choice[0] == self.instance.value["promo_processor"]][0]}
+        return {"promo_processor": SupportedProcessor.choices[0]}
 
     def get_selected_processor(self):
         if self.instance:
-            return [choice for choice in SupportedProcessor.choices if choice[0] == self.instance.value['processor']][0]
+            return [choice for choice in SupportedProcessor.choices if choice[0] == self.instance.value["promo_processor"]][0]
         return SupportedProcessor.choices[0]  # Return Default Processors
 
 
-class ProcessorSiteSelectSiteConfig(ProcessorSiteConfig):
+class PromoProcessorSiteSelectSiteConfig(PromoProcessorSiteConfig):
     label = _("Promo Code Processor")
-    default = {"processor": "base.PromoProcessorBase"}
-    form_class = ProcessorSiteSelectForm
+    default = {"promo_processor": "base.PromoProcessorBase"}
+    form_class = PromoProcessorSiteSelectForm
     instance = None
 
 

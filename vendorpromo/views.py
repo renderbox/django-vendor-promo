@@ -8,8 +8,8 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView, FormMixin, UpdateView, FormView
 
 from vendor.models import Offer
-from vendorpromo.config import ProcessorSiteConfig, ProcessorSiteSelectSiteConfig
-from vendorpromo.forms import PromoCodeFormset, ProcessorForm, ProcessorSiteSelectForm
+from vendorpromo.config import PromoProcessorSiteConfig, PromoProcessorSiteSelectSiteConfig
+from vendorpromo.forms import PromoCodeFormset, PromoProcessorForm, PromoProcessorSiteSelectForm
 from vendorpromo.models import Promo
 from vendorpromo.processors import get_site_promo_processor
 
@@ -27,41 +27,41 @@ class PromoCodeSiteConfigsListView(ListView):
     queryset = SiteConfigModel.objects.all()
 
 
-class ProcessorFormView(FormView):
+class PromoProcessorFormView(FormView):
     template_name = 'vendorpromo/processor_site_config.html'
-    form_class = ProcessorForm
+    form_class = PromoProcessorForm
 
     def get_success_url(self):
         return reverse('vendorpromo-processor')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor_config = ProcessorSiteConfig()
+        processor_config = PromoProcessorSiteConfig()
         context['form'] = processor_config.get_form()
         return context
 
     def form_valid(self, form):
-        processor_config = ProcessorSiteConfig()
+        processor_config = PromoProcessorSiteConfig()
         processor_config.save(form)
         return redirect('vendorpromo-processor-lists')
 
 
-class ProcessorSiteSelectFormView(FormView):
+class PromoProcessorSiteSelectFormView(FormView):
     template_name = 'vendorpromo/processor_site_config.html'
-    form_class = ProcessorSiteSelectForm
+    form_class = PromoProcessorSiteSelectForm
 
     def get_success_url(self):
         return reverse('vendorpromo-processor')
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor_config = ProcessorSiteSelectSiteConfig(Site.objects.get(pk=self.kwargs.get('pk')))
+        processor_config = PromoProcessorSiteSelectSiteConfig(Site.objects.get(pk=self.kwargs.get('pk')))
         context['form'] = processor_config.get_form()
         return context
 
     def form_valid(self, form):
         site = Site.objects.get(pk=form.cleaned_data['site'])
-        processor_config = ProcessorSiteSelectSiteConfig(site)
+        processor_config = PromoProcessorSiteSelectSiteConfig(site)
         processor_config.save(form)
         return redirect('vendorpromo-processor-lists')
 
