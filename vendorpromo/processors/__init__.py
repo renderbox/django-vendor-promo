@@ -11,4 +11,5 @@ def get_site_promo_processor(site):
     except ObjectDoesNotExist:
         # Should it return the default if not found?
         # raise ValueError("PromoProcessor has not been configured")
-        return import_string(f"vendorpromo.processors.{SiteConfigModel.objects.get(site=site, key=site_processor.key).value}")
+        default_config = PromoProcessorSiteConfig()
+        return import_string(f"vendorpromo.processors.{default_config.default['promo_processor']}")
