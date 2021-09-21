@@ -1,9 +1,10 @@
 from django import forms
 from django.contrib.sites.models import Site
 from django.db.models import TextChoices
-from django.forms import modelformset_factory
+from django.forms import fields, modelformset_factory
 from django.utils.translation import ugettext as _
 
+from integrations.models import Credential
 from vendorpromo.models import Promo
 
 class SupportedPromoProcessor(TextChoices):
@@ -63,3 +64,17 @@ PromoCodeFormset = modelformset_factory(
         )
     }
 )
+
+class VoucheryIntegrationForm(forms.ModelForm):
+    class Meta:
+        model = Credential
+        fields = ['client_url', 'private_key']
+        labels = {
+            'client_url': "Vouchery URL",
+            'private_key': "Vouchery Barrer Key"
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['client_url'].required = True
+        self.fields['private_key'].required = True
