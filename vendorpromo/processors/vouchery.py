@@ -53,6 +53,10 @@ class VoucheryProcessor(PromoProcessorBase):
         "discount_value": 0  # The actual discount is set in the Offer instance.
     }
 
+    def __init__(self, invoice=None):
+        super().__init__(invoice=invoice)
+        # TODO: Check that vouchery keys are set.
+
     ################
     # Promotion Management
     def create_promo_automate(self, promo_form):
