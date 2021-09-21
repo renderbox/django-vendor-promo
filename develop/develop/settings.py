@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'integrations',
     'iso4217',
     'siteconfigs',
     'vendor',

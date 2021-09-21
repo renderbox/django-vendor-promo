@@ -51,6 +51,7 @@ setup(
         'django-extensions',
         "django-vendor>=0.2.0",
         "django-site-configs",
+        'django-integrations',
         'iso4217',
     ],
     extras_require={
