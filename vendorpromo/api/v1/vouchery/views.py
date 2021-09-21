@@ -17,7 +17,7 @@ class VoucheryCreateOfferPromoAPIView(LoginRequiredMixin, FormView):
         promo_form = PromoForm(request.POST)
         if not promo_form.is_valid():
             raise HttpResponseBadRequest()
-        promo_form.save(commit=False)
+
         processor = VoucheryProcessor()
 
         processor.create_promo_automate(promo_form)
