@@ -26,6 +26,10 @@ class PromoCodeSiteConfigsListView(ListView):
     model = SiteConfigModel
     queryset = SiteConfigModel.objects.all()
 
+    def get_queryset(self):
+        promo_processor = PromoProcessorSiteConfig()
+        return SiteConfigModel.objects.filter(key=promo_processor.key)
+
 
 class PromoProcessorFormView(FormView):
     template_name = 'vendorpromo/processor_site_config.html'

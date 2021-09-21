@@ -27,7 +27,6 @@ class PromoProcessorSiteConfig(SiteConfigBaseClass):
     def save(self, valid_form):
         site_config, created = SiteConfigModel.objects.get_or_create(site=self.site, key=self.key)
         site_config.value = {"promo_processor": valid_form.cleaned_data["promo_processor"]}
-        site_config.site = self.site
         site_config.save()
 
     # TODO: This should be implemented in the SiteConfigBaseClass

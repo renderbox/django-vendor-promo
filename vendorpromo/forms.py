@@ -13,11 +13,6 @@ class SupportedPromoProcessor(TextChoices):
 class PromoProcessorForm(forms.Form):
     promo_processor = forms.CharField(label=_("Processor"), widget=forms.Select(choices=SupportedPromoProcessor.choices))
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fields['promo_processor'].widget = forms.Select(choices=SupportedPromoProcessor.choices)
-        self.fields['promo_processor'].label = _("Promo Processor")
 
 class PromoProcessorSiteSelectForm(PromoProcessorForm):
     site = forms.CharField(label=_("Site"), widget=forms.Select(choices=[(site.pk, site.domain) for site in Site.objects.all()]))
