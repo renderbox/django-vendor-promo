@@ -24,7 +24,7 @@
                 {% for object in object_list %}
                     <tr>
                         <td>{{object.site}}</td>
-                        <td>{{object.value.processor}}</td>
+                        <td>{{object.value.promo_processor}}</td>
                         <td>
                             <a class="btn btn-success" href="{% url 'vendorpromo-processor' %}">{% trans 'Edit Processor' %}</a>
                             <a class="btn btn-success" href="{% url 'vendorpromo-processor-site' object.site.pk%}">{% trans 'Edit Processor  and Site' %}</a>

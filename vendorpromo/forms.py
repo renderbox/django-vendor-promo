@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.sites.models import Site
 from django.db.models import TextChoices
-from django.forms import fields, modelformset_factory
+from django.forms import modelformset_factory
 from django.utils.translation import ugettext as _
 
 from vendorpromo.models import Promo
@@ -11,13 +11,13 @@ class SupportedPromoProcessor(TextChoices):
     VOUCHERY = ("vouchery.VoucheryProcessor", _("Vouchery.io"))
 
 class PromoProcessorForm(forms.Form):
-    processor = forms.CharField(label=_("Processor"), widget=forms.Select(choices=SupportedPromoProcessor.choices))
+    promo_processor = forms.CharField(label=_("Processor"), widget=forms.Select(choices=SupportedPromoProcessor.choices))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['processor'].widget = forms.Select(choices=SupportedPromoProcessor.choices)
-        self.fields['processor'].label = _("Promo Processor")
+        self.fields['promo_processor'].widget = forms.Select(choices=SupportedPromoProcessor.choices)
+        self.fields['promo_processor'].label = _("Promo Processor")
 
 class PromoProcessorSiteSelectForm(PromoProcessorForm):
     site = forms.CharField(label=_("Site"), widget=forms.Select(choices=[(site.pk, site.domain) for site in Site.objects.all()]))
