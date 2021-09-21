@@ -1,10 +1,11 @@
 import requests
 import json
 
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 
 from vendorpromo.config import VENDOR_PROMO_PROCESSOR_URL, VENDOR_PROMO_PROCESSOR_BARRER_KEY
-from vendorpromo.models import Promo
+from vendorpromo.integrations import VoucheryIntegration
 from vendorpromo.processors.base import PromoProcessorBase
 
 
@@ -26,10 +27,8 @@ class VoucheryProcessor(PromoProcessorBase):
         },
     ]
     """
-
-    BASE_URL = VENDOR_PROMO_PROCESSOR_URL
-    BARRER_KEY = VENDOR_PROMO_PROCESSOR_BARRER_KEY
-
+    BASE_URL = None
+    BARRER_KEY = None
     CAMPAIGN_URL = 'campaigns'
     REWARDS_URL = 'rewards'
     VOUCHER_URL = 'vouchers'
@@ -52,10 +51,24 @@ class VoucheryProcessor(PromoProcessorBase):
         "discount_type": "percentage",
         "discount_value": 0  # The actual discount is set in the Offer instance.
     }
+    credentials = None
 
     def __init__(self, invoice=None):
         super().__init__(invoice=invoice)
-        # TODO: Check that vouchery keys are set.
+        self.set_credentials(invoice.site)
+
+
+    def set_credentials(self, site):
+        self.credentials = VoucheryIntegration(site)
+        if self.credentials.instance:
+           self.BASE_URL = self.credentials.client_url
+           self.BARRER_KEY = self.credentials.private_key
+        elif VENDOR_PROMO_PROCESSOR_URL and VENDOR_PROMO_PROCESSOR_BARRER_KEY:
+           self.BASE_URL = VENDOR_PROMO_PROCESSOR_URL
+           self.BARRER_KEY = VENDOR_PROMO_PROCESSOR_BARRER_KEY
+        else:
+            raise ImproperlyConfigured("Vouchery is not properly Configured. Missing BASE_URL and/or BARRER_KEY")
+
 
     ################
     # Promotion Management
