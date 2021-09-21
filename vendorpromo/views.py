@@ -24,7 +24,6 @@ class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
 class PromoCodeSiteConfigsListView(ListView):
     template_name = 'vendorpromo/processor_site_config_list.html'
     model = SiteConfigModel
-    queryset = SiteConfigModel.objects.all()
 
     def get_queryset(self):
         promo_processor = PromoProcessorSiteConfig()
