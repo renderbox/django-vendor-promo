@@ -1,17 +1,19 @@
-
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView, FormMixin, UpdateView, FormView
 
 from vendor.models import Offer
 from vendorpromo.config import PromoProcessorSiteConfig, PromoProcessorSiteSelectSiteConfig
-from vendorpromo.forms import PromoCodeFormset, PromoProcessorForm, PromoProcessorSiteSelectForm
+from vendorpromo.forms import PromoCodeFormset, PromoProcessorForm, PromoProcessorSiteSelectForm, VoucheryIntegrationForm
+from vendorpromo.integrations import VoucheryIntegration
 from vendorpromo.models import Promo
 from vendorpromo.processors import get_site_promo_processor
+from vendorpromo.utils import get_site_from_request
 
 from siteconfigs.models import SiteConfigModel
 
@@ -124,3 +126,23 @@ class PromoCodeFormsetView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         return render(request, self.template_name, context)
+
+
+class VoucheryIntegrationView(FormView):
+    template_name = "vendorpromo/vouchery_integration.html"
+    form_class = VoucheryIntegrationForm
+    success_url = reverse_lazy('vouchery-integration')
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        vouchery_integration = VoucheryIntegration(get_site_from_request(self.request))
+        if vouchery_integration.instance:
+            context['form'] = VoucheryIntegrationForm(instance=vouchery_integration.instance)
+        else:
+            context['form'] = VoucheryIntegrationForm()
+        return context
+    
+    def form_valid(self, form):
+        vouchery_integration = VoucheryIntegration(get_site_from_request(self.request))
+        vouchery_integration.save(form.cleaned_data)
+        return super().form_valid(form)

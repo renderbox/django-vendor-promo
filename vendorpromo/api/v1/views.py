@@ -119,3 +119,4 @@ class ValidateLinkCodeAPIView(AddToCartView):
         # request.POST['csrf_token'] = csrf_token
         # self.kwargs['slug'] = promo.offer.slug
         # return super().post(request, args, kwargs)
+

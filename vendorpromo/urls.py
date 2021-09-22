@@ -11,4 +11,5 @@ urlpatterns = [
     path("processors/", views.PromoCodeSiteConfigsListView.as_view(), name="vendorpromo-processor-lists"),
     path("processor/siteconfig/", views.PromoProcessorFormView.as_view(), name="vendorpromo-processor"),
     path("processor/siteconfig/<int:pk>/site/", views.PromoProcessorSiteSelectFormView.as_view(), name="vendorpromo-processor-site"),
+    path("vouchery/integration/", views.VoucheryIntegrationView.as_view(), name="vouchery-integration"),
 ]
