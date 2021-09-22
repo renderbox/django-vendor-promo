@@ -13,7 +13,7 @@ from vendorpromo.forms import PromoCodeFormset, PromoProcessorForm, PromoProcess
 from vendorpromo.integrations import VoucheryIntegration
 from vendorpromo.models import Promo
 from vendorpromo.processors import get_site_promo_processor
-from vendorpromo.utils import get_site_from_request, get_vouchery_integration_or_none
+from vendorpromo.utils import get_site_from_request
 
 from siteconfigs.models import SiteConfigModel
 

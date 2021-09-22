@@ -6,9 +6,3 @@ def get_site_from_request(request):
     if hasattr(request, 'site'):
         return request.site
     return get_current_site(request)
-
-def get_vouchery_integration_or_none(site):
-    try:
-        return Credential.objects.get(name="Vouchery Integration", site=site)
-    except ObjectDoesNotExist :
-        return None

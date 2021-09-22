@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.sites.models import Site
 from django.db.models import TextChoices
-from django.forms import fields, modelformset_factory
+from django.forms import modelformset_factory
 from django.utils.translation import ugettext as _
 
 from integrations.models import Credential
