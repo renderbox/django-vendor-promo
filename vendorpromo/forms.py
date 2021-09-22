@@ -16,8 +16,11 @@ class PromoProcessorForm(forms.Form):
 
 
 class PromoProcessorSiteSelectForm(PromoProcessorForm):
-    site = forms.CharField(label=_("Site"), widget=forms.Select(choices=[(site.pk, site.domain) for site in Site.objects.all()]))
+    site = forms.CharField(label=_("Site"))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['site'].widget = forms.Select(choices=[(site.pk, site.domain) for site in Site.objects.all()])
 
 class PromoForm(forms.ModelForm):
     class Meta:
