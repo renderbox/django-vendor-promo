@@ -9,22 +9,20 @@ from vendor.models import Invoice
 from vendor.views.vendor import AddToCartView
 
 from vendorpromo.forms import PromoForm
-from vendorpromo.processors import PromoProcessor
+from vendorpromo.processors import get_site_promo_processor
 from vendorpromo.models import Promo
-
-
-promo_processor = PromoProcessor
 
 
 class CreatePromoAPIView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         promo_form = PromoForm(request.POST)
+        promo = promo_form.save(commit=False)
 
         if not promo_form.is_valid():
             messages.info(request, _(f'Create Promo Failed. Errors: {promo_form.errors}'))
             return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
-        processor = promo_processor()
+        processor = get_site_promo_processor(site=promo.offer.site)()
         processor.create_promo(promo_form)
         messages.success(request, _("Promo Code Created"))
         return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
@@ -36,7 +34,7 @@ class DeletePromoAPIView(LoginRequiredMixin, DeleteView):
     slug_url_kwarg = 'uuid'
 
     def post(self, request, *args, **kwargs):
-        processor = promo_processor()
+        processor = get_site_promo_processor(self.get_object().offer.site)()
         processor.delete_promo(self.get_object())
         return redirect(request.META.get('HTTP_REFERER'))
 
@@ -69,7 +67,7 @@ class ValidateCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
             messages.success(request, _("Invalid Promo Code"))
             return HttpResponseBadRequest(f"No related offer in cart for code: {promo.code}")
 
-        processor = promo_processor(invoice=invoice)
+        processor = get_site_promo_processor(site=invoice.site)(invoice=invoice)
 
         if not processor.is_code_valid_on_checkout(promo.code, promo.offer.current_price()):
             messages.success(request, _("Invalid Promo Code"))
@@ -121,3 +119,4 @@ class ValidateLinkCodeAPIView(AddToCartView):
         # request.POST['csrf_token'] = csrf_token
         # self.kwargs['slug'] = promo.offer.slug
         # return super().post(request, args, kwargs)
+

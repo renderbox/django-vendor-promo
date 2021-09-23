@@ -6,10 +6,8 @@ from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, FormView
 from django.utils.translation import ugettext as _
 
-from vendorpromo.processors import PromoProcessor
+from vendorpromo.processors.vouchery import VoucheryProcessor
 from vendorpromo.forms import VoucherySearchForm, PromoForm
-
-promo_processor = PromoProcessor
 
 
 class VoucheryCreateOfferPromoAPIView(LoginRequiredMixin, FormView):
@@ -20,7 +18,7 @@ class VoucheryCreateOfferPromoAPIView(LoginRequiredMixin, FormView):
         if not promo_form.is_valid():
             raise HttpResponseBadRequest()
 
-        processor = promo_processor()
+        processor = VoucheryProcessor()
 
         processor.create_promo_automate(promo_form)
 
@@ -39,7 +37,7 @@ class VoucheryCampaignsView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor = promo_processor()
+        processor = VoucheryProcessor()
         processor.get_campaigns()
         if not processor.is_request_success:
             raise HttpResponseBadRequest(_(f"Error: {processor.response_message}"))
@@ -51,7 +49,7 @@ class VoucheryCampaignsView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         vouchery_search_form = VoucherySearchForm(request.POST)
 
-        processor = promo_processor()
+        processor = VoucheryProcessor()
         processor.get_campaigns(**json.loads(vouchery_search_form.data['querystring']))
 
         if not processor.is_request_success:
@@ -67,7 +65,7 @@ class VoucheryCampaignDetailView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor = promo_processor()
+        processor = VoucheryProcessor()
         processor.get_campaign(kwargs.get('campaign_id'))
         if not processor.is_request_success:
             raise HttpResponseBadRequest(_(f"Error: {processor.response_message}"))
@@ -80,7 +78,7 @@ class VoucheryRedeemListView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor = promo_processor()
+        processor = VoucheryProcessor()
         processor.get_redeems(kwargs.get('campaign_id'))
         if not processor.is_request_success:
             raise HttpResponseBadRequest(_(f"Error: {processor.response_message}"))
@@ -93,7 +91,7 @@ class VoucheryRedeemDetailView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor = promo_processor()
+        processor = VoucheryProcessor()
         processor.get_redeem(kwargs.get('code'), kwargs.get('transaction_id'))
 
         if not processor.is_request_success:
@@ -108,7 +106,7 @@ class VoucheryVouchersView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor = promo_processor()
+        processor = VoucheryProcessor()
         processor.get_vouchers(kwargs.get('campaign_id'))
         if not processor.is_request_success:
             raise HttpResponseBadRequest(_(f"Error: {processor.response_message}"))
@@ -120,7 +118,7 @@ class VoucheryVouchersView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         vouchery_search_form = VoucherySearchForm(request.POST)
 
-        processor = promo_processor()
+        processor = VoucheryProcessor()
         processor.get_vouchers(kwargs.get('campaign_id'), **json.loads(vouchery_search_form.data['params']))
 
         if not processor.is_request_success:
@@ -136,7 +134,7 @@ class VoucheryVoucherDetailView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor = promo_processor()
+        processor = VoucheryProcessor()
         processor.get_voucher(kwargs.get('code'))
 
         if not processor.is_request_success:

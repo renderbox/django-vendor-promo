@@ -1,0 +1,40 @@
+{% extends "vendorpromo/base.html" %}
+{% load i18n %}
+
+
+{% block title %}Sites Processors'{% endblock %}
+
+{% block content %}
+<div class='card'>
+    <div class='card-header'>
+        <h3>
+            {% trans 'Processor Per Site' %}
+        </h3>
+    </div>
+    <div class='card-body'>
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>{% trans 'Site' %}</td>
+                    <td>{% trans 'Processor' %}</td>
+                    <td><a class="btn btn-primary" href="{% url 'vendorpromo-processor' %}">{% trans 'New' %}</a></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for object in object_list %}
+                    <tr>
+                        <td>{{object.site}}</td>
+                        <td>{{object.value.promo_processor}}</td>
+                        <td>
+                            <a class="btn btn-success" href="{% url 'vendorpromo-processor' %}">{% trans 'Edit Processor' %}</a>
+                            <a class="btn btn-success" href="{% url 'vendorpromo-processor-site' object.site.pk%}">{% trans 'Edit Processor  and Site' %}</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                
+            </tbody>
+
+        </table>
+    </div>
+</div>
+{% endblock %}
