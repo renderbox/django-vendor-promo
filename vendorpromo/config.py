@@ -13,28 +13,12 @@ class PromoProcessorSiteConfig(SiteConfigBaseClass):
     label = _("Promo Code Processor")
     default = {"promo_processor": "base.PromoProcessorBase"}
     form_class = PromoProcessorForm
-    key = ""
-    instance = None
 
     def __init__(self, site=None):
         if site is None:
             site = Site.objects.get_current()
         self.key = ".".join([__name__, __class__.__name__])
-        self.set_instance(site)
         super().__init__(site, self.key)
-
-    # TODO: This should be implemented in the SiteConfigBaseClass  
-    def save(self, valid_form):
-        site_config, created = SiteConfigModel.objects.get_or_create(site=self.site, key=self.key)
-        site_config.value = {"promo_processor": valid_form.cleaned_data["promo_processor"]}
-        site_config.save()
-
-    # TODO: This should be implemented in the SiteConfigBaseClass
-    def set_instance(self, site):
-        try:
-            self.instance = SiteConfigModel.objects.get(site=site, key=self.key)
-        except ObjectDoesNotExist:
-            self.instance = None
 
     def get_form(self):
         return self.form_class(initial=self.get_initials())
@@ -54,9 +38,6 @@ class PromoProcessorSiteSelectSiteConfig(PromoProcessorSiteConfig):
     label = _("Promo Code Processor")
     default = {"promo_processor": "base.PromoProcessorBase"}
     form_class = PromoProcessorSiteSelectForm
-    key = ""  # TODO: This should be in the base class in the site-configs package.
-    instance = None
-
 
     def get_initials(self):
         initial = super().get_initials()

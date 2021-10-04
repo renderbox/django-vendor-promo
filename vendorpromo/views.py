@@ -47,7 +47,7 @@ class PromoProcessorFormView(FormView):
 
     def form_valid(self, form):
         processor_config = PromoProcessorSiteConfig()
-        processor_config.save(form)
+        processor_config.save(form.cleaned_data["promo_processor"], "promo_processor")
         return redirect('vendorpromo-processor-lists')
 
 
@@ -67,7 +67,7 @@ class PromoProcessorSiteSelectFormView(FormView):
     def form_valid(self, form):
         site = Site.objects.get(pk=form.cleaned_data['site'])
         processor_config = PromoProcessorSiteSelectSiteConfig(site)
-        processor_config.save(form)
+        processor_config.save(form.cleaned_data["promo_processor"], "promo_processor")
         return redirect('vendorpromo-processor-lists')
 
 
