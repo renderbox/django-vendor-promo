@@ -6,7 +6,7 @@ from django.utils.translation import ugettext as _
 from django.views.generic import DeleteView, View
 
 from vendor.models import Invoice
-from vendor.views.vendor import AddToCartView
+from vendor.api.v1.views import AddToCartView
 
 from vendorpromo.forms import PromoForm
 from vendorpromo.processors import get_site_promo_processor
