@@ -9,16 +9,19 @@ from django.utils.translation import ugettext as _
 from vendorpromo.processors.vouchery import VoucheryProcessor
 from vendorpromo.forms import VoucherySearchForm, PromoForm
 
+from vendor.utils import get_site_from_request
+
 
 class VoucheryCreateOfferPromoAPIView(LoginRequiredMixin, FormView):
     form_class = PromoForm
 
     def post(self, request, *args, **kwargs):
         promo_form = PromoForm(request.POST)
+
         if not promo_form.is_valid():
             raise HttpResponseBadRequest()
 
-        processor = VoucheryProcessor()
+        processor = VoucheryProcessor(get_site_from_request(request))
 
         processor.create_promo_automate(promo_form)
 
@@ -37,19 +40,23 @@ class VoucheryCampaignsView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor = VoucheryProcessor()
+
+        processor = VoucheryProcessor(get_site_from_request(request))
         processor.get_campaigns()
+
         if not processor.is_request_success:
             raise HttpResponseBadRequest(_(f"Error: {processor.response_message}"))
+
         context['object_list'] = processor.response_content
         context['form'] = VoucherySearchForm
+
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         vouchery_search_form = VoucherySearchForm(request.POST)
 
-        processor = VoucheryProcessor()
+        processor = VoucheryProcessor(get_site_from_request(request))
         processor.get_campaigns(**json.loads(vouchery_search_form.data['querystring']))
 
         if not processor.is_request_success:
@@ -65,11 +72,14 @@ class VoucheryCampaignDetailView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor = VoucheryProcessor()
+        
+        processor = VoucheryProcessor(get_site_from_request(request))
         processor.get_campaign(kwargs.get('campaign_id'))
+        
         if not processor.is_request_success:
             raise HttpResponseBadRequest(_(f"Error: {processor.response_message}"))
         context['object'] = processor.response_content
+        
         return render(request, self.template_name, context)
 
 
@@ -78,11 +88,15 @@ class VoucheryRedeemListView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
-        processor = VoucheryProcessor()
+        
+        processor = VoucheryProcessor(get_site_from_request(request))
         processor.get_redeems(kwargs.get('campaign_id'))
+        
         if not processor.is_request_success:
             raise HttpResponseBadRequest(_(f"Error: {processor.response_message}"))
+        
         context['object_list'] = processor.response_content
+        
         return render(request, self.template_name, context)
 
 
@@ -91,6 +105,7 @@ class VoucheryRedeemDetailView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        
         processor = VoucheryProcessor()
         processor.get_redeem(kwargs.get('code'), kwargs.get('transaction_id'))
 
@@ -98,6 +113,7 @@ class VoucheryRedeemDetailView(LoginRequiredMixin, TemplateView):
             raise Http404()
 
         context['object'] = processor.response_content
+        
         return render(request, self.template_name, context)
 
 
@@ -106,16 +122,21 @@ class VoucheryVouchersView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        
         processor = VoucheryProcessor()
         processor.get_vouchers(kwargs.get('campaign_id'))
+        
         if not processor.is_request_success:
             raise HttpResponseBadRequest(_(f"Error: {processor.response_message}"))
+        
         context['object_list'] = processor.response_content
         context['form'] = VoucherySearchForm
+        
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)
+        
         vouchery_search_form = VoucherySearchForm(request.POST)
 
         processor = VoucheryProcessor()
@@ -126,6 +147,7 @@ class VoucheryVouchersView(LoginRequiredMixin, TemplateView):
 
         context['object_list'] = processor.response_content
         context['form'] = vouchery_search_form
+        
         return render(request, self.template_name, context)
 
 
@@ -141,4 +163,5 @@ class VoucheryVoucherDetailView(LoginRequiredMixin, TemplateView):
             raise Http404()
 
         context['object'] = processor.response_content
+        
         return render(request, self.template_name, context)

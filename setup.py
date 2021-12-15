@@ -49,7 +49,7 @@ setup(
         "Django>=3.0,<3.2",
         'django-autoslug',
         'django-extensions',
-        "django-vendor>=0.2.0",
+        "django-vendor>=0.2.25",
         "django-site-configs",
         'django-integrations',
         'iso4217',
