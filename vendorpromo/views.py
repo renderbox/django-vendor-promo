@@ -82,7 +82,7 @@ class PromoCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         promo = form.save(commit=False)
-        processor = get_site_promo_processor(promo.offer.site)()
+        processor = get_site_promo_processor(promo.offer.site)(promo.offer.site)
         processor.create_promo(form)
         return redirect('vendorpromo-list')
 
@@ -96,7 +96,7 @@ class PromoUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         promo = form.save(commit=False)
-        processor = get_site_promo_processor(promo.offer.site)()
+        processor = get_site_promo_processor(promo.offer.site)(promo.offer.site)
         processor.update_promo(form)
         return redirect('vendorpromo-list')
 
@@ -107,7 +107,7 @@ class PromoDeleteView(LoginRequiredMixin, DeleteView):
     slug_url_kwarg = 'uuid'
 
     def post(self, request, *args, **kwargs):
-        processor = get_site_promo_processor(self.get_object().offer.site)()
+        processor = get_site_promo_processor(self.get_object().offer.site)(self.get_object().offer.site)
         processor.delete_promo(self.get_object())
         return redirect(request.META.get('HTTP_REFERER'))
 
