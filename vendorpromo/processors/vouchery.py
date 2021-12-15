@@ -53,16 +53,16 @@ class VoucheryProcessor(PromoProcessorBase):
     }
     credentials = None
 
-    def __init__(self, invoice=None):
+    def __init__(self, site, invoice=None):
         super().__init__(invoice=invoice)
-        self.set_credentials(invoice.site)
+        self.set_credentials(site)
 
 
     def set_credentials(self, site):
         self.credentials = VoucheryIntegration(site)
         if self.credentials.instance:
-           self.BASE_URL = self.credentials.client_url
-           self.BARRER_KEY = self.credentials.private_key
+           self.BASE_URL = self.credentials.instance.client_url
+           self.BARRER_KEY = self.credentials.instance.private_key
         elif VENDOR_PROMO_PROCESSOR_URL and VENDOR_PROMO_PROCESSOR_BARRER_KEY:
            self.BASE_URL = VENDOR_PROMO_PROCESSOR_URL
            self.BARRER_KEY = VENDOR_PROMO_PROCESSOR_BARRER_KEY
