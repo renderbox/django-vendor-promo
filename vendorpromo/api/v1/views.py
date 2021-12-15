@@ -22,7 +22,7 @@ class CreatePromoAPIView(LoginRequiredMixin, View):
         if not promo_form.is_valid():
             messages.info(request, _(f'Create Promo Failed. Errors: {promo_form.errors}'))
             return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
-        processor = get_site_promo_processor(site=promo.offer.site)()
+        processor = get_site_promo_processor(promo.offer.site)(promo.offer.site)
         processor.create_promo(promo_form)
         messages.success(request, _("Promo Code Created"))
         return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
@@ -34,7 +34,7 @@ class DeletePromoAPIView(LoginRequiredMixin, DeleteView):
     slug_url_kwarg = 'uuid'
 
     def post(self, request, *args, **kwargs):
-        processor = get_site_promo_processor(self.get_object().offer.site)()
+        processor = get_site_promo_processor(self.get_object().offer.site)(self.get_object().offer.site)
         processor.delete_promo(self.get_object())
         return redirect(request.META.get('HTTP_REFERER'))
 
@@ -67,7 +67,7 @@ class ValidateCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
             messages.success(request, _("Invalid Promo Code"))
             return HttpResponseBadRequest(f"No related offer in cart for code: {promo.code}")
 
-        processor = get_site_promo_processor(site=invoice.site)(invoice=invoice)
+        processor = get_site_promo_processor(invoice.site)(invoice.site, invoice=invoice)
 
         if not processor.is_code_valid_on_checkout(promo.code, promo.offer.current_price()):
             messages.success(request, _("Invalid Promo Code"))
