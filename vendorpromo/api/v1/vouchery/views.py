@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import Http404, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, FormView
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from vendorpromo.processors.vouchery import VoucheryProcessor
 from vendorpromo.forms import VoucherySearchForm, PromoForm
