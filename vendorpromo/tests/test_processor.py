@@ -1,5 +1,6 @@
 
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.test import TestCase
 
 from unittest import skipIf
@@ -75,7 +76,7 @@ class VoucheryProcessorTests(TestCase):
     def setUp(self):
         self.existing_campaigns = None
         self.promo_processor = VoucheryProcessor
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.get_campaigns(**{'team_eq': self.TEAM})
         if processor.response_content:
             self.existing_campaigns = [{'id': campaign['id'], 'name': campaign['name']} for campaign in processor.response_content]
@@ -100,7 +101,7 @@ class VoucheryProcessorTests(TestCase):
     # Campaigns
     def test_create_campaign_success(self):
         campaign_name = "Django Vendor Promo Campaign"
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         extra_params = {
             "type": "MainCampaign",
             "template": "discount",
@@ -121,7 +122,7 @@ class VoucheryProcessorTests(TestCase):
     def test_create_campaign_additional_params_success(self):
         campaign_name = "Django Vendor Promo Campaign Description"
         description = 'Testing adding params'
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         extra_params = {
             "type": "MainCampaign",
             "template": "discount",
@@ -142,7 +143,7 @@ class VoucheryProcessorTests(TestCase):
         processor.delete_campaign(processor.response_content['id'])
 
     def test_create_campaign_existing_name_fail(self):
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         extra_params = {
             "type": "MainCampaign",
             "template": "discount",
@@ -170,20 +171,20 @@ class VoucheryProcessorTests(TestCase):
         }
 
         if not self.existing_campaigns:
-            create_processor = self.promo_processor()
+            create_processor = self.promo_processor(Site.objects.get(pk=1))
             create_processor.create_campaign(campaign_name, **extra_params)
             campaign_id = create_processor.response_content['id']
         else:
             campaign_id = self.existing_campaigns[0]['id']
             campaign_name = self.existing_campaigns[0]['name']
 
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.get_campaign(campaign_id)
         self.assertTrue(processor.is_request_success)
         self.assertEquals(campaign_name, processor.response_content['name'])
 
     def test_get_campaign_fail(self):
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.get_campaign(-2)
         self.assertFalse(processor.is_request_success)
 
@@ -198,14 +199,14 @@ class VoucheryProcessorTests(TestCase):
         }
 
         if not self.existing_campaigns:
-            create_processor = self.promo_processor()
+            create_processor = self.promo_processor(Site.objects.get(pk=1))
             create_processor.create_campaign(campaign_name, **extra_params)
             campaign_id = create_processor.response_content['id']
         else:
             campaign_name = self.existing_campaigns[0]['name']
             campaign_id = self.existing_campaigns[0]['id']
 
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.update_campaign(campaign_id, **update_value)
         self.assertTrue(processor.is_request_success)
         processor.clear_response_variables()
@@ -213,7 +214,7 @@ class VoucheryProcessorTests(TestCase):
         self.assertEquals(update_value['description'], processor.response_content['description'])
 
     def test_update_campaign_fail(self):
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.update_campaign(-2, **{"type": "MainCampaign"})
         self.assertFalse(processor.is_request_success)
 
@@ -223,22 +224,22 @@ class VoucheryProcessorTests(TestCase):
             "template": "discount",
             'team': self.TEAM
         }
-        create_processor = self.promo_processor()
+        create_processor = self.promo_processor(Site.objects.get(pk=1))
         create_processor.create_campaign(random_string(), **campaign_params)
         campaign_id = create_processor.response_content['id']
 
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.delete_campaign(campaign_id)
         self.assertTrue(processor.is_request_success)
 
     def test_delete_campaign_fail(self):
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.delete_campaign(-2)
         self.assertFalse(processor.is_request_success)
 
     # def test_delete_full_campaign_success(self):
     #     campaing_ids = []
-    #     processor = self.promo_processor()
+    #     processor = self.promo_processor(Site.objects.get(pk=1))
 
     #     for campaign_id in campaing_ids:
     #         processor.delete_full_campaign(campaign_id)
@@ -253,7 +254,7 @@ class VoucheryProcessorTests(TestCase):
         sub_campaign_name = random_string()
         sub_campaign_id = None
         reward_id = None
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         campaign_params = {
             "type": "MainCampaign",
             "template": "discount",
@@ -292,7 +293,7 @@ class VoucheryProcessorTests(TestCase):
         processor.delete_campaign(campaign_id)
 
     def test_create_reward_fail(self):
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.create_reward(-2)
         self.assertFalse(processor.is_request_success)
 
@@ -303,7 +304,7 @@ class VoucheryProcessorTests(TestCase):
         sub_campaign_id = None
         voucher_code = random_string(length=5, check=[campaign_name, sub_campaign_name])
         reward_id = None
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         campaign_params = {
             "type": "MainCampaign",
             "template": "discount",
@@ -346,7 +347,7 @@ class VoucheryProcessorTests(TestCase):
         processor.delete_campaign(campaign_id)
 
     def test_get_reward_fail(self):
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.get_reward(-2)
         self.assertFalse(processor.is_request_success)
 
@@ -371,7 +372,7 @@ class VoucheryProcessorTests(TestCase):
         sub_campaign_id = None
         voucher_code = random_string(length=5, check=[campaign_name, sub_campaign_name])
         reward_id = None
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         campaign_params = {
             "type": "MainCampaign",
             "template": "discount",
@@ -412,7 +413,7 @@ class VoucheryProcessorTests(TestCase):
         processor.delete_campaign(campaign_id)
 
     def test_create_voucher_fail(self):
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.create_voucher(random_string(), -2)
         self.assertFalse(processor.is_request_success)
 
@@ -423,7 +424,7 @@ class VoucheryProcessorTests(TestCase):
         sub_campaign_id = None
         voucher_code = random_string(length=5, check=[campaign_name, sub_campaign_name])
         reward_id = None
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         campaign_params = {
             "type": "MainCampaign",
             "template": "discount",
@@ -466,7 +467,7 @@ class VoucheryProcessorTests(TestCase):
         processor.delete_campaign(campaign_id)
 
     def test_get_vouchers_fail(self):
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
         processor.get_vouchers(-2)
         self.assertFalse(processor.is_request_success)
 
@@ -531,7 +532,7 @@ class VoucheryProcessorTests(TestCase):
             'code': promo_code,
             'offer': promo_offer})
         promo_form.is_bound = True
-        processor = self.promo_processor()
+        processor = self.promo_processor(Site.objects.get(pk=1))
 
         processor.create_promo_automate(promo_form)
         self.assertTrue(processor.is_request_success)

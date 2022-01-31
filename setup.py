@@ -44,9 +44,9 @@ setup(
     packages=find_packages(),
     package_data={"vendorpromo": ["templates/vendorpromo/*.html", "templates/vendorpromo/*/*.html"]},
     include_package_data=True,
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     install_requires=[
-        "Django>=3.0,<3.2",
+        "Django>=3.2,<4.1",
         'django-autoslug',
         'django-extensions',
         "django-vendor>=0.2.25",
@@ -56,10 +56,10 @@ setup(
     ],
     extras_require={
         "dev": [  # Packages needed by developers
+            "django-allauth",
             'dj-database-url',
             'psycopg2-binary',
             "django-crispy-forms",
-            "django-allauth",
         ],
         "test": [],  # Packages needed to run tests
         "prod": [],  # Packages needed to run in the deployment
