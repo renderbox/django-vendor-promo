@@ -56,10 +56,10 @@ setup(
     ],
     extras_require={
         "dev": [  # Packages needed by developers
+            "django-allauth",
             'dj-database-url',
             'psycopg2-binary',
             "django-crispy-forms",
-            "django-allauth",
         ],
         "test": [],  # Packages needed to run tests
         "prod": [],  # Packages needed to run in the deployment
