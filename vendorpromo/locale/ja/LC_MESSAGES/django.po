@@ -1,0 +1,212 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-01-31 19:24+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: api/v1/views.py:23
+msgid "Create Promo Failed. Errors: %(promo_form.errors)s"
+msgstr "プロモーションの作成に失敗しました。 エラー：%(promo_form.errors)s"
+
+#: api/v1/views.py:27
+msgid "Promo Code Created"
+msgstr "作成されたプロモーションコード"
+
+#: api/v1/views.py:57 api/v1/views.py:67 api/v1/views.py:73
+msgid "Invalid Promo Code"
+msgstr "無効なプロモーションコード"
+
+#: api/v1/views.py:77 api/v1/views.py:78
+msgid "Promo Code Applied"
+msgstr "適用されたプロモーションコード"
+
+#: api/v1/vouchery/views.py:29
+msgid ""
+"Createing Promo Failed: %(processor.response_message)s-%(processor.response_errors)s"
+msgstr "プロモーションの作成に失敗しました：%(processor.response message)s-%(processor.response errors)s"
+
+#: api/v1/vouchery/views.py:48 api/v1/vouchery/views.py:63
+#: api/v1/vouchery/views.py:80 api/v1/vouchery/views.py:96
+#: api/v1/vouchery/views.py:130 api/v1/vouchery/views.py:146
+msgid "Error: %(processor.response_message)s"
+msgstr "エラー：%(processor.response_message)s"
+
+#: config.py:13 config.py:38
+msgid "Promo Code Processor"
+msgstr "プロモーションコードプロセッサ"
+
+#: forms.py:11
+msgid "Default Processor"
+msgstr "デフォルトのプロセッサ"
+
+#: forms.py:12
+msgid "Vouchery.io"
+msgstr "Vouchery.io"
+
+#: forms.py:15 templates/vendorpromo/processor_site_config_list.html:19
+msgid "Processor"
+msgstr "プロセッサー"
+
+#: forms.py:19 templates/vendorpromo/processor_site_config_list.html:18
+msgid "Site"
+msgstr "サイト"
+
+#: forms.py:50 templates/vendorpromo/includes/promocode_apply.html:7
+msgid "Do you have a promo code?"
+msgstr "クーポンコードをお持ちですか？"
+
+#: models.py:32
+msgid "Promo Description"
+msgstr "プロモーションの説明"
+
+#: models.py:32
+msgid "Enter a description for your Promo Code"
+msgstr "プロモーションコードの説明を入力してください"
+
+#: models.py:33 templates/vendorpromo/promo_list.html:19
+msgid "Code"
+msgstr "コード"
+
+#: models.py:34
+msgid "Campaign Identifier"
+msgstr "キャンペーン識別子"
+
+#: models.py:35
+msgid "Campaign Name"
+msgstr "キャンペーン名"
+
+#: models.py:36
+msgid "Campaign Description"
+msgstr "キャンペーンの説明"
+
+#: models.py:37
+msgid "Meta"
+msgstr "メタ"
+
+#: models.py:49
+msgid "Code already exists"
+msgstr "コードはすでに存在します"
+
+#: processors/vouchery.py:93
+msgid "Create Campaing Failed"
+msgstr "キャンペーンの作成に失敗しました"
+
+#: processors/vouchery.py:108
+msgid "Create Sub-Campaing Failed"
+msgstr "サブキャンペーンの作成に失敗しました"
+
+#: processors/vouchery.py:124
+msgid "Create Reward Failed"
+msgstr "報酬の作成に失敗しました"
+
+#: processors/vouchery.py:130
+msgid "Create Voucher Failed"
+msgstr "バウチャーの作成に失敗しました"
+
+#: processors/vouchery.py:220
+msgid "name is required to create a campaign"
+msgstr "キャンペーンを作成するには名前が必要です"
+
+#: processors/vouchery.py:263
+msgid "campaign_id is required to delete a campaign"
+msgstr "キャンペーンを削除するにはcampaign_idが必要です"
+
+#: templates/vendorpromo/includes/promocode_apply.html:12
+msgid "Promo Code"
+msgstr "プロモーションコード"
+
+#: templates/vendorpromo/includes/promocode_apply.html:15
+#: templates/vendorpromo/vouchery_integration.html:14
+msgid "Apply"
+msgstr "申し込み"
+
+#: templates/vendorpromo/processor_site_config.html:11
+#: templates/vendorpromo/promo.html:22
+#: templates/vendorpromo/promocode_formset.html:22
+msgid "Cancel"
+msgstr "キャンセル"
+
+#: templates/vendorpromo/processor_site_config_list.html:11
+msgid "Processor Per Site"
+msgstr "サイトごとのプロセッサ"
+
+#: templates/vendorpromo/processor_site_config_list.html:20
+msgid "New"
+msgstr "新しい"
+
+#: templates/vendorpromo/processor_site_config_list.html:29
+msgid "Edit Processor"
+msgstr "プロセッサーの編集"
+
+#: templates/vendorpromo/processor_site_config_list.html:30
+msgid "Edit Processor  and Site"
+msgstr "プロセッサとサイトを編集する"
+
+#: templates/vendorpromo/promo.html:12
+#: templates/vendorpromo/promocode_formset.html:12
+msgid "Update Promo"
+msgstr "プロモーションを更新"
+
+#: templates/vendorpromo/promo.html:14
+#: templates/vendorpromo/promocode_formset.html:14
+msgid "Create Promo"
+msgstr "プロモーションを作成する"
+
+#: templates/vendorpromo/promo.html:23
+#: templates/vendorpromo/promocode_formset.html:23
+msgid "Save"
+msgstr "保存する"
+
+#: templates/vendorpromo/promo_list.html:11
+msgid "Promo List"
+msgstr "プロモーションリスト"
+
+#: templates/vendorpromo/promo_list.html:14
+msgid "Create"
+msgstr "作成"
+
+#: templates/vendorpromo/promo_list.html:18
+msgid "Product Name"
+msgstr "商品名"
+
+#: templates/vendorpromo/promo_list.html:20
+msgid "Slug"
+msgstr "ナメクジ"
+
+#: templates/vendorpromo/promo_list.html:21
+msgid "Actions"
+msgstr "行動"
+
+#: templates/vendorpromo/promo_list.html:31
+msgid "edit"
+msgstr "編集"
+
+#: templates/vendorpromo/promo_list.html:34
+msgid "delete"
+msgstr "編集"
+
+#: templates/vendorpromo/vouchery_integration.html:7
+msgid "Vouchery.io - Integration"
+msgstr "Vouchery.io - 統合"
+
+#: templates/vendorpromo/vouchery_list.html:17
+msgid "search"
+msgstr "探す"
+
+#: templates/vendorpromo/vouchery_list.html:19
+msgid "Results:"
+msgstr "結果："
