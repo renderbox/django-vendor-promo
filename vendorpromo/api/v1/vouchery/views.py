@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import Http404, HttpResponseBadRequest, HttpResponseServerError
@@ -11,6 +12,7 @@ from vendorpromo.forms import VoucherySearchForm, PromoForm
 
 from vendor.utils import get_site_from_request
 
+logger = logging.getLogger(__name__)
 
 class VoucheryCreateOfferPromoAPIView(LoginRequiredMixin, FormView):
     form_class = PromoForm
@@ -22,11 +24,14 @@ class VoucheryCreateOfferPromoAPIView(LoginRequiredMixin, FormView):
             raise HttpResponseBadRequest()
 
         processor = VoucheryProcessor(get_site_from_request(request))
+        try:
+            processor.create_promo_automate(promo_form)
 
-        processor.create_promo_automate(promo_form)
+            if not processor.is_request_success:
+                raise HttpResponseServerError(_(f"Createing Promo Failed: {processor.response_message}-{processor.response_error}"))
 
-        if not processor.is_request_success:
-            raise HttpResponseServerError(_(f"Createing Promo Failed: {processor.response_message}-{processor.response_errors}"))
+        except (HttpResponseServerError, Exception) as exce:
+            logger.error(f"VoucheryCreateOfferPromoAPIView: {exce}")
 
         return redirect(request.META.get('HTTP_REFERER'))
 
