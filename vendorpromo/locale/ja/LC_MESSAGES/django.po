@@ -36,7 +36,7 @@ msgstr "適用されたプロモーションコード"
 
 #: api/v1/vouchery/views.py:29
 msgid ""
-"Createing Promo Failed: %(processor.response_message)s-%(processor.response_errors)s"
+"Createing Promo Failed: %(processor.response_message)s-%(processor.response_error)s"
 msgstr "プロモーションの作成に失敗しました：%(processor.response message)s-%(processor.response errors)s"
 
 #: api/v1/vouchery/views.py:48 api/v1/vouchery/views.py:63

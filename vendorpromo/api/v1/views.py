@@ -22,6 +22,7 @@ class CreatePromoAPIView(LoginRequiredMixin, View):
         if not promo_form.is_valid():
             messages.info(request, _(f'Create Promo Failed. Errors: {promo_form.errors}'))
             return redirect(request.META.get('HTTP_REFERER', "vendorpromo-list"))
+            
         processor = get_site_promo_processor(promo.offer.site)(promo.offer.site)
         processor.create_promo(promo_form)
         messages.success(request, _("Promo Code Created"))
