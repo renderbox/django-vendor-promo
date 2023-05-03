@@ -24,6 +24,7 @@ jobs:
         pip install --upgrade pip
         pip install pip-tools
         pip-sync requirements.dev.txt
+        pip install .
     - name: Run Tests
       run: |
         cd develop
