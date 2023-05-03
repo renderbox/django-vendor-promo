@@ -23,6 +23,8 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install pip-tools
+        pip install authorizenet
+        pip install stripe
         pip-sync requirements.dev.txt
         pip install .
     - name: Run Tests
