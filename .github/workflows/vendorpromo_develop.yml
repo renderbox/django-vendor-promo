@@ -15,20 +15,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python from '.python-version'
-        uses: actions/setup-python@v4
-        id: python-cache
-        with:
-          python-version-file: '.python-version'
-          cache: 'pip' # caching pip dependencies
-          cache-dependency-path: requirements.dev.txt
-
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
       run: |
         pip install --upgrade pip
         pip install pip-tools
         pip-sync requirements.dev.txt
-        
     - name: Run Tests
       run: |
         cd develop
