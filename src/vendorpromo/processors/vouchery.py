@@ -80,7 +80,7 @@ class VoucheryProcessor(PromoProcessorBase):
         and finally the voucher.
         After creation, a user can login to Vouchery and change the campaigns, and
         sub-campaigns name if desired. They should not change the promo code as it
-        needs to be sent form vendor-promo
+        needs to be sent from vendor-promo
         '''
         promo = promo_form.save(commit=False)
         promo.campaign_name = promo.offer.site.name
@@ -225,6 +225,7 @@ class VoucheryProcessor(PromoProcessorBase):
 
         if not name:
             raise ValueError(_("name is required to create a campaign"))
+        
         base_payload = {
             "name": name,
         }
