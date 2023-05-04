@@ -30,6 +30,8 @@ dependencies = [
     "django-site-configs",
     'django-integrations',
     "iso4217",
+    "authorizenet",
+    "stripe"
 ]
 
 [project.optional-dependencies]
@@ -63,4 +65,4 @@ docs= [
 "Bug Tracker" = "https://github.com/renderbox/django-vendor-promo/issues"
 
 [tool.setuptools.package-data]
-vendor = ["templates/vendorpromo/*.html", "templates/vendorpromo/*/*.html"]
+vendorpromo = ["templates/vendorpromo/*.html", "templates/vendorpromo/*/*.html"]

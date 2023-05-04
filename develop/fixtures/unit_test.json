@@ -396,10 +396,8 @@
         "order_item": 2,
         "start_date": "2020-10-02T16:53:37.437Z",
         "end_date": null,
-        "auto_renew": false,
         "vendor_notes": {},
         "transaction": "7127667",
-        "status": 20,
         "meta": {}
     }
 },
