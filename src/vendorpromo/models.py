@@ -51,3 +51,45 @@ class Promo(CreateUpdateModelBase):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+
+class Affiliate(CreateUpdateModelBase):
+    '''
+    Class to link Customer Profiles or a general contact to a Promo
+    '''
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    slug = AutoSlugField(unique_with=('customer_profile__site'), editable=True, blank=True, null=True)
+    customer_profile = models.ForeignKey(CustomerProfile, blank=True, null=True, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=120, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    company = models.CharField(max_length=120, blank=True, null=True)
+    promo = models.ManyToManyField(Promo, blank=True)
+
+    objects = models.Manager()
+
+    class Meta:
+        verbose_name = "Affiliate"
+        verbose_name_plural = "Affiliates"
+
+    def clean(self):
+        if (self.customer_profile is None) and (self.full_name is None and self.email is None and self.company is None):
+            raise ValidationError(_("You at least need to assign a Customer Profile of enter a Full Name, Email or Company for the Affiliate"))
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def __str__(self):
+        if self.customer_profile:
+            return str(self.customer_profile)
+        
+        if self.full_name:
+            return self.full_name
+        
+        if self.email:
+            return self.email
+        
+        if self.company:
+            return self.company
+        
+        return self.uuid
