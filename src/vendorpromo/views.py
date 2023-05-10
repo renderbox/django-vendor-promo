@@ -1,26 +1,63 @@
-from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
 from django.views.generic.base import TemplateView
-from django.views.generic.edit import DeleteView, FormMixin, UpdateView, FormView
-
+from django.views.generic.edit import (DeleteView, FormView,
+                                       UpdateView)
+from siteconfigs.models import SiteConfigModel
 from vendor.models import Offer
-from vendorpromo.config import PromoProcessorSiteConfig, PromoProcessorSiteSelectSiteConfig
-from vendorpromo.forms import PromoCodeFormset, PromoProcessorForm, PromoProcessorSiteSelectForm, VoucheryIntegrationForm
+from vendor.views.mixin import TableFilterMixin, SiteOnRequestFilterMixin
+
+from vendorpromo.config import (PromoProcessorSiteConfig,
+                                PromoProcessorSiteSelectSiteConfig)
+from vendorpromo.forms import (PromoCodeFormset, PromoProcessorForm,
+                               PromoProcessorSiteSelectForm,
+                               VoucheryIntegrationForm)
 from vendorpromo.integrations import VoucheryIntegration
-from vendorpromo.models import Promo
+from vendorpromo.models import Affiliate, Promo
 from vendorpromo.processors import get_site_promo_processor
 from vendorpromo.utils import get_site_from_request
-
-from siteconfigs.models import SiteConfigModel
 
 
 class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
     template_name = "vendorpromo/promo_list.html"
     model = Promo
+
+
+class AffiliateListView(LoginRequiredMixin, TableFilterMixin, SiteOnRequestFilterMixin, ListView):
+    template_name = "vendor/manage/affiliate_list.html"
+    model = Affiliate
+    paginate_by = 100
+
+    def search_filter(self, queryset):
+        search_value = self.request.GET.get('search_filter')
+        return queryset.filter(Q(pk__icontains=search_value)
+                               | Q(customer_profile__user__email__icontains=search_value)
+                               | Q(customer_profile__user__username__icontains=search_value)
+                               | Q(full_name=search_value)
+                               | Q(email=search_value)
+                               | Q(company=search_value))
+    
+    def get_paginated_by(self, queryset):
+        if 'paginate_by' in self.request.kwargs:
+            return self.kwargs['paginate_by']
+        return self.paginate_by
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        return queryset.order_by('pk')
+
+
+class AffiliateCreateView(LoginRequiredMixin, CreateView):
+    ...
+
+
+class AffiliteUpdateView(LoginRequiredMixin, UpdateView):
+    ...
 
 
 class PromoCodeSiteConfigsListView(ListView):
