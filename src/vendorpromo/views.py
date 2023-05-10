@@ -1,6 +1,9 @@
+from typing import Any, Dict, Optional, Type
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
+from django.forms.models import BaseModelForm
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
@@ -15,7 +18,7 @@ from vendorpromo.config import (PromoProcessorSiteConfig,
                                 PromoProcessorSiteSelectSiteConfig)
 from vendorpromo.forms import (PromoCodeFormset, PromoProcessorForm,
                                PromoProcessorSiteSelectForm,
-                               VoucheryIntegrationForm)
+                               VoucheryIntegrationForm, AffiliateForm)
 from vendorpromo.integrations import VoucheryIntegration
 from vendorpromo.models import Affiliate, Promo
 from vendorpromo.processors import get_site_promo_processor
@@ -54,7 +57,17 @@ class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
 
 
 class AffiliateCreateView(LoginRequiredMixin, CreateView):
-    ...
+    template_name = 'vendorpromo/affiliate_detail.html'
+    model = Affiliate
+    form_class = AffiliateForm
+    success_url = reverse_lazy('affiliate-list')
+
+    def get_form(self):
+        site = get_site_from_request(self.request)
+        return super().get_form(self.form_class)({'site': site})
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs)
 
 
 class AffiliteUpdateView(LoginRequiredMixin, UpdateView):

@@ -5,11 +5,35 @@ from django.forms import modelformset_factory
 from django.utils.translation import gettext as _
 
 from integrations.models import Credential
-from vendorpromo.models import Promo
+from vendorpromo.models import Affiliate, Promo
+
+from vendor.models import CustomerProfile
+
+
+class AffiliateForm(forms.ModelForm):
+    customer_profile = forms.ModelChoiceField(queryset=None)
+    promo = forms.ModelChoiceField(queryset=None)
+
+    class Meta:
+        model = Affiliate
+        fields = ['slug', 'customer_profile', 'full_name', 'email', 'company', 'promo']
+
+    def __init__(self, *args, **kwargs):
+        customer_profile_queryset = None
+        promo_queryset = None
+        if 'site' in kwargs:
+            customer_profile_queryset = CustomerProfile.objects.filter(site=kwargs.get('site'))
+            promo_queryset = Promo.objects.filter(offer__site=kwargs.get('site'))
+            del(kwargs['site'])
+
+        super().__init__(*args, **kwargs)
+        self.fields['customer_profile'].queryset = customer_profile_queryset
+        self.fields['promo'].queryset = promo_queryset
 
 class SupportedPromoProcessor(TextChoices):
     PROMO_CODE_BASE = ("base.PromoProcessorBase", _("Default Processor"))
     VOUCHERY = ("vouchery.VoucheryProcessor", _("Vouchery.io"))
+
 
 class PromoProcessorForm(forms.Form):
     promo_processor = forms.CharField(label=_("Processor"), widget=forms.Select(choices=SupportedPromoProcessor.choices))
@@ -21,6 +45,7 @@ class PromoProcessorSiteSelectForm(PromoProcessorForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['site'].widget = forms.Select(choices=[(site.pk, site.domain) for site in Site.objects.all()])
+
 
 class PromoForm(forms.ModelForm):
     class Meta:
@@ -67,6 +92,7 @@ PromoCodeFormset = modelformset_factory(
         )
     }
 )
+
 
 class VoucheryIntegrationForm(forms.ModelForm):
     class Meta:
