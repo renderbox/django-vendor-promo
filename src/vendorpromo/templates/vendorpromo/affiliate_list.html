@@ -1,4 +1,4 @@
-{% extends "vendor/manage/base.html" %}
+{% extends "vendorpromo/base.html" %}
 {% load i18n %}
 
 {% block vendor_content %}
@@ -12,6 +12,9 @@
     {% trans 'Manage Affiliates' %}
   </div>
   <div class="card-body">
+    <div class="d-flex flex-row">
+      <a href="{% url 'affiliate-create' %}" class="btn btn-success mb-3 ml-auto">{% trans 'Create' %}</a>
+    </div>
     <div class="search-bar d-flex justify-content-between align-items-center mb-2">
       <div class="input-group  flex-nowrap">
         <input type="text" name="search_filter" class="textinput textInput" id="search_filter" placeholder="{% trans 'Search' %}" {% if request.GET.search_filter %} value="{{request.GET.search_filter}}" {% endif %}>
@@ -54,13 +57,13 @@
         <tbody>
           {% for item in object_list %}
           <tr class="row">
-            <td class="col"><a href="{% url 'vendor_admin:manager-profile' item.uuid %}">{{ item.customer_profile.user.username }}</a></td>
+            <td class="col">{{ item.customer_profile.user.username }}</td>
             <td class="col">{{ item.full_name }}</td>
             <td class="col">{{ item.email }}</td>
             <td class="col">{{ item.company }}</td>
             <td class="col">{{ item.site }}</td>
             <td class="col"></td>
-            <td class="col"><a class="btn btn-sm btn-outline-primary" href="{% url 'vendor_admin:manager-profile' item.uuid %}">{% trans 'Edit' %}</a></td>
+            <td class="col"><a class="btn btn-sm btn-outline-primary" href="{% url 'affiliate-update' item.uuid %}">{% trans 'Edit' %}</a></td>
           </tr>
           {% empty %}
           <tr>

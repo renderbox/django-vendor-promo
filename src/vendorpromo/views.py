@@ -27,7 +27,7 @@ class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
     model = Promo
 
 
-class AffiliateListView(LoginRequiredMixin, TableFilterMixin, SiteOnRequestFilterMixin, ListView):
+class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
     template_name = "vendor/manage/affiliate_list.html"
     model = Affiliate
     paginate_by = 100
@@ -47,7 +47,8 @@ class AffiliateListView(LoginRequiredMixin, TableFilterMixin, SiteOnRequestFilte
         return self.paginate_by
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        site = get_site_from_request(self.request)
+        queryset = super().get_queryset().filter(customer_profile__site=site)
 
         return queryset.order_by('pk')
 

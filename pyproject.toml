@@ -37,6 +37,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "black",
+    "crispy-bootstrap4",
+    "crispy-bootstrap5",
     "flake8",
     "flake8-black",
     "mypy",

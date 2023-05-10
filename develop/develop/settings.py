@@ -36,7 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'core',
-    'crispy_forms',
+    "crispy_forms",
+    "crispy_bootstrap4",
+    "crispy_bootstrap5",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -74,6 +76,10 @@ TEMPLATES = [
         },
     },
 ]
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap4", "bootstrap5"]
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 WSGI_APPLICATION = 'develop.wsgi.application'
 
