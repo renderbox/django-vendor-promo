@@ -1,8 +1,10 @@
-from typing import Optional, Type
+from typing import Any, Dict, Optional, Type
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.forms.forms import BaseForm
+from django.forms.models import BaseModelForm
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
@@ -50,21 +52,30 @@ class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
     
     def get_queryset(self):
         site = get_site_from_request(self.request)
-        queryset = super().get_queryset().filter(customer_profile__site=site)
+        queryset = super().get_queryset().filter(site=site)
 
         return queryset.order_by('pk')
 
 
-class AffiliateCreateView(LoginRequiredMixin, FormMixin, TemplateView):
+class AffiliateCreateView(LoginRequiredMixin, CreateView):
     template_name = 'vendorpromo/affiliate_detail.html'
+    model = Affiliate
     form_class = AffiliateForm
     success_url = reverse_lazy('affiliate-list')
 
-    def get_form(self):
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        affiliate = form.save(commit=False)
         site = get_site_from_request(self.request)
-        return self.form_class(site=site)
-
-
+        affiliate.site = site
+        affiliate.save()
+        return redirect(self.success_url)
+    
+    
 class AffiliteUpdateView(LoginRequiredMixin, UpdateView):
     ...
 

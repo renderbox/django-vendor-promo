@@ -49,6 +49,7 @@
             <th class="col">{% trans 'Full Name' %}</th>
             <th class="col">{% trans 'Email' %}</th>
             <th class="col">{% trans 'Company' %}</th>
+            <th class="col">{% trans 'Slug' %}</th>
             <th class="col">{% trans 'Site' %}</th>
             <th class="col"></th>
             <th class="col"></th>
@@ -61,7 +62,8 @@
             <td class="col">{{ item.full_name }}</td>
             <td class="col">{{ item.email }}</td>
             <td class="col">{{ item.company }}</td>
-            <td class="col">{{ item.site }}</td>
+            <td class="col">{{ item.slug }}</td>
+            <td class="col">{{ item.customer_profile.site }}</td>
             <td class="col"></td>
             <td class="col"><a class="btn btn-sm btn-outline-primary" href="{% url 'affiliate-update' item.uuid %}">{% trans 'Edit' %}</a></td>
           </tr>
