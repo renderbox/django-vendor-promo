@@ -16,6 +16,12 @@
         </h5>
     </div>
     <div class='card-body'>
+        {% if form.instance.pk %}
+        <form method="post" action="{% url 'affiliate-delete' form.instance.uuid %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">{% trans 'Delete' %}</button>
+        </form>
+        {% endif %}
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}

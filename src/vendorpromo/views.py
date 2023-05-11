@@ -74,10 +74,35 @@ class AffiliateCreateView(LoginRequiredMixin, CreateView):
         affiliate.site = site
         affiliate.save()
         return redirect(self.success_url)
-    
-    
-class AffiliteUpdateView(LoginRequiredMixin, UpdateView):
-    ...
+
+
+class AffiliateUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = 'vendorpromo/affiliate_detail.html'
+    model = Affiliate
+    form_class = AffiliateForm
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('affiliate-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        affiliate = form.save(commit=False)
+        site = get_site_from_request(self.request)
+        affiliate.site = site
+        affiliate.save()
+        return redirect(self.success_url)
+
+
+class AffiliateDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = 'vendorpromo/affiliate_detail.html'
+    model = Affiliate
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('affiliate-list')
 
 
 class PromoCodeSiteConfigsListView(ListView):
