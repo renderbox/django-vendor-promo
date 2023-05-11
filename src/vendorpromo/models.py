@@ -80,7 +80,7 @@ class Affiliate(CreateUpdateModelBase):
         if (self.customer_profile is None) and (self.full_name is None and self.email is None and self.company is None):
             raise ValidationError(_("You at least need to assign a Customer Profile or enter a Full Name, Email or Company for the Affiliate"))
         
-        if Affiliate.objects.filter(customer_profile=self.customer_profile).exists():
+        if self.customer_profile is not None and Affiliate.objects.filter(customer_profile=self.customer_profile).exists():
             raise ValidationError(_("The selected Customer Profile is already linked to an existing Affiliate."))
 
     def save(self, *args, **kwargs):
