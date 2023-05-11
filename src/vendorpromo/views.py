@@ -1,24 +1,23 @@
-from typing import Any, Dict, Optional, Type
-from django.db.models import Q
+from typing import Optional, Type
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
-from django.forms.models import BaseModelForm
-from django.http import HttpResponse
+from django.db.models import Q
+from django.forms.forms import BaseForm
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
 from django.views.generic.base import TemplateView
-from django.views.generic.edit import (DeleteView, FormView,
-                                       UpdateView)
+from django.views.generic.edit import DeleteView, FormView, UpdateView, FormMixin
 from siteconfigs.models import SiteConfigModel
 from vendor.models import Offer
-from vendor.views.mixin import TableFilterMixin, SiteOnRequestFilterMixin
+from vendor.views.mixin import TableFilterMixin
 
 from vendorpromo.config import (PromoProcessorSiteConfig,
                                 PromoProcessorSiteSelectSiteConfig)
-from vendorpromo.forms import (PromoCodeFormset, PromoProcessorForm,
+from vendorpromo.forms import (AffiliateForm, PromoCodeFormset,
+                               PromoProcessorForm,
                                PromoProcessorSiteSelectForm,
-                               VoucheryIntegrationForm, AffiliateForm)
+                               VoucheryIntegrationForm)
 from vendorpromo.integrations import VoucheryIntegration
 from vendorpromo.models import Affiliate, Promo
 from vendorpromo.processors import get_site_promo_processor
@@ -56,18 +55,14 @@ class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
         return queryset.order_by('pk')
 
 
-class AffiliateCreateView(LoginRequiredMixin, CreateView):
+class AffiliateCreateView(LoginRequiredMixin, FormMixin, TemplateView):
     template_name = 'vendorpromo/affiliate_detail.html'
-    model = Affiliate
     form_class = AffiliateForm
     success_url = reverse_lazy('affiliate-list')
 
     def get_form(self):
         site = get_site_from_request(self.request)
-        return super().get_form(self.form_class)({'site': site})
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
+        return self.form_class(site=site)
 
 
 class AffiliteUpdateView(LoginRequiredMixin, UpdateView):
