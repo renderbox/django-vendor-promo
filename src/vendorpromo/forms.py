@@ -15,7 +15,7 @@ class AffiliateForm(forms.ModelForm):
     
     class Meta:
         model = Affiliate
-        fields = ['slug', 'customer_profile', 'full_name', 'email', 'company']
+        fields = ['slug', 'customer_profile', 'contact_name', 'email', 'company']
 
     def __init__(self, *args, **kwargs):
         site = kwargs.pop('site', None)

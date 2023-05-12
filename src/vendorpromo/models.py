@@ -63,7 +63,7 @@ class Affiliate(CreateUpdateModelBase):
     '''
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     slug = AutoSlugField(unique_with=('customer_profile__site'), editable=True, blank=True, null=True, verbose_name=_("Affiliate Code"))
-    full_name = models.CharField(max_length=120, blank=True, null=True, verbose_name=_("Full Name"))
+    contact_name = models.CharField(max_length=120, blank=True, null=True, verbose_name=_("Contact Name"))
     email = models.EmailField(blank=True, null=True, verbose_name=_("Email"))
     company = models.CharField(max_length=120, blank=True, null=True, verbose_name=_("Company"))
     customer_profile = models.ForeignKey(CustomerProfile, blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("Customer Profile"))
@@ -77,7 +77,7 @@ class Affiliate(CreateUpdateModelBase):
         verbose_name_plural = "Affiliates"
 
     def clean(self):
-        if (self.customer_profile is None) and (self.full_name is None and self.email is None and self.company is None):
+        if (self.customer_profile is None) and (self.contact_name is None and self.email is None and self.company is None):
             raise ValidationError(_("You at least need to assign a Customer Profile or enter a Full Name, Email or Company for the Affiliate"))
         
         if self.customer_profile is not None and Affiliate.objects.filter(customer_profile=self.customer_profile).exists():
@@ -91,8 +91,8 @@ class Affiliate(CreateUpdateModelBase):
         if self.customer_profile:
             return str(self.customer_profile)
         
-        if self.full_name:
-            return self.full_name
+        if self.contact_name:
+            return self.contact_name
         
         if self.email:
             return self.email

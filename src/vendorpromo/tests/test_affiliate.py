@@ -25,22 +25,22 @@ class AffiliateModelTests(TestCase):
     def test_affiliate_create_success(self):
         new_affiliate = Affiliate()
         new_affiliate.customer_profile = self.customer_profile
-        new_affiliate.full_name = "Norrin Radd"
+        new_affiliate.contact_name = "Norrin Radd"
         new_affiliate.email = "jawa@mail.com"
         new_affiliate.company = "WML"
         new_affiliate.save()
         self.assertTrue(Affiliate.objects.get(customer_profile=self.customer_profile))
 
     def test_affiliate_create_except_customer_profile_success(self):
-        full_name = "Norrin Radd"
+        contact_name = "Norrin Radd"
         email = "jawa@mail.com"
         company = "WML"
         new_affiliate = Affiliate()
-        new_affiliate.full_name = full_name
+        new_affiliate.contact_name = contact_name
         new_affiliate.email = email
         new_affiliate.company = company
         new_affiliate.save()
-        self.assertTrue(Affiliate.objects.get(full_name=full_name, email=email, company=company))
+        self.assertTrue(Affiliate.objects.get(contact_name=contact_name, email=email, company=company))
 
     def test_promo_create_only_customer_profile_success(self):
         new_affiliate = Affiliate()
@@ -48,12 +48,12 @@ class AffiliateModelTests(TestCase):
         new_affiliate.save()
         self.assertTrue(Affiliate.objects.get(customer_profile=self.customer_profile))
 
-    def test_promo_create_only_full_name_success(self):
-        full_name = "Norrin Radd"
+    def test_promo_create_only_contact_name_success(self):
+        contact_name = "Norrin Radd"
         new_affiliate = Affiliate()
-        new_affiliate.full_name = full_name
+        new_affiliate.contact_name = contact_name
         new_affiliate.save()
-        self.assertTrue(Affiliate.objects.get(full_name=full_name))
+        self.assertTrue(Affiliate.objects.get(contact_name=contact_name))
 
     def test_promo_create_only_email_success(self):
         email = "jawa@mail.com"

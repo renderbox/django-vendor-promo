@@ -41,7 +41,7 @@ class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
         return queryset.filter(Q(pk__icontains=search_value)
                                | Q(customer_profile__user__email__icontains=search_value)
                                | Q(customer_profile__user__username__icontains=search_value)
-                               | Q(full_name=search_value)
+                               | Q(contact_name=search_value)
                                | Q(email=search_value)
                                | Q(company=search_value))
     

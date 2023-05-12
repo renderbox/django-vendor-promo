@@ -46,7 +46,7 @@
         <thead>
           <tr class="row">
             <th class="col">{% trans 'User Name' %}</th>
-            <th class="col">{% trans 'Full Name' %}</th>
+            <th class="col">{% trans 'Contact Name' %}</th>
             <th class="col">{% trans 'Email' %}</th>
             <th class="col">{% trans 'Company' %}</th>
             <th class="col">{% trans 'Slug' %}</th>
@@ -59,7 +59,7 @@
           {% for item in object_list %}
           <tr class="row">
             <td class="col">{{ item.customer_profile.user.username }}</td>
-            <td class="col">{{ item.full_name }}</td>
+            <td class="col">{{ item.contact_name }}</td>
             <td class="col">{{ item.email }}</td>
             <td class="col">{{ item.company }}</td>
             <td class="col">{{ item.slug }}</td>
