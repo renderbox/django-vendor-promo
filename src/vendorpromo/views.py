@@ -41,9 +41,9 @@ class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
         return queryset.filter(Q(pk__icontains=search_value)
                                | Q(customer_profile__user__email__icontains=search_value)
                                | Q(customer_profile__user__username__icontains=search_value)
-                               | Q(contact_name=search_value)
-                               | Q(email=search_value)
-                               | Q(company=search_value))
+                               | Q(contact_name__icontains=search_value)
+                               | Q(email__icontains=search_value)
+                               | Q(company__icontains=search_value))
     
     def get_paginated_by(self, queryset):
         if 'paginate_by' in self.request.kwargs:
