@@ -68,3 +68,69 @@ class AffiliateModelTests(TestCase):
         new_affiliate.company = company
         new_affiliate.save()
         self.assertTrue(Affiliate.objects.get(company=company))
+
+
+class AffiliateViewTests(TestCase):
+
+    fixtures = ['user', 'unit_test']
+
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.get(pk=1)
+        self.client.force_login(self.user)
+        self.existing_promo = Promo.objects.get(pk=1)
+        self.customer_profile = CustomerProfile.objects.get(pk=1)
+
+    def test_affiliate_list_get_200(self):
+        view_url = reverse('affiliate-list')
+        response = self.client.get(view_url)
+        self.assertEquals(response.status_code, 200)
+
+    def test_affiliate_list_search_success(self):
+        ...
+
+    def test_affiliate_list_search_empty(self):
+        ...
+
+    def test_affiliate_create_get_200(self):
+        view_url = reverse('affiliate-create')
+        response = self.client.get(view_url)
+        self.assertEquals(response.status_code, 200)
+    
+    def test_affiliate_create_post_success(self):
+        ...
+
+    def test_affiliate_create_post_error(self):
+        ...
+
+    def test_affiliate_update_get_200(self):
+        view_url = reverse('affiliate-update')
+        response = self.client.get(view_url)
+        self.assertEquals(response.status_code, 200)
+    
+    def test_affiliate_update_post_success(self):
+        ...
+
+    def test_affiliate_update_post_error(self):
+        ...
+
+    def test_delete_post_success(self):
+        view_url = reverse('affiliate-delete')
+        response = self.client.get(view_url)
+        self.assertEquals(response.status_code, 200)
+
+    def test_delete_post_error(self):
+        ...
+
+
+
+
+
+
+
+
+
+
+
+
+
