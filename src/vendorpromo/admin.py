@@ -14,8 +14,8 @@ class PromoAdmin(admin.ModelAdmin):
 
 class AffiliateAdmin(admin.ModelAdmin):
     readonly_fields = ('uuid', )
-    list_display = ('customer_profile', 'slug', 'full_name', 'email', 'company')
-    search_fields = ('full_name', 'email', 'company', 'slug')
+    list_display = ('customer_profile', 'slug', 'contact_name', 'email', 'company')
+    search_fields = ('contact_name', 'email', 'company', 'slug')
     list_filter = ('customer_profile__site', )
 
 

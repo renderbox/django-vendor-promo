@@ -2,6 +2,7 @@ import uuid
 
 from autoslug import AutoSlugField
 
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -40,6 +41,9 @@ class Promo(CreateUpdateModelBase):
 
     objects = models.Manager()
 
+    def __str__(self):
+        return self.campaign_name
+    
     class Meta:
         verbose_name = "Promo"
         verbose_name_plural = "Promos"
@@ -58,12 +62,13 @@ class Affiliate(CreateUpdateModelBase):
     Class to link Customer Profiles or a general contact to a Promo
     '''
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    slug = AutoSlugField(unique_with=('customer_profile__site'), editable=True, blank=True, null=True)
-    customer_profile = models.ForeignKey(CustomerProfile, blank=True, null=True, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=120, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    company = models.CharField(max_length=120, blank=True, null=True)
-    promo = models.ManyToManyField(Promo, blank=True)
+    slug = AutoSlugField(unique_with=('customer_profile__site'), editable=True, blank=True, null=True, verbose_name=_("Affiliate Code"))
+    contact_name = models.CharField(max_length=120, blank=True, null=True, verbose_name=_("Contact Name"))
+    email = models.EmailField(blank=True, null=True, verbose_name=_("Email"))
+    company = models.CharField(max_length=120, blank=True, null=True, verbose_name=_("Company"))
+    customer_profile = models.ForeignKey(CustomerProfile, blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("Customer Profile"))
+    promo = models.ManyToManyField(Promo, blank=True, verbose_name=_("Promotion"))
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, blank=False, null=False, verbose_name=_("Site"))
 
     objects = models.Manager()
 
@@ -72,8 +77,11 @@ class Affiliate(CreateUpdateModelBase):
         verbose_name_plural = "Affiliates"
 
     def clean(self):
-        if (self.customer_profile is None) and (self.full_name is None and self.email is None and self.company is None):
-            raise ValidationError(_("You at least need to assign a Customer Profile of enter a Full Name, Email or Company for the Affiliate"))
+        if (self.customer_profile is None) and (self.contact_name is None and self.email is None and self.company is None):
+            raise ValidationError(_("You at least need to assign a Customer Profile or enter a Full Name, Email or Company for the Affiliate"))
+        
+        if self.customer_profile is not None and Affiliate.objects.filter(customer_profile=self.customer_profile).exists():
+            raise ValidationError(_("The selected Customer Profile is already linked to an existing Affiliate."))
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -83,8 +91,8 @@ class Affiliate(CreateUpdateModelBase):
         if self.customer_profile:
             return str(self.customer_profile)
         
-        if self.full_name:
-            return self.full_name
+        if self.contact_name:
+            return self.contact_name
         
         if self.email:
             return self.email

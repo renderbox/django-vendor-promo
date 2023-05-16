@@ -14,7 +14,7 @@ black==23.3.0
     # via
     #   django-vendor-promo (pyproject.toml)
     #   flake8-black
-certifi==2022.12.7
+certifi==2023.5.7
     # via requests
 cffi==1.15.1
     # via cryptography
@@ -22,6 +22,10 @@ charset-normalizer==3.1.0
     # via requests
 click==8.1.3
     # via black
+crispy-bootstrap4==2022.1
+    # via django-vendor-promo (pyproject.toml)
+crispy-bootstrap5==0.7
+    # via django-vendor-promo (pyproject.toml)
 cryptography==40.0.2
     # via
     #   django-fernet-fields
@@ -32,6 +36,8 @@ dj-database-url==2.0.0
     # via django-vendor-promo (pyproject.toml)
 django==3.2.19
     # via
+    #   crispy-bootstrap4
+    #   crispy-bootstrap5
     #   dj-database-url
     #   django-allauth
     #   django-crispy-forms
@@ -49,7 +55,10 @@ django-autoslug==1.9.9
     #   django-vendor
     #   django-vendor-promo (pyproject.toml)
 django-crispy-forms==2.0
-    # via django-vendor-promo (pyproject.toml)
+    # via
+    #   crispy-bootstrap4
+    #   crispy-bootstrap5
+    #   django-vendor-promo (pyproject.toml)
 django-extensions==3.2.1
     # via
     #   django-vendor
@@ -60,7 +69,7 @@ django-integrations==0.1.4
     # via django-vendor-promo (pyproject.toml)
 django-site-configs==0.1.6
     # via django-vendor-promo (pyproject.toml)
-django-vendor==0.3.27
+django-vendor==0.3.30
     # via django-vendor-promo (pyproject.toml)
 djangorestframework==3.14.0
     # via django-site-configs
@@ -90,7 +99,7 @@ mccabe==0.7.0
     # via flake8
 mdurl==0.1.2
     # via markdown-it-py
-mypy==1.2.0
+mypy==1.3.0
     # via django-vendor-promo (pyproject.toml)
 mypy-extensions==1.0.0
     # via
@@ -116,7 +125,7 @@ pyflakes==3.0.1
     # via flake8
 pygments==2.15.1
     # via rich
-pyjwt[crypto]==2.6.0
+pyjwt[crypto]==2.7.0
     # via django-allauth
 python3-openid==3.2.0
     # via django-allauth
@@ -128,7 +137,7 @@ pyxb==1.2.5
     # via authorizenet
 pyyaml==6.0
     # via bandit
-requests==2.29.0
+requests==2.30.0
     # via
     #   authorizenet
     #   django-allauth
@@ -158,5 +167,5 @@ typing-extensions==4.5.0
     #   black
     #   dj-database-url
     #   mypy
-urllib3==1.26.15
+urllib3==2.0.2
     # via requests

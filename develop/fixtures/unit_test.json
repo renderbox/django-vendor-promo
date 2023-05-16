@@ -417,5 +417,37 @@
         "slug": "1-month-free",
         "offer": 5
     }
+},
+{
+    "model": "vendorpromo.affiliate",
+    "pk": 1,
+    "fields": {
+        "created": "2023-05-12T18:39:36.961Z",
+        "updated": "2023-05-12T18:39:36.961Z",
+        "uuid": "5e90f83b-63a4-411d-91d4-842fc373f0a9",
+        "slug": null,
+        "contact_name": "Roberto Himmelbauer",
+        "email": null,
+        "company": "WhiteMoondLabs",
+        "customer_profile": 1,
+        "site": 1,
+        "promo": []
+    }
+},
+{
+    "model": "vendorpromo.affiliate",
+    "pk": 2,
+    "fields": {
+        "created": "2023-05-12T18:39:58.516Z",
+        "updated": "2023-05-12T18:39:58.516Z",
+        "uuid": "cfc9d06f-199f-497f-b986-73d8e19fde04",
+        "slug": null,
+        "contact_name": "Norrin Radd",
+        "email": "norrin.radd@mail.com",
+        "company": "Marvel",
+        "customer_profile": null,
+        "site": 1,
+        "promo": []
+    }
 }
 ]
