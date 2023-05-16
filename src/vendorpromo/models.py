@@ -126,7 +126,7 @@ class Affiliate(CreateUpdateModelBase):
         "max_redemptions": promo.max_redemptions,
         "redeem_by": promo.end_date,
         "promo": {
-            "code": promo.code,
+            "code": PromoCode.code,
             "metadata": {
                 "site": id,
                 "promo_id": promo.id,
