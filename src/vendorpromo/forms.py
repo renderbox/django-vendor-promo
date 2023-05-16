@@ -5,7 +5,7 @@ from django.forms import modelformset_factory
 from django.utils.translation import gettext as _
 
 from integrations.models import Credential
-from vendorpromo.models import Affiliate, Promo
+from vendorpromo.models import Affiliate, Promo, PromotionalCampaign, CouponCode
 
 from vendor.models import CustomerProfile
 
@@ -41,7 +41,7 @@ class PromoProcessorSiteSelectForm(PromoProcessorForm):
         super().__init__(*args, **kwargs)
         self.fields['site'].widget = forms.Select(choices=[(site.pk, site.domain) for site in Site.objects.all()])
 
-
+# To be deprecated
 class PromoForm(forms.ModelForm):
     class Meta:
         model = Promo
@@ -53,12 +53,42 @@ class PromoForm(forms.ModelForm):
             'meta',
             'offer']
 
-
+# To be deprecated
 class PromoCodeForm(forms.ModelForm):
 
     class Meta:
         model = Promo
         fields = ['code']
+
+
+class PromotionalCampaignForm(forms.ModelForm):
+
+    class Meta:
+        model = PromotionalCampaign
+        fields = [
+            "campaign_id",
+            "name",
+            "description",
+            "start_date",
+            "end_date",
+            "is_percent_off",
+            "max_redemptions",
+            "applys_to",
+        ]
+
+
+class CouponCodeForm(forms.ModelForm):
+
+    class Meta:
+        model = CouponCode
+        fields = [
+            "code",
+            "max_redemptions",
+            "end_date"
+        ]
+
+
+CouponCodeFormset = modelformset_factory(CouponCode, CouponCodeForm, extra=1)
 
 
 class VoucherySearchForm(forms.Form):
@@ -74,12 +104,7 @@ class PromoCodeBillingForm(forms.ModelForm):
         fields = ['code']
 
 
-# class OfferAsCampaignForm(forms.modelForm):
-#     ...
-
-
-
-
+# To be deprecated
 PromoCodeFormset = modelformset_factory(
     Promo,
     fields=['code', ],

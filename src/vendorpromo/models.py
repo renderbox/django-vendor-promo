@@ -25,6 +25,8 @@ class CreateUpdateModelBase(models.Model):
 
 #######################################
 # MODELS
+
+# To be deprecated
 class Promo(CreateUpdateModelBase):
     '''
     This is the base class that all Promo should inherit from.
@@ -35,10 +37,6 @@ class Promo(CreateUpdateModelBase):
     campaign_id = models.CharField(_("Campaign Identifier"), max_length=80, blank=True, null=True)
     campaign_name = models.CharField(_("Campaign Name"), max_length=100, blank=True, null=True)
     campaign_description = models.TextField(_("Campaign Description"), blank=True, null=True)
-    start_date = models.DateTimeField(_("Start Date"), blank=True, null=True, help_text=_("The date when this promotion is valid from"))
-    end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("The date when this promotion is no longer valid"))
-    is_percent_off = models.BooleanField(_("Percent Off?"), default=False, help_text=_("Fixed Amount or Percent Off"))
-    max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True, help_text=_("The maximum redemptions for the whole promotion"))
     meta = models.JSONField(_("Meta"), default=dict, blank=True, null=True)
     offer = models.ForeignKey(Offer, blank=False, null=False, related_name="promo", on_delete=models.CASCADE)
     slug = AutoSlugField(populate_from='code', unique_with='offer__site__id')
@@ -61,12 +59,46 @@ class Promo(CreateUpdateModelBase):
         return super().save(*args, **kwargs)
 
 
-class PromoCode(CreateUpdateModelBase):
+class PromotionalCampaign(CreateUpdateModelBase):
+    '''
+    This is the base class that all Promo should inherit from.
+    '''
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    campaign_id = models.CharField(_("Campaign Identifier"), max_length=80, blank=True, null=True)
+    name = models.CharField(_("Campaign Name"), max_length=100, blank=True, null=True)
+    description = models.TextField(_("Description"), default=None, blank=True, null=True, help_text=_("Enter a description or objective for thie campaign"))
+    start_date = models.DateTimeField(_("Start Date"), blank=True, null=True, help_text=_("The date when this promotion is valid from"))
+    end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("The date when this promotion is no longer valid"))
+    is_percent_off = models.BooleanField(_("Percent Off?"), default=False, help_text=_("Fixed Amount or Percent Off"))
+    max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True, help_text=_("The maximum redemptions for the whole promotion"))
+    applys_to = models.ForeignKey(Offer, blank=False, null=False, on_delete=models.CASCADE)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, blank=False, null=False, verbose_name=_("Site"))
+    meta = models.JSONField(_("Meta"), default=dict, blank=True, null=True)
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = "Promo"
+        verbose_name_plural = "Promos"
+
+    def clean(self):
+        if Promo.objects.filter(code=self.code, offer__site=self.offer.site).exists():
+            raise ValidationError(_("Code already exists"))
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+
+class CouponCode(CreateUpdateModelBase):
     code = models.CharField(_("Code"), max_length=80, blank=False, null=False)
     max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True)
     end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("When will the code be unavailable"))
     meta = models.JSONField(blank=True, null=True, default=dict)
-    promo = models.ForeignKey(Promo, blank=False, null=False, on_delete=models.CASCADE)
+    promo = models.ForeignKey(PromotionalCampaign, related_name=("promo"), blank=False, null=False, on_delete=models.CASCADE)
 
     objects = models.Manager()
 
@@ -88,7 +120,7 @@ class Affiliate(CreateUpdateModelBase):
     email = models.EmailField(blank=True, null=True, verbose_name=_("Email"))
     company = models.CharField(max_length=120, blank=True, null=True, verbose_name=_("Company"))
     customer_profile = models.ForeignKey(CustomerProfile, blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("Customer Profile"))
-    promo = models.ManyToManyField(Promo, blank=True, verbose_name=_("Promotion"))
+    promo = models.ManyToManyField(PromotionalCampaign, blank=True, verbose_name=_("Promotion Campaign"))
     site = models.ForeignKey(Site, on_delete=models.CASCADE, blank=False, null=False, verbose_name=_("Site"))
 
     objects = models.Manager()
