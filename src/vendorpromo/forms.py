@@ -74,6 +74,12 @@ class PromoCodeBillingForm(forms.ModelForm):
         fields = ['code']
 
 
+class OfferAsCampaignForm(forms.modelForm):
+    ...
+
+
+
+
 PromoCodeFormset = modelformset_factory(
     Promo,
     fields=['code', ],

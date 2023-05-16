@@ -31,10 +31,12 @@ class Promo(CreateUpdateModelBase):
     '''
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     description = models.TextField(_("Promo Description"), default=None, blank=True, null=True, help_text=_("Enter a description for your Promo Code"))
-    code = models.CharField(_("Code"), max_length=80, blank=False)
+    code = models.CharField(_("Code"), max_length=80, blank=False)  # This field will be depracted in favor of having the PromoCode Model
     campaign_id = models.CharField(_("Campaign Identifier"), max_length=80, blank=True, null=True)
     campaign_name = models.CharField(_("Campaign Name"), max_length=100, blank=True, null=True)
     campaign_description = models.TextField(_("Campaign Description"), blank=True, null=True)
+    end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("The date when this promotion is no longer valid"))
+    is_percent_off = models.BooleanField(_("Percent Off?"), default=False, help_text=_("Fixed Amount or Percent Off"))
     meta = models.JSONField(_("Meta"), default=dict, blank=True, null=True)
     offer = models.ForeignKey(Offer, blank=False, null=False, related_name="promo", on_delete=models.CASCADE)
     slug = AutoSlugField(populate_from='code', unique_with='offer__site__id')
@@ -55,6 +57,14 @@ class Promo(CreateUpdateModelBase):
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
+
+
+class PromoCode(CreateUpdateModelBase):
+    code = models.CharField(_("Code"), max_length=80, blank=False)
+    max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True)
+    end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("When will the code be unavailable"))
+    meta = models.JSONField(blank=True, null=True, default=dict)
+    promo = models.ForeignKey(Promo, blank=False, null=False, on_delete=models.CASCADE)
 
 
 class Affiliate(CreateUpdateModelBase):
@@ -101,3 +111,34 @@ class Affiliate(CreateUpdateModelBase):
             return self.company
         
         return self.uuid
+
+
+
+{
+    "coupon": {
+        "amount_off": offer.current_price(),
+        "percent_off": offer.current_price(),
+        "currency": offer.currency(),
+        "duration": 'once' if offer.term_details['trial_occurrences'] <= 1 else 'repeating',
+        "duration_in_months": offer.term_details['trial_occurrences'],
+        "name": promo.campaign_name and offer.name,
+        "applies_to": promo.offer.products,
+        "max_redemptions": promo.max_redemptions,
+        "redeem_by": promo.end_date,
+        "promo": {
+            "code": promo.code,
+            "metadata": {
+                "site": id,
+                "promo_id": promo.id,
+                "offer_id": offer.id
+            },
+            "expires_at": offer.end_date,
+            "max_redemptions": promo.meta['max_redemptions'],
+            "restrictions": {
+                "first_time_transaction": promo.meta["first_time_transaction"],
+                "minimum_amount": promo.meta["minimum_amount"],
+                ""
+            }
+        }
+    }
+}
