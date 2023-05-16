@@ -10,8 +10,9 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView, FormView, UpdateView, FormMixin
+from django.utils import timezone
 from siteconfigs.models import SiteConfigModel
-from vendor.models import Offer
+from vendor.models import Offer, Price
 from vendor.views.mixin import TableFilterMixin
 
 from vendorpromo.config import (PromoProcessorSiteConfig,
@@ -33,7 +34,7 @@ class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
 
 
 class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
-    template_name = "vendor/manage/affiliate_list.html"
+    template_name = "vendorpromo/affiliate_list.html"
     model = Affiliate
     paginate_by = 100
 
@@ -107,7 +108,7 @@ class AffiliateDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class PromotionalCampaignListView(LoginRequiredMixin, TableFilterMixin, ListView):
-    template_name = "vendor/manage/affiliate_list.html"
+    template_name = "vendorpromo/promotional_campaign_list.html"
     model = PromotionalCampaign
     paginate_by = 100
 
@@ -128,6 +129,26 @@ class PromotionalCampaignListView(LoginRequiredMixin, TableFilterMixin, ListView
 
         return queryset.order_by('name')
 
+def create_promo_offer(promo_campaign, products, cost):
+    now = timezone.now()
+    promo_offer = Offer()
+    promo_offer.name = promo_campaign.name
+    promo_offer.start_date = now
+    promo_offer.site = promo_campaign.site
+    promo_offer.is_promotional = True
+    promo_offer.save()
+
+    for product in products.all():
+        promo_offer.products.add(product)
+
+    price = Price()
+    price.offer = promo_offer
+    price.cost = cost
+    price.start_date = now
+    price.save()
+
+    return promo_offer
+
 
 class PromotionalCampaignCreateView(LoginRequiredMixin, CreateView):
     template_name = 'vendorpromo/promotional_campaign_detail.html'
@@ -141,10 +162,12 @@ class PromotionalCampaignCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        affiliate = form.save(commit=False)
+        promo_campaign = form.save(commit=False)
         site = get_site_from_request(self.request)
-        affiliate.site = site
-        affiliate.save()
+        promo_campaign.site = site
+        promo_campaign.is_percent_off = form.cleaned_data['is_percent_off']
+        promo_campaign.applys_to = create_promo_offer(promo_campaign, form.cleaned_data['applys_to'], form.cleaned_data['discount_value'])
+        promo_campaign.save()
         return redirect(self.success_url)
 
 
@@ -162,10 +185,12 @@ class PromotionalCampaignUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        affiliate = form.save(commit=False)
+        promo_campaign = form.save(commit=False)
         site = get_site_from_request(self.request)
-        affiliate.site = site
-        affiliate.save()
+        promo_campaign.site = site
+        promo_campaign.is_percent_off = form.cleaned_data['is_percent_off']
+        promo_campaign.applys_to = create_promo_offer(promo_campaign, form.cleaned_data['applys_to'], form.cleaned_data['discount_value'])
+        promo_campaign.save()
         return redirect(self.success_url)
 
 

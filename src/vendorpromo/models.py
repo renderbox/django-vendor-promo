@@ -84,10 +84,6 @@ class PromotionalCampaign(CreateUpdateModelBase):
         verbose_name = "Promo"
         verbose_name_plural = "Promos"
 
-    def clean(self):
-        if Promo.objects.filter(code=self.code, offer__site=self.offer.site).exists():
-            raise ValidationError(_("Code already exists"))
-
     def save(self, *args, **kwargs):
         self.full_clean()
         return super().save(*args, **kwargs)
@@ -98,17 +94,20 @@ class CouponCode(CreateUpdateModelBase):
     max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True)
     end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("When will the code be unavailable"))
     meta = models.JSONField(blank=True, null=True, default=dict)
-    promo = models.ForeignKey(PromotionalCampaign, related_name=("promo"), blank=False, null=False, on_delete=models.CASCADE)
+    promo = models.ForeignKey(PromotionalCampaign, related_name=("coupon"), blank=False, null=False, on_delete=models.CASCADE)
 
     objects = models.Manager()
 
-    def __str__(self):
-        return self.code
-    
     class Meta:
         verbose_name = "Promo Code"
         verbose_name_plural = "Promo Codes"
 
+    def __str__(self):
+        return self.code
+
+    def clean(self):
+        if PromotionalCampaign.objects.filter(coupon__code=self.code, site=self.site).exists():
+            raise ValidationError(_("Code already exists"))
 
 class Affiliate(CreateUpdateModelBase):
     '''
