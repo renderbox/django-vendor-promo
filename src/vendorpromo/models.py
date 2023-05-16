@@ -35,8 +35,10 @@ class Promo(CreateUpdateModelBase):
     campaign_id = models.CharField(_("Campaign Identifier"), max_length=80, blank=True, null=True)
     campaign_name = models.CharField(_("Campaign Name"), max_length=100, blank=True, null=True)
     campaign_description = models.TextField(_("Campaign Description"), blank=True, null=True)
+    start_date = models.DateTimeField(_("Start Date"), blank=True, null=True, help_text=_("The date when this promotion is valid from"))
     end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("The date when this promotion is no longer valid"))
     is_percent_off = models.BooleanField(_("Percent Off?"), default=False, help_text=_("Fixed Amount or Percent Off"))
+    max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True, help_text=_("The maximum redemptions for the whole promotion"))
     meta = models.JSONField(_("Meta"), default=dict, blank=True, null=True)
     offer = models.ForeignKey(Offer, blank=False, null=False, related_name="promo", on_delete=models.CASCADE)
     slug = AutoSlugField(populate_from='code', unique_with='offer__site__id')
@@ -60,11 +62,20 @@ class Promo(CreateUpdateModelBase):
 
 
 class PromoCode(CreateUpdateModelBase):
-    code = models.CharField(_("Code"), max_length=80, blank=False)
+    code = models.CharField(_("Code"), max_length=80, blank=False, null=False)
     max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True)
     end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("When will the code be unavailable"))
     meta = models.JSONField(blank=True, null=True, default=dict)
     promo = models.ForeignKey(Promo, blank=False, null=False, on_delete=models.CASCADE)
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return self.code
+    
+    class Meta:
+        verbose_name = "Promo Code"
+        verbose_name_plural = "Promo Codes"
 
 
 class Affiliate(CreateUpdateModelBase):
@@ -112,8 +123,8 @@ class Affiliate(CreateUpdateModelBase):
         
         return self.uuid
 
-
-
+"""
+Stripe Structure
 {
     "coupon": {
         "amount_off": offer.current_price(),
@@ -142,3 +153,4 @@ class Affiliate(CreateUpdateModelBase):
         }
     }
 }
+"""

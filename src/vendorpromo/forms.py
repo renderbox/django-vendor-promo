@@ -74,8 +74,8 @@ class PromoCodeBillingForm(forms.ModelForm):
         fields = ['code']
 
 
-class OfferAsCampaignForm(forms.modelForm):
-    ...
+# class OfferAsCampaignForm(forms.modelForm):
+#     ...
 
 
 
