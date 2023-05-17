@@ -96,7 +96,7 @@ class PromotionalCampaignForm(forms.ModelForm):
             self.fields['discount_value'].initial = self.instance.applys_to.current_price()
 
     def clean_discount_value(self):
-        discount_value = self.cleaned_data.get('discount_value')
+        discount_value = self.cleaned_data.get('discount_value', 0)
 
         if discount_value <= 0:
             raise forms.ValidationError(_("Number must be greater than 0"))

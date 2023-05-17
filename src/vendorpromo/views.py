@@ -56,7 +56,7 @@ class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
         site = get_site_from_request(self.request)
         queryset = super().get_queryset().filter(site=site)
 
-        return queryset.order_by('name')
+        return queryset.order_by('contact_name')
 
 
 class AffiliateCreateView(LoginRequiredMixin, CreateView):

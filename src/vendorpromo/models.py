@@ -61,7 +61,11 @@ class Promo(CreateUpdateModelBase):
 
 class PromotionalCampaign(CreateUpdateModelBase):
     '''
-    This is the base class that all Promo should inherit from.
+    Promotional Campaign is defined by it's name and description as intended to link between CouponCodes and Affiliates.
+    A Promotional Campaign can only have one Affiliate, and can have multiple CouponCodes.
+    The applys_to field is a connection to an vendor.offer that can be linked to multiple product models.
+    The offer's price represents the discount to apply to the invoice and is controlled by the is_percent_off. 
+    If is_percent_off is marked as true the offer.price is treated as a percentage.
     '''
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     campaign_id = models.CharField(_("Campaign Identifier"), max_length=80, blank=True, null=True)
@@ -83,10 +87,6 @@ class PromotionalCampaign(CreateUpdateModelBase):
     class Meta:
         verbose_name = "Promotional Campaign"
         verbose_name_plural = "Promotional Campaigns"
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)
 
 
 class CouponCode(CreateUpdateModelBase):
