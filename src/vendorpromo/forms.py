@@ -120,21 +120,12 @@ class CouponCodeForm(forms.ModelForm):
         ]
 
     def __init__(self, *args, **kwargs):
-        self.site = kwargs.pop('site', None)
-
+        site = kwargs.pop('site', None)
         super().__init__(*args, **kwargs)
 
-        if self.site:
-            self.fields['promo'].queryset = PromotionalCampaign.objects.filter(site=self.site)
+        if site:
+            self.fields['promo'].queryset = PromotionalCampaign.objects.filter(site=site)
 
-    def clean_code(self):
-        code = self.cleaned_data['code']
-        promo = self.data['promo']
-
-        if PromotionalCampaign.objects.filter(pk=promo, coupon__code=code, site=self.site).exists():
-            raise forms.ValidationError(_("Code already exists"))
-        
-        return code
 
 
 CouponCodeFormset = modelformset_factory(CouponCode, CouponCodeForm, extra=1)

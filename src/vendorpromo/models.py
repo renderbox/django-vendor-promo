@@ -91,7 +91,7 @@ class PromotionalCampaign(CreateUpdateModelBase):
 
 class CouponCode(CreateUpdateModelBase):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    code = models.CharField(_("Code"), max_length=80, blank=False, null=False)
+    code = AutoSlugField(unique_with=('promo__site'), editable=True, blank=True, null=True, verbose_name=_("Affiliate Code"))
     max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True)
     end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("When will the code be unavailable"))
     meta = models.JSONField(blank=True, null=True, default=dict)
@@ -106,10 +106,8 @@ class CouponCode(CreateUpdateModelBase):
     def __str__(self):
         return self.code
 
-    # def clean(self):
-    #     if PromotionalCampaign.objects.filter(coupon__code=self.code, site=self.site).exists():
-    #         raise ValidationError(_("Code already exists"))
-
+    def get_display_code(self):
+        return str(self.code).upper()
 
 class Affiliate(CreateUpdateModelBase):
     '''
