@@ -1,0 +1,33 @@
+{% extends "vendorpromo/base.html" %}
+{% load i18n %}
+
+
+{% block title %}Django Vendor Promo - Coupon Code{% endblock %}
+
+{% block content %}
+<div class='card'>
+    <div class='card-header'>
+        <h5>
+            {% if form.instance.pk %}
+            {% trans 'Update Coupon Code' %}
+            {% else %}
+            {% trans 'Create Coupon Code' %}
+            {% endif %}
+        </h5>
+    </div>
+    <div class='card-body'>
+        {% if form.instance.pk %}
+        <form method="post" action="{% url 'coupon-code-delete' form.instance.uuid %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">{% trans 'Delete' %}</button>
+        </form>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <a href="{% url 'coupon-code-list' %}" class="btn btn-danger">{% trans 'Cancel' %}</a>
+            <button type="submit" class="btn btn-success">{% trans 'Save' %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
