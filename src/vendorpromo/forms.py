@@ -63,7 +63,7 @@ class PromoCodeForm(forms.ModelForm):
 
 
 class PromotionalCampaignForm(forms.ModelForm):
-    applys_to = forms.ModelMultipleChoiceField(queryset=get_product_model().objects.all(), required=False)
+    applies_to = forms.ModelMultipleChoiceField(queryset=get_product_model().objects.all(), required=False)
     is_percent_off = forms.NullBooleanField(widget=forms.RadioSelect(
         choices=[
             (True, "Percent Off"),
@@ -88,12 +88,12 @@ class PromotionalCampaignForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if site:
-            self.fields['applys_to'].queryset = get_product_model().objects.filter(site=site)
+            self.fields['applies_to'].queryset = get_product_model().objects.filter(site=site)
 
         if self.instance.pk:
-            self.fields['applys_to'].initial = self.instance.applys_to.products.all()
+            self.fields['applies_to'].initial = self.instance.applies_to.products.all()
             self.fields['is_percent_off'].initial = (True, "Percent Off") if self.instance.is_percent_off else (False, "Fixed Amount")
-            self.fields['discount_value'].initial = self.instance.applys_to.current_price()
+            self.fields['discount_value'].initial = self.instance.applies_to.current_price()
 
     def clean_discount_value(self):
         discount_value = self.cleaned_data.get('discount_value', 0)
@@ -102,8 +102,8 @@ class PromotionalCampaignForm(forms.ModelForm):
             raise forms.ValidationError(_("Number must be greater than 0"))
         
         if self.cleaned_data.get('is_percent_off'):
-            if discount_value < 0 or self.cleaned_data.get('discount_value') > 100:
-                raise forms.ValidationError(_("Must be a number between 0 and 100"))
+            if not (0 < discount_value > 100):
+                raise forms.ValidationError(_("Must be a number between 1 and 100"))
         
         return discount_value
 

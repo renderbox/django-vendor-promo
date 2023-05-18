@@ -29,9 +29,9 @@ class PromotionalCampaignModelTests(TestCase):
         new_promotional_campaign = PromotionalCampaign()
         new_promotional_campaign.max_redemptions = 10
         new_promotional_campaign.site = site
-        new_promotional_campaign.applys_to = Offer.objects.get(pk=1)
+        new_promotional_campaign.applies_to = Offer.objects.get(pk=1)
         new_promotional_campaign.save()
-        self.assertTrue(PromotionalCampaign.objects.get(site=site, applys_to=offer))
+        self.assertTrue(PromotionalCampaign.objects.get(site=site, applies_to=offer))
 
 
 class PromotionalCampaignViewTests(TestCase):
@@ -71,7 +71,7 @@ class PromotionalCampaignViewTests(TestCase):
         post_data = {
             'name': "Peter Townsend",
             'max_redemptions': 10,
-            'applys_to': [1],
+            'applies_to': [1],
             'site': 1,
             'is_percent_off': False,
             'discount_value': 10

@@ -524,7 +524,7 @@
         "end_date": null,
         "is_percent_off": true,
         "max_redemptions": 10,
-        "applys_to": 7,
+        "applies_to": 7,
         "site": 1,
         "meta": {}
     }
@@ -543,7 +543,7 @@
         "end_date": null,
         "is_percent_off": false,
         "max_redemptions": 100,
-        "applys_to": 8,
+        "applies_to": 8,
         "site": 1,
         "meta": {}
     }

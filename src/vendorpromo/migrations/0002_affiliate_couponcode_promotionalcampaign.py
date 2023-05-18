@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('is_percent_off', models.BooleanField(default=False, help_text='Fixed Amount or Percent Off', verbose_name='Percent Off?')),
                 ('max_redemptions', models.IntegerField(blank=True, help_text='The maximum redemptions for the whole promotion', null=True, verbose_name='Max Redemptions')),
                 ('meta', models.JSONField(blank=True, default=dict, null=True, verbose_name='Meta')),
-                ('applys_to', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='vendor.offer')),
+                ('applies_to', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='vendor.offer')),
                 ('site', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sites.site', verbose_name='Site')),
             ],
             options={

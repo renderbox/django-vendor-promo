@@ -133,7 +133,7 @@ def valid_form_save_promotional_campaign(request, form):
     site = get_site_from_request(request)
     promo_campaign.site = site
     promo_campaign.is_percent_off = form.cleaned_data['is_percent_off']
-    promo_campaign.applys_to = create_promo_offer(promo_campaign, form.cleaned_data['applys_to'], form.cleaned_data['discount_value'])
+    promo_campaign.applies_to = create_promo_offer(promo_campaign, form.cleaned_data['applies_to'], form.cleaned_data['discount_value'])
     promo_campaign.save()
 
 
