@@ -1,15 +1,11 @@
-from typing import Any, Dict, Optional, Type
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.db.models import Q
-from django.forms.forms import BaseForm
-from django.forms.models import BaseModelForm
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
 from django.views.generic.base import TemplateView
-from django.views.generic.edit import DeleteView, FormView, UpdateView, FormMixin
+from django.views.generic.edit import DeleteView, FormView, UpdateView
 from django.utils import timezone
 from siteconfigs.models import SiteConfigModel
 from vendor.models import Offer, Price
@@ -26,7 +22,7 @@ from vendorpromo.integrations import VoucheryIntegration
 from vendorpromo.models import Affiliate, Promo, CouponCode, PromotionalCampaign
 from vendorpromo.processors import get_site_promo_processor
 from vendorpromo.utils import get_site_from_request
-
+from vendorpromo.processors.stripe import StripeProcessor
 
 class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
     template_name = "vendorpromo/promo_list.html"
@@ -128,13 +124,16 @@ def create_promo_offer(promo_campaign, products, cost):
     return promo_offer
 
 
-def valid_form_save_promotional_campaign(request, form):
+def save_promotional_campaign_form(request, form):
     promo_campaign = form.save(commit=False)
     site = get_site_from_request(request)
     promo_campaign.site = site
     promo_campaign.is_percent_off = form.cleaned_data['is_percent_off']
     promo_campaign.applys_to = create_promo_offer(promo_campaign, form.cleaned_data['applys_to'], form.cleaned_data['discount_value'])
     promo_campaign.save()
+
+    return promo_campaign
+
 
 
 class PromotionalCampaignListView(LoginRequiredMixin, TableFilterMixin, ListView):
@@ -172,7 +171,9 @@ class PromotionalCampaignCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
     def form_valid(self, form):
-        valid_form_save_promotional_campaign(self.request, form)
+        promo_campaign = save_promotional_campaign_form(self.request, form)
+        stripe_promo_processor = StripeProcessor(get_site_from_request(self.request))
+        stripe_promo_processor.create_stripe_coupon(promo_campaign)
         return redirect(self.success_url)
 
 
@@ -190,7 +191,9 @@ class PromotionalCampaignUpdateView(LoginRequiredMixin, UpdateView):
         return kwargs
 
     def form_valid(self, form):
-        valid_form_save_promotional_campaign(self.request, form)
+        promo_campaign = save_promotional_campaign_form(self.request, form)
+        stripe_promo_processor = StripeProcessor(get_site_from_request(self.request))
+        stripe_promo_processor.update_stripe_coupon(promo_campaign)
         return redirect(self.success_url)
 
 
