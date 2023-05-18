@@ -102,8 +102,8 @@ class PromotionalCampaignForm(forms.ModelForm):
             raise forms.ValidationError(_("Number must be greater than 0"))
         
         if self.cleaned_data.get('is_percent_off'):
-            if not (0 < discount_value > 100):
-                raise forms.ValidationError(_("Must be a number between 1 and 100"))
+            if not (0 < discount_value < 100):
+                raise forms.ValidationError(_("Must be a number between 1 and 99"))
         
         return discount_value
 

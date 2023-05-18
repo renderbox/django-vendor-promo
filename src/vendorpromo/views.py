@@ -116,7 +116,7 @@ def create_promo_offer(promo_campaign, products, cost):
     promo_offer.is_promotional = True
     promo_offer.save()
 
-    for product in products.all():
+    for product in products:
         promo_offer.products.add(product)
 
     price = Price()
@@ -128,12 +128,34 @@ def create_promo_offer(promo_campaign, products, cost):
     return promo_offer
 
 
+def update_promo_offer(promo_campaign, products, cost):
+    promo_campaign.applies_to.name = promo_campaign.name
+    promo_campaign.applies_to.products.clear()
+
+    for product in products:
+        promo_campaign.applies_to.products.add(product)
+    promo_campaign.applies_to.save()
+
+    update_price = promo_campaign.applies_to.prices.first()
+    update_price.cost = cost
+    update_price.save()
+
+    promo_campaign.save()
+
+
 def valid_form_save_promotional_campaign(request, form):
     promo_campaign = form.save(commit=False)
     site = get_site_from_request(request)
     promo_campaign.site = site
     promo_campaign.is_percent_off = form.cleaned_data['is_percent_off']
-    promo_campaign.applies_to = create_promo_offer(promo_campaign, form.cleaned_data['applies_to'], form.cleaned_data['discount_value'])
+
+    try:
+        if promo_campaign.applies_to:
+            update_promo_offer(promo_campaign, form.cleaned_data['applies_to'], form.cleaned_data['discount_value'])
+        
+    except Exception as e:
+        promo_campaign.applies_to = create_promo_offer(promo_campaign, form.cleaned_data['applies_to'], form.cleaned_data['discount_value'])
+    
     promo_campaign.save()
 
 
