@@ -63,19 +63,19 @@ class PromotionalCampaign(CreateUpdateModelBase):
     '''
     Promotional Campaign is defined by it's name and description as intended to link between CouponCodes and Affiliates.
     A Promotional Campaign can only have one Affiliate, and can have multiple CouponCodes.
-    The applys_to field is a connection to an vendor.offer that can be linked to multiple product models.
+    The applies_to field is a connection to an vendor.offer that can be linked to multiple product models.
     The offer's price represents the discount to apply to the invoice and is controlled by the is_percent_off. 
     If is_percent_off is marked as true the offer.price is treated as a percentage.
     '''
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     campaign_id = models.CharField(_("Campaign Identifier"), max_length=80, blank=True, null=True)
     name = models.CharField(_("Campaign Name"), max_length=100, blank=True, null=True)
-    description = models.TextField(_("Description"), default=None, blank=True, null=True, help_text=_("Enter a description or objective for thie campaign"))
+    description = models.TextField(_("Description"), default=None, blank=True, null=True, help_text=_("Enter a description or objective for this campaign"))
     start_date = models.DateTimeField(_("Start Date"), blank=True, null=True, help_text=_("The date when this promotion is valid from"))
     end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("The date when this promotion is no longer valid"))
     is_percent_off = models.BooleanField(_("Percent Off?"), default=False, help_text=_("Fixed Amount or Percent Off"))
     max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True, help_text=_("The maximum redemptions for the whole promotion"))
-    applys_to = models.ForeignKey(Offer, blank=False, null=False, on_delete=models.CASCADE)
+    applies_to = models.ForeignKey(Offer, blank=False, null=False, on_delete=models.CASCADE)
     site = models.ForeignKey(Site, on_delete=models.CASCADE, blank=False, null=False, verbose_name=_("Site"))
     meta = models.JSONField(_("Meta"), default=dict, blank=True, null=True)
 

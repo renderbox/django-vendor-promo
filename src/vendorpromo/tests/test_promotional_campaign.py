@@ -29,9 +29,9 @@ class PromotionalCampaignModelTests(TestCase):
         new_promotional_campaign = PromotionalCampaign()
         new_promotional_campaign.max_redemptions = 10
         new_promotional_campaign.site = site
-        new_promotional_campaign.applys_to = Offer.objects.get(pk=1)
+        new_promotional_campaign.applies_to = Offer.objects.get(pk=1)
         new_promotional_campaign.save()
-        self.assertTrue(PromotionalCampaign.objects.get(site=site, applys_to=offer))
+        self.assertTrue(PromotionalCampaign.objects.get(site=site, applies_to=offer))
 
 
 class PromotionalCampaignViewTests(TestCase):
@@ -71,7 +71,7 @@ class PromotionalCampaignViewTests(TestCase):
         post_data = {
             'name': "Peter Townsend",
             'max_redemptions': 10,
-            'applys_to': [1],
+            'applies_to': [1],
             'site': 1,
             'is_percent_off': False,
             'discount_value': 10
@@ -89,19 +89,25 @@ class PromotionalCampaignViewTests(TestCase):
         self.assertEquals(response.status_code, 200)
     
     def test_promotional_campaign_update_post_success(self):
+        offer_counter = Offer.objects.all().count()
+        applies_to_offer = Offer.objects.get(pk=7)
         promotional_campaign = PromotionalCampaign.objects.get(pk=1)
         view_url = reverse('promotional-campaign-update', kwargs={'uuid': promotional_campaign.uuid})
         post_data = {
             'name': 'NXP',
             'is_percent_off': True,
-            'discount_value': 10
+            'discount_value': 13
         }
 
         response = self.client.post(view_url, post_data)
         
         self.assertEqual(response.status_code, 302)
         promotional_campaign.refresh_from_db()
+        applies_to_offer.refresh_from_db()
         self.assertEquals(promotional_campaign.name, post_data['name'])
+        self.assertEquals(promotional_campaign.name, applies_to_offer.name)
+        self.assertEquals(post_data['discount_value'], applies_to_offer.prices.first().cost)
+        self.assertEquals(offer_counter, Offer.objects.all().count())
     
     def test_promotional_campaign_update_post_discount_value_error(self):
         promotional_campaign = PromotionalCampaign.objects.get(pk=1)
@@ -127,7 +133,7 @@ class PromotionalCampaignViewTests(TestCase):
 
         response = self.client.post(view_url, post_data)
         
-        self.assertIn("Must be a number between 0 and 100", str(response.content))
+        self.assertIn("Must be a number between 1 and 99", str(response.content))
 
     def test_delete_post_success(self):
         promotional_campaign = PromotionalCampaign.objects.get(pk=1)
