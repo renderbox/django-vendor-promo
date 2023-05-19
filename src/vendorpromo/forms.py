@@ -5,9 +5,10 @@ from django.forms import modelformset_factory
 from django.utils.translation import gettext as _
 
 from integrations.models import Credential
-from vendorpromo.models import Affiliate, Promo
+from vendorpromo.models import Affiliate, Promo, PromotionalCampaign, CouponCode
 
 from vendor.models import CustomerProfile
+from vendor.models.base import get_product_model
 
 
 class AffiliateForm(forms.ModelForm):
@@ -41,7 +42,7 @@ class PromoProcessorSiteSelectForm(PromoProcessorForm):
         super().__init__(*args, **kwargs)
         self.fields['site'].widget = forms.Select(choices=[(site.pk, site.domain) for site in Site.objects.all()])
 
-
+# To be deprecated
 class PromoForm(forms.ModelForm):
     class Meta:
         model = Promo
@@ -53,12 +54,81 @@ class PromoForm(forms.ModelForm):
             'meta',
             'offer']
 
-
+# To be deprecated
 class PromoCodeForm(forms.ModelForm):
 
     class Meta:
         model = Promo
         fields = ['code']
+
+
+class PromotionalCampaignForm(forms.ModelForm):
+    applies_to = forms.ModelMultipleChoiceField(queryset=get_product_model().objects.all(), required=False)
+    is_percent_off = forms.NullBooleanField(widget=forms.RadioSelect(
+        choices=[
+            (True, "Percent Off"),
+            (False, "Fixed Amount")
+        ]
+    ))
+    discount_value = forms.DecimalField(min_value=0, label=_("Discount Value"), required=False)
+
+    class Meta:
+        model = PromotionalCampaign
+        fields = [
+            "campaign_id",
+            "name",
+            "description",
+            "start_date",
+            "end_date",
+            "max_redemptions",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        site = kwargs.pop('site', None)
+        super().__init__(*args, **kwargs)
+
+        if site:
+            self.fields['applies_to'].queryset = get_product_model().objects.filter(site=site)
+
+        if self.instance.pk:
+            self.fields['applies_to'].initial = self.instance.applies_to.products.all()
+            self.fields['is_percent_off'].initial = (True, "Percent Off") if self.instance.is_percent_off else (False, "Fixed Amount")
+            self.fields['discount_value'].initial = self.instance.applies_to.current_price()
+
+    def clean_discount_value(self):
+        discount_value = self.cleaned_data.get('discount_value', 0)
+
+        if discount_value <= 0:
+            raise forms.ValidationError(_("Number must be greater than 0"))
+        
+        if self.cleaned_data.get('is_percent_off'):
+            if not (0 < discount_value < 100):
+                raise forms.ValidationError(_("Must be a number between 1 and 99"))
+        
+        return discount_value
+
+
+class CouponCodeForm(forms.ModelForm):
+
+    class Meta:
+        model = CouponCode
+        fields = [
+            "code",
+            "max_redemptions",
+            "end_date",
+            "promo"
+        ]
+
+    def __init__(self, *args, **kwargs):
+        site = kwargs.pop('site', None)
+        super().__init__(*args, **kwargs)
+
+        if site:
+            self.fields['promo'].queryset = PromotionalCampaign.objects.filter(site=site)
+
+
+
+CouponCodeFormset = modelformset_factory(CouponCode, CouponCodeForm, extra=1)
 
 
 class VoucherySearchForm(forms.Form):
@@ -74,6 +144,7 @@ class PromoCodeBillingForm(forms.ModelForm):
         fields = ['code']
 
 
+# To be deprecated
 PromoCodeFormset = modelformset_factory(
     Promo,
     fields=['code', ],

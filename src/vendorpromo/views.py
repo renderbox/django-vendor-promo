@@ -10,18 +10,20 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView, FormView, UpdateView, FormMixin
+from django.utils import timezone
 from siteconfigs.models import SiteConfigModel
-from vendor.models import Offer
+from vendor.models import Offer, Price
 from vendor.views.mixin import TableFilterMixin
 
 from vendorpromo.config import (PromoProcessorSiteConfig,
                                 PromoProcessorSiteSelectSiteConfig)
-from vendorpromo.forms import (AffiliateForm, PromoCodeFormset,
+from vendorpromo.forms import (AffiliateForm, PromoCodeFormset, CouponCodeForm,
                                PromoProcessorForm,
                                PromoProcessorSiteSelectForm,
-                               VoucheryIntegrationForm)
+                               VoucheryIntegrationForm,
+                               PromotionalCampaignForm)
 from vendorpromo.integrations import VoucheryIntegration
-from vendorpromo.models import Affiliate, Promo
+from vendorpromo.models import Affiliate, Promo, CouponCode, PromotionalCampaign
 from vendorpromo.processors import get_site_promo_processor
 from vendorpromo.utils import get_site_from_request
 
@@ -32,7 +34,7 @@ class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
 
 
 class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
-    template_name = "vendor/manage/affiliate_list.html"
+    template_name = "vendorpromo/affiliate_list.html"
     model = Affiliate
     paginate_by = 100
 
@@ -54,7 +56,7 @@ class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
         site = get_site_from_request(self.request)
         queryset = super().get_queryset().filter(site=site)
 
-        return queryset.order_by('pk')
+        return queryset.order_by('contact_name')
 
 
 class AffiliateCreateView(LoginRequiredMixin, CreateView):
@@ -103,6 +105,180 @@ class AffiliateDeleteView(LoginRequiredMixin, DeleteView):
     slug_field = 'uuid'
     slug_url_kwarg = 'uuid'
     success_url = reverse_lazy('affiliate-list')
+
+
+def create_promo_offer(promo_campaign, products, cost):
+    now = timezone.now()
+    promo_offer = Offer()
+    promo_offer.name = promo_campaign.name
+    promo_offer.start_date = now
+    promo_offer.site = promo_campaign.site
+    promo_offer.is_promotional = True
+    promo_offer.save()
+
+    for product in products:
+        promo_offer.products.add(product)
+
+    price = Price()
+    price.offer = promo_offer
+    price.cost = cost
+    price.start_date = now
+    price.save()
+
+    return promo_offer
+
+
+def update_promo_offer(promo_campaign, products, cost):
+    promo_campaign.applies_to.name = promo_campaign.name
+    promo_campaign.applies_to.products.clear()
+
+    for product in products:
+        promo_campaign.applies_to.products.add(product)
+    promo_campaign.applies_to.save()
+
+    update_price = promo_campaign.applies_to.prices.first()
+    update_price.cost = cost
+    update_price.save()
+
+    promo_campaign.save()
+
+
+def valid_form_save_promotional_campaign(request, form):
+    promo_campaign = form.save(commit=False)
+    site = get_site_from_request(request)
+    promo_campaign.site = site
+    promo_campaign.is_percent_off = form.cleaned_data['is_percent_off']
+
+    try:
+        if promo_campaign.applies_to:
+            update_promo_offer(promo_campaign, form.cleaned_data['applies_to'], form.cleaned_data['discount_value'])
+        
+    except Exception as e:
+        promo_campaign.applies_to = create_promo_offer(promo_campaign, form.cleaned_data['applies_to'], form.cleaned_data['discount_value'])
+    
+    promo_campaign.save()
+
+
+class PromotionalCampaignListView(LoginRequiredMixin, TableFilterMixin, ListView):
+    template_name = "vendorpromo/promotional_campaign_list.html"
+    model = PromotionalCampaign
+    paginate_by = 100
+
+    def search_filter(self, queryset):
+        search_value = self.request.GET.get('search_filter')
+        return queryset.filter(Q(pk__icontains=search_value)
+                               | Q(name__icontains=search_value)
+                               | Q(description__icontains=search_value))
+    
+    def get_paginated_by(self, queryset):
+        if 'paginate_by' in self.request.kwargs:
+            return self.kwargs['paginate_by']
+        return self.paginate_by
+    
+    def get_queryset(self):
+        site = get_site_from_request(self.request)
+        queryset = super().get_queryset().filter(site=site)
+
+        return queryset.order_by('name')
+
+
+class PromotionalCampaignCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'vendorpromo/promotional_campaign_detail.html'
+    model = PromotionalCampaign
+    form_class = PromotionalCampaignForm
+    success_url = reverse_lazy('promotional-campaign-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        valid_form_save_promotional_campaign(self.request, form)
+        return redirect(self.success_url)
+
+
+class PromotionalCampaignUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = 'vendorpromo/promotional_campaign_detail.html'
+    model = PromotionalCampaign
+    form_class = PromotionalCampaignForm
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('promotional-campaign-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        valid_form_save_promotional_campaign(self.request, form)
+        return redirect(self.success_url)
+
+
+class PromotionalCampaignDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = 'vendorpromo/promotional_campaign_detail.html'
+    model = PromotionalCampaign
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('promotional-campaign-list')
+
+
+class CouponCodeListView(LoginRequiredMixin, TableFilterMixin, ListView):
+    template_name = "vendorpromo/coupon_code_list.html"
+    model = CouponCode
+    paginate_by = 100
+
+    def search_filter(self, queryset):
+        search_value = self.request.GET.get('search_filter')
+        return queryset.filter(Q(pk__icontains=search_value)
+                               | Q(code__icontains=search_value)
+                               | Q(promo__name__icontains=search_value))
+    
+    def get_paginated_by(self, queryset):
+        if 'paginate_by' in self.request.kwargs:
+            return self.kwargs['paginate_by']
+        return self.paginate_by
+    
+    def get_queryset(self):
+        site = get_site_from_request(self.request)
+        queryset = super().get_queryset().filter(promo__site=site)
+
+        return queryset.order_by('code')
+
+
+class CouponCodeCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'vendorpromo/coupon_code_detail.html'
+    model = CouponCode
+    form_class = CouponCodeForm
+    success_url = reverse_lazy('coupon-code-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+
+class CouponCodeUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = 'vendorpromo/coupon_code_detail.html'
+    model = CouponCode
+    form_class = CouponCodeForm
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('coupon-code-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+
+class CouponCodeDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = 'vendorpromo/coupon_code_detail.html'
+    model = CouponCode
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('coupon-code-list')
 
 
 class PromoCodeSiteConfigsListView(ListView):
