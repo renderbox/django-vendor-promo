@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
@@ -14,7 +15,7 @@ from vendor.views.mixin import TableFilterMixin
 from vendorpromo.config import (PromoProcessorSiteConfig,
                                 PromoProcessorSiteSelectSiteConfig)
 from vendorpromo.forms import (AffiliateForm, PromoCodeFormset, CouponCodeForm,
-                               PromoProcessorForm,
+                               PromoProcessorForm, StripePromotionalCampaignForm,
                                PromoProcessorSiteSelectForm,
                                VoucheryIntegrationForm,
                                PromotionalCampaignForm)
@@ -22,7 +23,7 @@ from vendorpromo.integrations import VoucheryIntegration
 from vendorpromo.models import Affiliate, Promo, CouponCode, PromotionalCampaign
 from vendorpromo.processors import get_site_promo_processor
 from vendorpromo.utils import get_site_from_request
-from vendorpromo.processors.stripe import StripeProcessor
+from vendorpromo.processors.stripe import StripePromoProcessor
 
 class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
     template_name = "vendorpromo/promo_list.html"
@@ -143,7 +144,9 @@ def save_promotional_campaign_form(request, form):
     promo_campaign = form.save(commit=False)
     site = get_site_from_request(request)
     promo_campaign.site = site
-    promo_campaign.is_percent_off = form.cleaned_data['is_percent_off']
+
+    if form.cleaned_data['is_percent_off'] is not None:
+        promo_campaign.is_percent_off = form.cleaned_data['is_percent_off']
 
     try:
         if promo_campaign.applies_to:
@@ -181,11 +184,28 @@ class PromotionalCampaignListView(LoginRequiredMixin, TableFilterMixin, ListView
         return queryset.order_by('name')
 
 
+def get_promotional_campaign_form_class_by_site_promo_processor(site):
+    promo_processor = get_site_promo_processor(site)
+
+    if promo_processor.__name__ == "StripePromoProcessor":
+        return StripePromotionalCampaignForm
+
+    return None
+
+
 class PromotionalCampaignCreateView(LoginRequiredMixin, CreateView):
     template_name = 'vendorpromo/promotional_campaign_detail.html'
     model = PromotionalCampaign
     form_class = PromotionalCampaignForm
     success_url = reverse_lazy('promotional-campaign-list')
+
+    def get_form_class(self):
+        form_class = get_promotional_campaign_form_class_by_site_promo_processor(get_site_from_request(self.request))
+        
+        if form_class:
+            return form_class
+        
+        return super().get_form_class()
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -194,7 +214,7 @@ class PromotionalCampaignCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         promo_campaign = save_promotional_campaign_form(self.request, form)
-        stripe_promo_processor = StripeProcessor(get_site_from_request(self.request))
+        stripe_promo_processor = StripePromoProcessor(get_site_from_request(self.request))
         stripe_promo_processor.create_stripe_coupon(promo_campaign)
         return redirect(self.success_url)
 
@@ -207,6 +227,14 @@ class PromotionalCampaignUpdateView(LoginRequiredMixin, UpdateView):
     slug_url_kwarg = 'uuid'
     success_url = reverse_lazy('promotional-campaign-list')
 
+    def get_form_class(self):
+        form_class = get_promotional_campaign_form_class_by_site_promo_processor(get_site_from_request(self.request))
+        
+        if form_class:
+            return form_class
+        
+        return super().get_form_class()
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['site'] = get_site_from_request(self.request)
@@ -214,7 +242,7 @@ class PromotionalCampaignUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         promo_campaign = save_promotional_campaign_form(self.request, form)
-        stripe_promo_processor = StripeProcessor(get_site_from_request(self.request))
+        stripe_promo_processor = StripePromoProcessor(get_site_from_request(self.request))
         stripe_promo_processor.update_stripe_coupon(promo_campaign)
         return redirect(self.success_url)
 
@@ -225,6 +253,11 @@ class PromotionalCampaignDeleteView(LoginRequiredMixin, DeleteView):
     slug_field = 'uuid'
     slug_url_kwarg = 'uuid'
     success_url = reverse_lazy('promotional-campaign-list')
+
+    def post(self, request, *args, **kwargs):
+        promo_processor = get_site_promo_processor(get_site_from_request(request))
+        promo_processor.delete(self.get_object())
+        return HttpResponseRedirect(self.success_url)
 
 
 class CouponCodeListView(LoginRequiredMixin, TableFilterMixin, ListView):

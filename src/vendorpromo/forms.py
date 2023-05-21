@@ -1,3 +1,4 @@
+from typing import Any
 from django import forms
 from django.contrib.sites.models import Site
 from django.db.models import TextChoices
@@ -29,6 +30,7 @@ class AffiliateForm(forms.ModelForm):
 class SupportedPromoProcessor(TextChoices):
     PROMO_CODE_BASE = ("base.PromoProcessorBase", _("Default Processor"))
     VOUCHERY = ("vouchery.VoucheryProcessor", _("Vouchery.io"))
+    STRIPE = ("stripe.StripePromoProcessor", _("Stripe"))
 
 
 class PromoProcessorForm(forms.Form):
@@ -95,6 +97,7 @@ class PromotionalCampaignForm(forms.ModelForm):
             self.fields['is_percent_off'].initial = (True, "Percent Off") if self.instance.is_percent_off else (False, "Fixed Amount")
             self.fields['discount_value'].initial = self.instance.applies_to.current_price()
 
+
     def clean_discount_value(self):
         discount_value = self.cleaned_data.get('discount_value', 0)
 
@@ -107,6 +110,17 @@ class PromotionalCampaignForm(forms.ModelForm):
         
         return discount_value
 
+
+class StripePromotionalCampaignForm(PromotionalCampaignForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            self.fields['is_percent_off'].disabled = True
+            self.fields['is_percent_off'].initial = (True, "Percent Off") if self.instance.is_percent_off else (False, "Fixed Amount")
+            self.fields['discount_value'].disabled = True
+            self.fields['discount_value'].initial = self.instance.applies_to.current_price()
 
 class CouponCodeForm(forms.ModelForm):
 
