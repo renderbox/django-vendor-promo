@@ -1,3 +1,5 @@
+from django.utils import timezone
+from vendor.models import Offer, Price
 from vendorpromo.models import Promo
 
 
@@ -5,6 +7,7 @@ from vendorpromo.models import Promo
 # BASE CLASS
 class PromoProcessorBase(object):
 
+    site = None
     promo = None
     invoice = None
     redeemed = False
@@ -45,6 +48,40 @@ class PromoProcessorBase(object):
 
         self.invoice.save()
 
+    def create_promo_offer(self, promo_campaign, products, cost):
+        now = timezone.now()
+        promo_offer = Offer()
+        promo_offer.name = promo_campaign.name
+        promo_offer.start_date = now
+        promo_offer.site = promo_campaign.site
+        promo_offer.is_promotional = True
+        promo_offer.save()
+
+        for product in products:
+            promo_offer.products.add(product)
+
+        price = Price()
+        price.offer = promo_offer
+        price.cost = cost
+        price.start_date = now
+        price.save()
+
+        return promo_offer
+
+    def update_promo_offer(self, promo_campaign, products, cost):
+        promo_campaign.applies_to.name = promo_campaign.name
+        promo_campaign.applies_to.products.clear()
+
+        for product in products:
+            promo_campaign.applies_to.products.add(product)
+        promo_campaign.applies_to.save()
+
+        update_price = promo_campaign.applies_to.prices.first()
+        update_price.cost = cost
+        update_price.save()
+
+        promo_campaign.save()
+    
     ################
     # Promotion Management
     def create_promo(self, promo_form):
@@ -52,16 +89,29 @@ class PromoProcessorBase(object):
         Override if you need to do additional steps when creating a Promo instance,
         such as creating the promo code in an external service if needed.
         '''
-        promo = promo_form.save(commit=False)
-        promo.save()
-
+        promo_campaign = promo_form.save(commit=False)
+        promo_campaign.site = self.site
+        promo_campaign.applies_to = self.create_promo_offer(promo_campaign, promo_form.cleaned_data['applies_to'], promo_form.cleaned_data['discount_value'])
+        promo_campaign.save()
+        
+        return promo_campaign
+        
     def update_promo(self, promo_form):
         '''
         Override if you need to do additional steps when updating a Promo instance,
         such as editing the promo code in an external service if needed.
         '''
-        promo = promo_form.save(commit=False)
-        promo.save()
+        promo_campaign = promo_form.save(commit=False)
+        promo_campaign.site = self.site
+
+        if promo_form.cleaned_data['is_percent_off'] is not None:
+            promo_campaign.is_percent_off = promo_form.cleaned_data['is_percent_off']
+
+        self.update_promo_offer(promo_campaign, promo_form.cleaned_data['applies_to'], promo_form.cleaned_data['discount_value'])
+
+        promo_campaign.save()
+
+        return promo_campaign
 
     def delete_promo(self, promo):
         '''
