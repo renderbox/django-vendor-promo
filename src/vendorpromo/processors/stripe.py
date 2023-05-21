@@ -27,25 +27,40 @@ class StripePromoProcessor(PromoProcessorBase):
         }
 
         return coupon_data
+    
+    def build_promotion_code(self, coupon_code):
+        promotion_code_data = {
+            "coupon": coupon_code.promo.meta['stripe_id'],
+            "code": coupon_code.code,
+            'metadata': {'site': coupon_code.promo.site},
+            "active": coupon_code.active,
+            "expires_at": coupon_code.end_date,
+            "max_redemptions": coupon_code.max_redemptions,
+            "restrictions": None  # TODO: Implement option
+        }
 
-    def create_stripe_coupon(self, promotional_campaign):
-        coupon_data = self.build_coupon(promotional_campaign)
-        stripe_coupon = self.stripe_builder.stripe_create_object(self.stripe_builder.stripe.Coupon, coupon_data)
+        return promotion_code_data
 
-        if not stripe_coupon:
+    def create_stripe_promotion_code(self, coupon_code):
+        promotion_code_data = self.build_promotion_code(coupon_code)
+        stripe_promotion_code = self.stripe_builder.stripe_create_object(self.stripe_builder.stripe.PromotionCode, promotion_code_data)
+
+        if not stripe_promotion_code:
             return None  # Think about returning an error
         
-        promotional_campaign.meta['stripe_id'] = stripe_coupon.id
-        promotional_campaign.applies_to.meta['stripe_id'] = stripe_coupon.id
-        promotional_campaign.save()
+        coupon_code.meta['stripe_id'] = stripe_promotion_code.id
+        coupon_code.applies_to.meta['stripe_id'] = stripe_promotion_code.id
+        coupon_code.save()
 
-    def update_stripe_coupon(self, promotional_campaign):
-        coupon_data = self.build_coupon(promotional_campaign)
-        del(coupon_data['amount_off'])
-        del(coupon_data['percent_off'])
-        del(coupon_data['currency'])
+    def update_stripe_promotion_code(self, coupon_code):
+        promotion_code_data = self.build_promotion_code(coupon_code)
+        del(promotion_code_data['coupon'])
+        del(promotion_code_data['code'])
+        del(promotion_code_data['metadata'])
+        del(promotion_code_data['expires_at'])
+        del(promotion_code_data['max_redemptions'])
 
-        stripe_coupon = self.stripe_builder.stripe_update_object(self.stripe_builder.stripe.Coupon, promotional_campaign.meta['stripe_id'], coupon_data)
+        stripe_coupon = self.stripe_builder.stripe_update_object(self.stripe_builder.stripe.PromotionCode, coupon_code.meta['stripe_id'], promotion_code_data)
 
         if not stripe_coupon:
             return None  # Think about returning an error
@@ -57,7 +72,7 @@ class StripePromoProcessor(PromoProcessorBase):
         Override if you need to do additional steps when creating a Promo instance,
         such as creating the promo code in an external service if needed.
         '''
-        promo_campaign = super().update_promo(promo_form)
+        promo_campaign = super().create_promo(promo_form)
         self.create_stripe_coupon(promo_campaign)
         
         return promo_campaign
@@ -81,8 +96,22 @@ class StripePromoProcessor(PromoProcessorBase):
         
         if stripe_id:
             self.stripe_builder.stripe_delete_object(self.stripe.Coupon, stripe_id)
+        
+        super().delete_promo(promo_campaign)
 
-        promo_campaign.delete()
+    ################
+    # Coupon Code Management
+    def create_coupon_code(self, coupon_form):
+        coupon_code = super().create_coupon_code(coupon_form)
+        self.create_stripe_promotion_code(coupon_code)
+
+        return coupon_code
+
+    def update_coupon_code(self, coupon_form):
+        coupon_code = super().update_coupon_code(coupon_form)
+        self.update_stripe_promotion_code(coupon_code)
+
+        return coupon_code
 
     ################
     # Processor Functions

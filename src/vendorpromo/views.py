@@ -236,6 +236,11 @@ class CouponCodeCreateView(LoginRequiredMixin, CreateView):
         kwargs['site'] = get_site_from_request(self.request)
         return kwargs
 
+    def form_valid(self, form):
+        promo_processor = get_site_promo_processor(get_site_from_request(self.request))
+        promo_processor.create_coupon_code(form)
+        return redirect(self.success_url)
+
 
 class CouponCodeUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'vendorpromo/coupon_code_detail.html'
@@ -250,6 +255,11 @@ class CouponCodeUpdateView(LoginRequiredMixin, UpdateView):
         kwargs['site'] = get_site_from_request(self.request)
         return kwargs
 
+    def form_valid(self, form):
+        promo_processor = get_site_promo_processor(get_site_from_request(self.request))
+        promo_processor.update_coupon_code(form)
+        return redirect(self.success_url)
+    
 
 class CouponCodeDeleteView(LoginRequiredMixin, DeleteView):
     template_name = 'vendorpromo/coupon_code_detail.html'
@@ -257,6 +267,11 @@ class CouponCodeDeleteView(LoginRequiredMixin, DeleteView):
     slug_field = 'uuid'
     slug_url_kwarg = 'uuid'
     success_url = reverse_lazy('coupon-code-list')
+
+    def post(self, request, *args, **kwargs):
+        promo_processor = get_site_promo_processor(get_site_from_request(request))
+        promo_processor.delete_coupon_code(self.get_object())
+        return HttpResponseRedirect(self.success_url)
 
 
 class PromoCodeSiteConfigsListView(ListView):

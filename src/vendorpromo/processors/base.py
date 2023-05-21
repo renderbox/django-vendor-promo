@@ -113,12 +113,25 @@ class PromoProcessorBase(object):
 
         return promo_campaign
 
-    def delete_promo(self, promo):
+    def delete_promo(self, promo_campaign):
         '''
         Override if you need to do additional steps when deleting a Promo instance,
         such as editing the promo code in an external service if needed.
         '''
-        Promo.delete(promo)
+        promo_campaign.delete()
+
+    ################
+    # Coupon Code Management
+    def create_coupon_code(self, coupon_form):
+        coupon_code = coupon_form.save(commit=True)
+        return coupon_code
+
+    def update_coupon_code(self, coupon_form):
+        coupon_code = coupon_form.save(commit=True)
+        return coupon_code
+
+    def delete_coupon_code(self, coupon_code):
+        coupon_code.delete()
 
     ################
     # Processor Functions
