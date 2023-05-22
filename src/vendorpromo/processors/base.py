@@ -2,13 +2,11 @@ import math
 
 from django.utils import timezone
 from vendor.models import Offer, Price
-from vendorpromo.models import Promo
 
 
 #############
 # BASE CLASS
 class PromoProcessorBase(object):
-
     site = None
     promo = None
     invoice = None

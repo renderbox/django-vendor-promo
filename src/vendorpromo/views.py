@@ -7,23 +7,23 @@ from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView, FormView, UpdateView
-from django.utils import timezone
 from siteconfigs.models import SiteConfigModel
-from vendor.models import Offer, Price
+from vendor.models import Offer
 from vendor.views.mixin import TableFilterMixin
 
 from vendorpromo.config import (PromoProcessorSiteConfig,
                                 PromoProcessorSiteSelectSiteConfig)
-from vendorpromo.forms import (AffiliateForm, PromoCodeFormset, CouponCodeForm,
-                               PromoProcessorForm, StripePromotionalCampaignForm,
+from vendorpromo.forms import (AffiliateForm, CouponCodeForm, PromoCodeFormset,
+                               PromoProcessorForm,
                                PromoProcessorSiteSelectForm,
-                               VoucheryIntegrationForm,
-                               PromotionalCampaignForm)
+                               PromotionalCampaignForm,
+                               StripePromotionalCampaignForm,
+                               VoucheryIntegrationForm)
 from vendorpromo.integrations import VoucheryIntegration
-from vendorpromo.models import Affiliate, Promo, CouponCode, PromotionalCampaign
+from vendorpromo.models import (Affiliate, CouponCode, Promo,
+                                PromotionalCampaign)
 from vendorpromo.processors import get_site_promo_processor
 from vendorpromo.utils import get_site_from_request
-from vendorpromo.processors.stripe import StripePromoProcessor
 
 
 class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):

@@ -1,15 +1,14 @@
-from typing import Any
 from django import forms
 from django.contrib.sites.models import Site
 from django.db.models import TextChoices
 from django.forms import modelformset_factory
 from django.utils.translation import gettext as _
-
 from integrations.models import Credential
-from vendorpromo.models import Affiliate, Promo, PromotionalCampaign, CouponCode
-
 from vendor.models import CustomerProfile
 from vendor.models.base import get_product_model
+
+from vendorpromo.models import (Affiliate, CouponCode, Promo,
+                                PromotionalCampaign)
 
 
 class AffiliateForm(forms.ModelForm):
@@ -44,6 +43,7 @@ class PromoProcessorSiteSelectForm(PromoProcessorForm):
         super().__init__(*args, **kwargs)
         self.fields['site'].widget = forms.Select(choices=[(site.pk, site.domain) for site in Site.objects.all()])
 
+
 # To be deprecated
 class PromoForm(forms.ModelForm):
     class Meta:
@@ -55,6 +55,7 @@ class PromoForm(forms.ModelForm):
             'campaign_description',
             'meta',
             'offer']
+
 
 # To be deprecated
 class PromoCodeForm(forms.ModelForm):
@@ -121,6 +122,7 @@ class StripePromotionalCampaignForm(PromotionalCampaignForm):
             self.fields['is_percent_off'].initial = (True, "Percent Off") if self.instance.is_percent_off else (False, "Fixed Amount")
             self.fields['discount_value'].disabled = True
             self.fields['discount_value'].initial = self.instance.applies_to.current_price()
+
 
 class CouponCodeForm(forms.ModelForm):
 
