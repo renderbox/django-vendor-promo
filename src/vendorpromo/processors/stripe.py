@@ -7,7 +7,7 @@ class StripePromoProcessor(PromoProcessorBase):
     stripe_builder = None
 
     def __init__(self, site):
-        self.site = site
+        super().__init__(site)
         self.stripe_builder = StripeBuilder(self.site)
 
     # Stripe Object Builders

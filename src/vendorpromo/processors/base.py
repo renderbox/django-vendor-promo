@@ -1,3 +1,5 @@
+import math
+
 from django.utils import timezone
 from vendor.models import Offer, Price
 from vendorpromo.models import Promo
@@ -18,7 +20,8 @@ class PromoProcessorBase(object):
     response_message = None
     is_request_success = False
 
-    def __init__(self, invoice=None):
+    def __init__(self, site, invoice=None):
+        self.site = site
         if invoice is not None:
             self.invoice = invoice
 
@@ -62,7 +65,12 @@ class PromoProcessorBase(object):
 
         price = Price()
         price.offer = promo_offer
-        price.cost = cost
+
+        if not promo_campaign.is_percent_off:
+            price.cost = -math.fabs(cost)
+        else:
+            price.cost = math.fabs(cost)
+
         price.start_date = now
         price.save()
 

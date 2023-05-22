@@ -141,6 +141,18 @@ class CouponCodeForm(forms.ModelForm):
             self.fields['promo'].queryset = PromotionalCampaign.objects.filter(site=site)
 
 
+class StripeCouponCode(CouponCodeForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance.pk:
+            self.fields['code'].disabled = True
+            self.fields['max_redemptions'].disabled = True
+            self.fields['end_date'].disabled = True
+            self.fields['promo'].disabled = True
+
+        
 
 CouponCodeFormset = modelformset_factory(CouponCode, CouponCodeForm, extra=1)
 

@@ -81,6 +81,7 @@ class PromotionalCampaignViewTests(TestCase):
         self.assertTrue(Offer.objects.filter(name='Peter Townsend').exists())
         self.assertEqual(Offer.objects.get(name='Peter Townsend').products.first(), get_product_model().objects.get(pk=1))
         self.assertTrue(PromotionalCampaign.objects.filter(name="Peter Townsend"))
+        self.assertEqual(Offer.objects.get(name="Peter Townsend").prices.first().cost, -post_data['discount_value'])
 
     def test_promotional_campaign_update_get_200(self):
         promotional_campaign = PromotionalCampaign.objects.get(pk=1)
