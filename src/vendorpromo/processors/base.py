@@ -59,6 +59,7 @@ class PromoProcessorBase(object):
         promo_offer.save()
 
         for product in products:
+            
             promo_offer.products.add(product)
 
         price = Price()
@@ -97,6 +98,7 @@ class PromoProcessorBase(object):
         '''
         promo_campaign = promo_form.save(commit=False)
         promo_campaign.site = self.site
+        promo_campaign.is_percent_off = promo_form.cleaned_data['is_percent_off']
         promo_campaign.applies_to = self.create_promo_offer(promo_campaign, promo_form.cleaned_data['applies_to'], promo_form.cleaned_data['discount_value'])
         promo_campaign.save()
         

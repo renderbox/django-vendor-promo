@@ -5,6 +5,7 @@ from vendorpromo.api.v1.vouchery import views as vouchery_api_views
 
 urlpatterns = [
     path('checkout/validate/<str:invoice_uuid>', api_views.ValidateCodeCheckoutProcessAPIView.as_view(), name='checkout-validation'),
+    path('checkout/validate/<str:invoice_uuid>/coupon', api_views.ValidateCouponCodeCheckoutProcessAPIView.as_view(), name='checkout-validation-coupon-code'),
     path('open/validate', api_views.ValidateLinkCodeAPIView.as_view(), name='open-validation'),
     path('delete/<str:uuid>', api_views.DeletePromoAPIView.as_view(), name='api-promo-delete'),
 

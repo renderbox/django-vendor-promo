@@ -21,7 +21,7 @@ class AffiliateAdmin(admin.ModelAdmin):
 
 class PromotionalCampaignAdmin(admin.ModelAdmin):
     readonly_fields = ('uuid',)
-    list_display = ('name', 'site', 'affiliate')
+    list_display = ('name', 'site')
     search_fields = ('name',)
     list_filter = ('site',)
 
