@@ -143,19 +143,10 @@ class StripePromoProcessor(PromoProcessorBase):
         
         return True
         
-
     def redeem_code(self, code):
         """
         Overwrite funtion to call external promo services to redeem code.
         Eg. call Vouchary.io API to redeem the code.
-        """
-        raise NotImplementedError
-
-    def confirm_redeemed_code(self, code):
-        """
-        Overwrite funtion to call external promo services to confirm
-        that the redeem code was applied.
-        Eg. call Vouchary.io API to confirm redeem the code was applied.
         """
         raise NotImplementedError
 

@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http.response import Http404, HttpResponse, HttpResponseBadRequest
+from django.http.response import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext as _
 from django.views.generic import DeleteView, View
@@ -133,20 +133,18 @@ class ValidateCouponCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         try:
             invoice = get_object_or_404(Invoice, uuid=kwargs['invoice_uuid'])
-            coupon_code = get_object_or_404(CouponCode, code__icontains=request.POST['promo_code'], promo__site=invoice.site)
+            coupon_code = get_object_or_404(CouponCode, code__iexact=request.POST['promo_code'], promo__site=invoice.site)
         except Http404 as error:
-            messages.success(request, _("Invalid Coupon Code"))
-            return HttpResponseBadRequest(f"404 error: {error}")
+            return JsonResponse({'error': _("Invalid Code")}, status=404)
         
         if invoice.order_items.filter(offer__is_promotional=True).exists():
-            messages.success(request, _("You can only apply one promo code per checkout session"))
-            return HttpResponseBadRequest(f"404 error: You can only apply one promo code per checkout session")
+            return JsonResponse({'error': "You can only apply one promo code per checkout session"}, status=404)
 
         processor = get_site_promo_processor(invoice.site)(invoice.site, invoice=invoice)
         if not processor.is_code_valid(coupon_code):
-            messages.success(request, _("Invalid Coupon Code"))
-            return HttpResponseBadRequest(f"404 error: Invalid Coupon Code")
+            return JsonResponse({'error': _("Invalid Code")}, status=404)
 
+        coupon_code.invoice.add(invoice)
         invoice.add_offer(coupon_code.promo.applies_to)
         if coupon_code.promo.is_percent_off:
             # Calculate global_discount

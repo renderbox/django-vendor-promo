@@ -157,13 +157,14 @@ class PromoProcessorBase(object):
         """
         raise NotImplementedError
 
-    def confirm_redeemed_code(self, code):
+    def confirm_redeemed_code(self, coupon_code, invoice):
         """
         Overwrite funtion to call external promo services to confirm
         that the redeem code was applied.
         Eg. call Vouchary.io API to confirm redeem the code was applied.
         """
-        raise NotImplementedError
+        coupon_code.invoice = invoice
+        coupon_code.save()
 
     def process_promo(self, offer, promo_code):
         '''
