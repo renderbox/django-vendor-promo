@@ -36,7 +36,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'core',
-    'crispy_forms',
+    "crispy_forms",
+    "crispy_bootstrap4",
+    "crispy_bootstrap5",
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -74,6 +76,10 @@ TEMPLATES = [
         },
     },
 ]
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap4", "bootstrap5"]
+CRISPY_TEMPLATE_PACK = "bootstrap4"
 
 WSGI_APPLICATION = 'develop.wsgi.application'
 
@@ -169,3 +175,8 @@ AUTHORIZE_NET_TRANSACTION_KEY = os.getenv("AUTHORIZE_NET_TRANSACTION_KEY")
 AUTHORIZE_NET_SIGNITURE_KEY = os.getenv("AUTHORIZE_NET_SIGNITURE_KEY")
 AUTHORIZE_NET_KEY = os.getenv("AUTHORIZE_NET_KEY")
 AUTHORIZE_NET_TRANSACTION_TYPE_DEFAULT = os.getenv("AUTHORIZE_NET_TRANSACTION_TYPE_DEFAULT")
+
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+STRIPE_LIVE_MODE = False

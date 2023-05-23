@@ -8,7 +8,7 @@ asgiref==3.6.0
     # via django
 authorizenet==1.1.4
     # via django-vendor-promo (pyproject.toml)
-certifi==2022.12.7
+certifi==2023.5.7
     # via requests
 cffi==1.15.1
     # via cryptography
@@ -39,7 +39,7 @@ django-integrations==0.1.4
     # via django-vendor-promo (pyproject.toml)
 django-site-configs==0.1.6
     # via django-vendor-promo (pyproject.toml)
-django-vendor==0.3.27
+django-vendor==0.3.30
     # via django-vendor-promo (pyproject.toml)
 djangorestframework==3.14.0
     # via django-site-configs
@@ -59,7 +59,7 @@ pytz==2023.3
     #   djangorestframework
 pyxb==1.2.5
     # via authorizenet
-requests==2.29.0
+requests==2.30.0
     # via
     #   authorizenet
     #   stripe
@@ -67,5 +67,5 @@ sqlparse==0.4.4
     # via django
 stripe==5.4.0
     # via django-vendor-promo (pyproject.toml)
-urllib3==1.26.15
+urllib3==2.0.2
     # via requests

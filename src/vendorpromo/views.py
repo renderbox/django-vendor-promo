@@ -1,26 +1,283 @@
-from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
+from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView
 from django.views.generic.base import TemplateView
-from django.views.generic.edit import DeleteView, FormMixin, UpdateView, FormView
-
+from django.views.generic.edit import DeleteView, FormView, UpdateView
+from siteconfigs.models import SiteConfigModel
 from vendor.models import Offer
-from vendorpromo.config import PromoProcessorSiteConfig, PromoProcessorSiteSelectSiteConfig
-from vendorpromo.forms import PromoCodeFormset, PromoProcessorForm, PromoProcessorSiteSelectForm, VoucheryIntegrationForm
+from vendor.views.mixin import TableFilterMixin
+
+from vendorpromo.config import (PromoProcessorSiteConfig,
+                                PromoProcessorSiteSelectSiteConfig)
+from vendorpromo.forms import (AffiliateForm, CouponCodeForm, PromoCodeFormset,
+                               PromoProcessorForm,
+                               PromoProcessorSiteSelectForm,
+                               PromotionalCampaignForm,
+                               StripePromotionalCampaignForm,
+                               VoucheryIntegrationForm)
 from vendorpromo.integrations import VoucheryIntegration
-from vendorpromo.models import Promo
+from vendorpromo.models import (Affiliate, CouponCode, Promo,
+                                PromotionalCampaign)
 from vendorpromo.processors import get_site_promo_processor
 from vendorpromo.utils import get_site_from_request
-
-from siteconfigs.models import SiteConfigModel
 
 
 class DjangoVendorPromoIndexView(LoginRequiredMixin, ListView):
     template_name = "vendorpromo/promo_list.html"
     model = Promo
+
+
+class AffiliateListView(LoginRequiredMixin, TableFilterMixin, ListView):
+    template_name = "vendorpromo/affiliate_list.html"
+    model = Affiliate
+    paginate_by = 100
+
+    def search_filter(self, queryset):
+        search_value = self.request.GET.get('search_filter')
+        return queryset.filter(Q(pk__icontains=search_value)
+                               | Q(customer_profile__user__email__icontains=search_value)
+                               | Q(customer_profile__user__username__icontains=search_value)
+                               | Q(contact_name__icontains=search_value)
+                               | Q(email__icontains=search_value)
+                               | Q(company__icontains=search_value))
+    
+    def get_paginated_by(self, queryset):
+        if 'paginate_by' in self.request.kwargs:
+            return self.kwargs['paginate_by']
+        return self.paginate_by
+    
+    def get_queryset(self):
+        site = get_site_from_request(self.request)
+        queryset = super().get_queryset().filter(site=site)
+
+        return queryset.order_by('contact_name')
+
+
+class AffiliateCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'vendorpromo/affiliate_detail.html'
+    model = Affiliate
+    form_class = AffiliateForm
+    success_url = reverse_lazy('affiliate-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        affiliate = form.save(commit=False)
+        site = get_site_from_request(self.request)
+        affiliate.site = site
+        affiliate.save()
+        return redirect(self.success_url)
+
+
+class AffiliateUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = 'vendorpromo/affiliate_detail.html'
+    model = Affiliate
+    form_class = AffiliateForm
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('affiliate-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        affiliate = form.save(commit=False)
+        site = get_site_from_request(self.request)
+        affiliate.site = site
+        affiliate.save()
+        return redirect(self.success_url)
+
+
+class AffiliateDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = 'vendorpromo/affiliate_detail.html'
+    model = Affiliate
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('affiliate-list')
+
+
+class PromotionalCampaignListView(LoginRequiredMixin, TableFilterMixin, ListView):
+    template_name = "vendorpromo/promotional_campaign_list.html"
+    model = PromotionalCampaign
+    paginate_by = 100
+
+    def search_filter(self, queryset):
+        search_value = self.request.GET.get('search_filter')
+        return queryset.filter(Q(pk__icontains=search_value)
+                               | Q(name__icontains=search_value)
+                               | Q(description__icontains=search_value))
+    
+    def get_paginated_by(self, queryset):
+        if 'paginate_by' in self.request.kwargs:
+            return self.kwargs['paginate_by']
+        return self.paginate_by
+    
+    def get_queryset(self):
+        site = get_site_from_request(self.request)
+        queryset = super().get_queryset().filter(site=site)
+
+        return queryset.order_by('name')
+
+
+def get_promotional_campaign_form_class_by_site_promo_processor(site):
+    promo_processor = get_site_promo_processor(site)
+
+    if promo_processor.__name__ == "StripePromoProcessor":
+        return StripePromotionalCampaignForm
+
+    return None
+
+
+class PromotionalCampaignCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'vendorpromo/promotional_campaign_detail.html'
+    model = PromotionalCampaign
+    form_class = PromotionalCampaignForm
+    success_url = reverse_lazy('promotional-campaign-list')
+
+    def get_form_class(self):
+        form_class = get_promotional_campaign_form_class_by_site_promo_processor(get_site_from_request(self.request))
+        
+        if form_class:
+            return form_class
+        
+        return super().get_form_class()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        site = get_site_from_request(self.request)
+        promo_processor = get_site_promo_processor(site)(site)
+        promo_processor.create_promo(form)
+        return redirect(self.success_url)
+
+
+class PromotionalCampaignUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = 'vendorpromo/promotional_campaign_detail.html'
+    model = PromotionalCampaign
+    form_class = PromotionalCampaignForm
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('promotional-campaign-list')
+
+    def get_form_class(self):
+        form_class = get_promotional_campaign_form_class_by_site_promo_processor(get_site_from_request(self.request))
+        
+        if form_class:
+            return form_class
+        
+        return super().get_form_class()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        site = get_site_from_request(self.request)
+        promo_processor = get_site_promo_processor(site)(site)
+        promo_processor.update_promo(form)
+        return redirect(self.success_url)
+
+
+class PromotionalCampaignDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = 'vendorpromo/promotional_campaign_detail.html'
+    model = PromotionalCampaign
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('promotional-campaign-list')
+
+    def post(self, request, *args, **kwargs):
+        site = get_site_from_request(request)
+        promo_processor = get_site_promo_processor(site)(site)
+        promo_processor.delete_promo(self.get_object())
+        return HttpResponseRedirect(self.success_url)
+
+
+class CouponCodeListView(LoginRequiredMixin, TableFilterMixin, ListView):
+    template_name = "vendorpromo/coupon_code_list.html"
+    model = CouponCode
+    paginate_by = 100
+
+    def search_filter(self, queryset):
+        search_value = self.request.GET.get('search_filter')
+        return queryset.filter(Q(pk__icontains=search_value)
+                               | Q(code__icontains=search_value)
+                               | Q(promo__name__icontains=search_value))
+    
+    def get_paginated_by(self, queryset):
+        if 'paginate_by' in self.request.kwargs:
+            return self.kwargs['paginate_by']
+        return self.paginate_by
+    
+    def get_queryset(self):
+        site = get_site_from_request(self.request)
+        queryset = super().get_queryset().filter(promo__site=site)
+
+        return queryset.order_by('code')
+
+
+class CouponCodeCreateView(LoginRequiredMixin, CreateView):
+    template_name = 'vendorpromo/coupon_code_detail.html'
+    model = CouponCode
+    form_class = CouponCodeForm
+    success_url = reverse_lazy('coupon-code-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        site = get_site_from_request(self.request)
+        promo_processor = get_site_promo_processor(site)(site)
+        promo_processor.create_coupon_code(form)
+        return redirect(self.success_url)
+
+
+class CouponCodeUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = 'vendorpromo/coupon_code_detail.html'
+    model = CouponCode
+    form_class = CouponCodeForm
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('coupon-code-list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+
+    def form_valid(self, form):
+        site = get_site_from_request(self.request)
+        promo_processor = get_site_promo_processor(site)(site)
+        promo_processor.update_coupon_code(form)
+        return redirect(self.success_url)
+    
+
+class CouponCodeDeleteView(LoginRequiredMixin, DeleteView):
+    template_name = 'vendorpromo/coupon_code_detail.html'
+    model = CouponCode
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('coupon-code-list')
+
+    def post(self, request, *args, **kwargs):
+        site = get_site_from_request(request)
+        promo_processor = get_site_promo_processor(site)(site)
+        promo_processor.delete_coupon_code(self.get_object())
+        return HttpResponseRedirect(self.success_url)
 
 
 class PromoCodeSiteConfigsListView(ListView):

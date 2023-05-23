@@ -7,7 +7,7 @@ universal = true
 
 [project]
 name = "django-vendor-promo"
-version = "0.1.15"
+version = "0.2.0"
 
 authors = [
   { name="Grant Viklund", email="renderbox@gmail.com" },
@@ -37,6 +37,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "black",
+    "crispy-bootstrap4",
+    "crispy-bootstrap5",
     "flake8",
     "flake8-black",
     "mypy",
