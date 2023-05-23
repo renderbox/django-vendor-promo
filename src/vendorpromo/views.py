@@ -1,6 +1,8 @@
+from typing import Any, Dict
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.models import Site
 from django.db.models import Q
+from django.forms import modelformset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -279,6 +281,39 @@ class CouponCodeDeleteView(LoginRequiredMixin, DeleteView):
         promo_processor.delete_coupon_code(self.get_object())
         return HttpResponseRedirect(self.success_url)
 
+
+class PromoCampaignCouponCodeView(LoginRequiredMixin, UpdateView):
+    template_name = 'vendorpromo/promotional_campaign_coupn_code_detail.html'
+    model = PromotionalCampaign
+    form_class = PromotionalCampaignForm
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+    success_url = reverse_lazy('promotional-campaign-list')
+
+    def get_form_class(self):
+        form_class = get_promotional_campaign_form_class_by_site_promo_processor(get_site_from_request(self.request))
+        
+        if form_class:
+            return form_class
+        
+        return super().get_form_class()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['site'] = get_site_from_request(self.request)
+        return kwargs
+    
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context['formset'] = modelformset_factory(CouponCode, fields=['code', 'max_redemptions', 'end_date', 'promo'])
+        return context
+    
+    def post(self, request):
+        promo_campign_form = get_promotional_campaign_form_class_by_site_promo_processor(get_site_from_request(self.request))(request.POST)
+        coupon_code_formset = modelformset_factory(CouponCode, fields=['code', 'max_redemptions', 'end_date', 'promo'])(request.POST)
+
+
+        return redirect(self.success_url)
 
 class PromoCodeSiteConfigsListView(ListView):
     template_name = 'vendorpromo/processor_site_config_list.html'

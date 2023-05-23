@@ -71,7 +71,7 @@
             <td class="col">{{ item.affiliate|default:"-" }}</td>
             <td class="col">{{ item.site }}</td>
             <td class="col"></td>
-            <td class="col"><a class="btn btn-sm btn-outline-primary" href="{% url 'promotional-campaign-update' item.uuid %}">{% trans 'Edit' %}</a></td>
+            <td class="col"><a class="btn btn-sm btn-outline-primary" href="{% url 'promotional-campaign-couponcode-update' item.uuid %}">{% trans 'Edit' %}</a></td>
           </tr>
           {% empty %}
           <tr>

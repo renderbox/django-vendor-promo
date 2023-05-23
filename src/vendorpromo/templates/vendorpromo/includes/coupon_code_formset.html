@@ -1,0 +1,11 @@
+{% load i18n %}
+
+<div class="row">
+  <form method="post">
+    {{ formset.management_form }}
+    {% for form in formset %}
+      {{ form.as_table }}
+    {% endfor %}
+  </form>
+</div>
+

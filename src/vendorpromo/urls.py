@@ -16,6 +16,7 @@ urlpatterns = [
     path("couponcode/create/", views.CouponCodeCreateView.as_view(), name="coupon-code-create"),
     path("couponcode/<str:uuid>/update/", views.CouponCodeUpdateView.as_view(), name="coupon-code-update"),
     path("couponcode/<str:uuid>/delete/", views.CouponCodeDeleteView.as_view(), name="coupon-code-delete"),
+    path("promotionalcampaign/couponcode/<str:uuid>/update/", views.PromoCampaignCouponCodeView.as_view(), name="promotional-campaign-couponcode-update"),
     path("promo/create", views.PromoCreateView.as_view(), name="vendorpromo-create"),
     path("promo/<str:uuid>/update", views.PromoUpdateView.as_view(), name="vendorpromo-update"),
     path("promo/<str:uuid>/delete", views.PromoDeleteView.as_view(), name="vendorpromo-delete"),
