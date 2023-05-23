@@ -312,6 +312,72 @@
     }
 },
 {
+    "model": "vendor.offer",
+    "pk": 7,
+    "fields": {
+        "created": "2023-05-17T16:49:11.103Z",
+        "updated": "2023-05-17T16:49:11.103Z",
+        "deleted": false,
+        "uuid": "bb4ac8e1-8045-4857-9703-58af4720b9a1",
+        "slug": "tom-morrello-summer-sale",
+        "site": 1,
+        "name": "Tom Morrello Summer Sale",
+        "start_date": "2023-05-17T16:49:11.103Z",
+        "end_date": null,
+        "terms": 0,
+        "term_details": {
+            "term_units": 20,
+            "trial_days": 0,
+            "trial_amount": 0,
+            "period_length": 1,
+            "trial_occurrences": 0,
+            "payment_occurrences": 12
+        },
+        "term_start_date": null,
+        "billing_start_date": null,
+        "available": false,
+        "bundle": false,
+        "offer_description": null,
+        "list_bundle_items": false,
+        "allow_multiple": false,
+        "is_promotional": true,
+        "meta": {}
+    }
+},
+{
+    "model": "vendor.offer",
+    "pk": 8,
+    "fields": {
+        "created": "2023-05-17T16:49:37.575Z",
+        "updated": "2023-05-17T16:49:37.575Z",
+        "deleted": false,
+        "uuid": "db008b22-dde3-4dda-886b-b527d1dc5417",
+        "slug": "jimmy-page-summer-rock-sales",
+        "site": 1,
+        "name": "Jimmy Page Summer Rock Sales",
+        "start_date": "2023-05-17T16:49:37.575Z",
+        "end_date": null,
+        "terms": 0,
+        "term_details": {
+            "term_units": 20,
+            "trial_days": 0,
+            "trial_amount": 0,
+            "period_length": 1,
+            "trial_occurrences": 0,
+            "payment_occurrences": 12
+        },
+        "term_start_date": null,
+        "billing_start_date": null,
+        "available": false,
+        "bundle": false,
+        "offer_description": null,
+        "list_bundle_items": false,
+        "allow_multiple": false,
+        "is_promotional": true,
+        "meta": {}
+    }
+},
+{
     "model": "vendor.price",
     "pk": 1,
     "fields": {
@@ -372,6 +438,30 @@
     }
 },
 {
+    "model": "vendor.price",
+    "pk": 6,
+    "fields": {
+        "offer": 7,
+        "cost": 10.0,
+        "currency": "usd",
+        "start_date": "2023-05-17T16:49:11.103Z",
+        "end_date": null,
+        "priority": 0
+    }
+},
+{
+    "model": "vendor.price",
+    "pk": 7,
+    "fields": {
+        "offer": 8,
+        "cost": 13.0,
+        "currency": "usd",
+        "start_date": "2023-05-17T16:49:37.575Z",
+        "end_date": null,
+        "priority": 0
+    }
+},
+{
     "model": "vendorpromo.promo",
     "pk": 1,
     "fields": {
@@ -386,6 +476,104 @@
         "meta": {},
         "slug": "1-month-free",
         "offer": 6
+    }
+},
+{
+    "model": "vendorpromo.affiliate",
+    "pk": 1,
+    "fields": {
+        "created": "2023-05-12T18:39:36.961Z",
+        "updated": "2023-05-12T18:39:36.961Z",
+        "uuid": "5e90f83b-63a4-411d-91d4-842fc373f0a9",
+        "slug": null,
+        "contact_name": "Roberto Himmelbauer",
+        "email": null,
+        "company": "WhiteMoondLabs",
+        "customer_profile": 1,
+        "site": 1,
+        "promo": []
+    }
+},
+{
+    "model": "vendorpromo.affiliate",
+    "pk": 2,
+    "fields": {
+        "created": "2023-05-12T18:39:58.516Z",
+        "updated": "2023-05-12T18:39:58.516Z",
+        "uuid": "cfc9d06f-199f-497f-b986-73d8e19fde04",
+        "slug": null,
+        "contact_name": "Norrin Radd",
+        "email": "norrin.radd@mail.com",
+        "company": "Marvel",
+        "customer_profile": null,
+        "site": 1,
+        "promo": []
+    }
+},
+{
+    "model": "vendorpromo.promotionalcampaign",
+    "pk": 1,
+    "fields": {
+        "created": "2023-05-17T16:49:11.160Z",
+        "updated": "2023-05-17T16:49:11.160Z",
+        "uuid": "61fcdea8-7fdb-4e38-aa79-af1873913723",
+        "campaign_id": null,
+        "name": "Tom Morrello Summer Sale",
+        "description": "",
+        "start_date": null,
+        "end_date": null,
+        "is_percent_off": true,
+        "max_redemptions": 10,
+        "applies_to": 7,
+        "site": 1,
+        "meta": {}
+    }
+},
+{
+    "model": "vendorpromo.promotionalcampaign",
+    "pk": 2,
+    "fields": {
+        "created": "2023-05-17T16:49:37.612Z",
+        "updated": "2023-05-17T16:49:37.612Z",
+        "uuid": "4a40f7bb-f1c4-4670-b03b-73ebb752c1f0",
+        "campaign_id": null,
+        "name": "Jimmy Page Summer Rock Sales",
+        "description": "",
+        "start_date": null,
+        "end_date": null,
+        "is_percent_off": false,
+        "max_redemptions": 100,
+        "applies_to": 8,
+        "site": 1,
+        "meta": {}
+    }
+},
+{
+    "model": "vendorpromo.couponcode",
+    "pk": 1,
+    "fields": {
+        "created": "2023-05-17T16:53:52.505Z",
+        "updated": "2023-05-17T16:53:52.505Z",
+        "uuid": "0504fbbf-8ae1-4e75-be38-61c7d255a6c2",
+        "code": "JIMMYOFF",
+        "max_redemptions": 10,
+        "end_date": null,
+        "meta": {},
+        "promo": 2
+    }
+},
+{
+    "model": "vendorpromo.couponcode",
+    "pk": 2,
+    "fields": {
+        "created": "2023-05-17T16:54:20.751Z",
+        "updated": "2023-05-17T16:54:20.751Z",
+        "uuid": "290ece9d-eeae-4943-bec7-310e1be7f245",
+        "code": "MORRELLOSALE",
+        "max_redemptions": 10,
+        "end_date": null,
+        "meta": {},
+        "promo": 1
     }
 }
 ]

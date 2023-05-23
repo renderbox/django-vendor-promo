@@ -80,12 +80,19 @@ class VoucheryProcessor(PromoProcessorBase):
         and finally the voucher.
         After creation, a user can login to Vouchery and change the campaigns, and
         sub-campaigns name if desired. They should not change the promo code as it
-        needs to be sent form vendor-promo
+        needs to be sent from vendor-promo
         '''
         promo = promo_form.save(commit=False)
         promo.campaign_name = promo.offer.site.name
 
         self.get_campaigns(**{'name_cont': promo.campaign_name})
+        self.process_response()
+
+        if not self.is_request_success:
+            raise Exception(f"Create Promo Automate Failed: errors: {self.response_error}")
+        
+        self.is_request_success = False # Reset response flag
+
         # Checks if the Main Campaign already exists
         if not self.response_content:
             self.create_campaign(promo.campaign_name, **self.CAMPAIGN_PARAMS)
@@ -179,9 +186,9 @@ class VoucheryProcessor(PromoProcessorBase):
             self.response_message = self.response_content.get('message')
             if self.response_content.get('type') == "Error":
                 if "error" in self.response_content:
-                    self.response_errors = self.response_content.get("error")
+                    self.response_error = self.response_content.get("error")
                 else:
-                    self.response_errors = self.response_content.get("errors")
+                    self.response_error = self.response_content.get("errors")
                 self.is_request_success = False
             else:
                 self.is_request_success = True
@@ -218,6 +225,7 @@ class VoucheryProcessor(PromoProcessorBase):
 
         if not name:
             raise ValueError(_("name is required to create a campaign"))
+        
         base_payload = {
             "name": name,
         }
