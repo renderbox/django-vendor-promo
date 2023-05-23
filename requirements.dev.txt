@@ -69,7 +69,7 @@ django-integrations==0.1.4
     # via django-vendor-promo (pyproject.toml)
 django-site-configs==0.1.6
     # via django-vendor-promo (pyproject.toml)
-django-vendor==0.3.30
+django-vendor==0.4.0
     # via django-vendor-promo (pyproject.toml)
 djangorestframework==3.14.0
     # via django-site-configs
