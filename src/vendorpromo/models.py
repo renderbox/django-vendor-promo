@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from vendor.models import CustomerProfile, Offer
+from vendor.models import CustomerProfile, Offer, Invoice
 
 
 #######################################
@@ -75,8 +75,8 @@ class PromotionalCampaign(CreateUpdateModelBase):
     end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("The date when this promotion is no longer valid"))
     is_percent_off = models.BooleanField(_("Percent Off?"), default=False, help_text=_("Fixed Amount or Percent Off"))
     max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True, help_text=_("The maximum redemptions for the whole promotion"))
-    applies_to = models.ForeignKey(Offer, blank=False, null=False, on_delete=models.CASCADE)
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, blank=False, null=False, verbose_name=_("Site"))
+    applies_to = models.ForeignKey(Offer, related_name=("promo_campaign"), blank=False, null=False, on_delete=models.CASCADE)
+    site = models.ForeignKey(Site, related_name=("promo_campaign"), on_delete=models.CASCADE, blank=False, null=False, verbose_name=_("Site"))
     meta = models.JSONField(_("Meta"), default=dict, blank=True, null=True)
 
     objects = models.Manager()
@@ -96,13 +96,14 @@ class CouponCode(CreateUpdateModelBase):
     max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True)
     end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("When will the code be unavailable"))
     meta = models.JSONField(blank=True, null=True, default=dict)
-    promo = models.ForeignKey(PromotionalCampaign, related_name=("coupon"), blank=False, null=False, on_delete=models.CASCADE)
+    promo = models.ForeignKey(PromotionalCampaign, related_name=("coupon_code"), blank=False, null=False, on_delete=models.CASCADE)
+    invoice = models.ManyToManyField(Invoice, related_name=("coupon_code"), blank=True)
 
     objects = models.Manager()
 
     class Meta:
-        verbose_name = "Promo Code"
-        verbose_name_plural = "Promo Codes"
+        verbose_name = "Coupon Code"
+        verbose_name_plural = "Coupon Codes"
 
     def __str__(self):
         return self.code
