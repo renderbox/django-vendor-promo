@@ -63,7 +63,7 @@
       <div id="collapseTwo" class="collapse show" aria-labelledby="billing_info" data-parent="#checkout_accordion">
         <div class="card-body px-0">
             {% comment %}
-            <form id="promo-code-form" method="post" action="{% url 'checkout-validation' invoice.uuid %}">
+            <form id="promo-code-form" method="post" action="{% url 'checkout-validation-coupon-code' invoice.uuid %}">
                 {% csrf_token %}
                 {% include "../vendorpromo/includes/promocode_apply.html" %}
             </form>
@@ -206,7 +206,7 @@
         {% endfor %}
         {% endif %}
         {% endfor %}
-        <form id="promo-code-form" method="post" action="{% url 'checkout-validation' invoice.uuid %}">
+        <form id="promo-code-form" method="post" action="{% url 'checkout-validation-coupon-code' invoice.uuid %}">
             {% csrf_token %}
             <div class="input-group">
                 <input type="text" class="form-control" name="promo_code" placeholder="Promo code">

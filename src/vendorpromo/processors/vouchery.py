@@ -445,12 +445,13 @@ class VoucheryProcessor(PromoProcessorBase):
         """
         pass
 
-    def confirm_redeemed_code(self, code):
+    def confirm_redeemed_code(self, coupon_code, invoice):
         """
         After purchase with a promo code the funtion should be called to
         confirm that the promo code was used.
         """
-        response = self.confirm_redeem(code)
+        super().confirm_redeemed_code(coupon_code, invoice)
+        response = self.confirm_redeem(coupon_code)
         self.process_response(response)
 
     def process_promo(self, promo_code):

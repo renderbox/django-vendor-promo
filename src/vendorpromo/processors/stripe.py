@@ -1,3 +1,4 @@
+import math
 from vendor.config import DEFAULT_CURRENCY
 from vendorpromo.processors.base import PromoProcessorBase
 from vendor.processors.stripe_processor import StripeProcessor as StripeBuilder
@@ -6,8 +7,8 @@ from vendor.processors.stripe_processor import StripeProcessor as StripeBuilder
 class StripePromoProcessor(PromoProcessorBase):
     stripe_builder = None
 
-    def __init__(self, site):
-        super().__init__(site)
+    def __init__(self, site, invoice=None):
+        super().__init__(site, invoice)
         self.stripe_builder = StripeBuilder(self.site)
 
     # Stripe Object Builders
@@ -15,7 +16,7 @@ class StripePromoProcessor(PromoProcessorBase):
     def build_coupon(self, promotional_campaign):
         coupon_data = {
             'name': promotional_campaign.name,
-            'amount_off': promotional_campaign.applies_to.current_price() if not promotional_campaign.is_percent_off else None,
+            'amount_off': self.stripe_builder.convert_decimal_to_integer(math.fabs(promotional_campaign.applies_to.current_price())) if not promotional_campaign.is_percent_off else None,
             'percent_off': promotional_campaign.applies_to.current_price() if promotional_campaign.is_percent_off else None,
             'metadata': {'site': promotional_campaign.site},
             'duration': promotional_campaign.meta.get('duration'),
@@ -41,6 +42,28 @@ class StripePromoProcessor(PromoProcessorBase):
 
         return promotion_code_data
 
+    def create_stripe_coupon(self, promotional_campaign):
+        coupon_data = self.build_coupon(promotional_campaign)
+        stripe_coupon = self.stripe_builder.stripe_create_object(self.stripe_builder.stripe.Coupon, coupon_data)
+
+        if not stripe_coupon:
+            return None  # Think about returning an error
+        
+        promotional_campaign.meta['stripe_id'] = stripe_coupon.id
+        promotional_campaign.applies_to.meta['stripe_id'] = stripe_coupon.id
+        promotional_campaign.save()
+
+    def update_stripe_coupon(self, promotional_campaign):
+        coupon_data = self.build_coupon(promotional_campaign)
+        del(coupon_data['amount_off'])
+        del(coupon_data['percent_off'])
+        del(coupon_data['currency'])
+
+        stripe_coupon = self.stripe_builder.stripe_update_object(self.stripe_builder.stripe.Coupon, promotional_campaign.meta['stripe_id'], coupon_data)
+
+        if not stripe_coupon:
+            return None  # Think about returning an error
+
     def create_stripe_promotion_code(self, coupon_code):
         promotion_code_data = self.build_promotion_code(coupon_code)
         stripe_promotion_code = self.stripe_builder.stripe_create_object(self.stripe_builder.stripe.PromotionCode, promotion_code_data)
@@ -49,7 +72,6 @@ class StripePromoProcessor(PromoProcessorBase):
             return None  # Think about returning an error
         
         coupon_code.meta['stripe_id'] = stripe_promotion_code.id
-        coupon_code.applies_to.meta['stripe_id'] = stripe_promotion_code.id
         coupon_code.save()
 
     def update_stripe_promotion_code(self, coupon_code):
@@ -115,25 +137,16 @@ class StripePromoProcessor(PromoProcessorBase):
 
     ################
     # Processor Functions
-    def is_code_valid(self, code):
-        """
-        Overwrite funtion to call external promo services.
-        Eg. call Vouchary.io API to see if the code entered is valid.
-        """
-        raise NotImplementedError
-
+    def is_code_valid(self, coupon_code):
+        if 'stripe_id' not in coupon_code.meta:
+            return False
+        
+        return True
+        
     def redeem_code(self, code):
         """
         Overwrite funtion to call external promo services to redeem code.
         Eg. call Vouchary.io API to redeem the code.
-        """
-        raise NotImplementedError
-
-    def confirm_redeemed_code(self, code):
-        """
-        Overwrite funtion to call external promo services to confirm
-        that the redeem code was applied.
-        Eg. call Vouchary.io API to confirm redeem the code was applied.
         """
         raise NotImplementedError
 

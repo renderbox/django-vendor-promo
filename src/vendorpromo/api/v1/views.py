@@ -1,16 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http.response import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.http.response import HttpResponse, HttpResponseBadRequest, Http404
 from django.utils.translation import gettext as _
 from django.views.generic import DeleteView, View
-
-from vendor.models import Invoice
 from vendor.api.v1.views import AddToCartView
+from vendor.models import Invoice
 
 from vendorpromo.forms import PromoForm
+from vendorpromo.models import Promo, CouponCode
 from vendorpromo.processors import get_site_promo_processor
-from vendorpromo.models import Promo
 
 
 class CreatePromoAPIView(LoginRequiredMixin, View):
@@ -121,3 +120,49 @@ class ValidateLinkCodeAPIView(AddToCartView):
         # self.kwargs['slug'] = promo.offer.slug
         # return super().post(request, args, kwargs)
 
+
+class ValidateCouponCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
+    """
+    When a customer is applying a code during the checkout process
+    the function will check if the entered code is valid to the items
+    in the cart. If valsid it will swap the Offer with the Offer that
+    has that promo code. If not it will display an error message.
+    In both cases it will redirect to the view that called the
+    endpoint.
+    """
+    def post(self, request, *args, **kwargs):
+        try:
+            invoice = get_object_or_404(Invoice, uuid=kwargs['invoice_uuid'])
+            coupon_code = get_object_or_404(CouponCode, code__iexact=request.POST['promo_code'], promo__site=invoice.site)
+        except Http404 as error:
+            return JsonResponse({'error': _("Invalid Code")}, status=404)
+        
+        if invoice.order_items.filter(offer__is_promotional=True).exists():
+            return JsonResponse({'error': "You can only apply one promo code per checkout session"}, status=404)
+
+        processor = get_site_promo_processor(invoice.site)(invoice.site, invoice=invoice)
+        if not processor.is_code_valid(coupon_code):
+            return JsonResponse({'error': _("Invalid Code")}, status=404)
+
+        coupon_code.invoice.add(invoice)
+        invoice.add_offer(coupon_code.promo.applies_to)
+        if coupon_code.promo.is_percent_off:
+            # Calculate global_discount
+            invoice.global_discount = (invoice.subtotal * coupon_code.promo.applies_to.current_price()) / 100
+            invoice.update_totals()
+            invoice.save()
+            # TODO: Implement percent discount on specific or individual products by using MSRP
+            # if coupon_code.promo.applies_to.products.count():
+                # loop through offers in invoice to see if any match the product form the Promo.offer instance
+                # for order_item in invoice.order_items.all():
+                #     if order_item.offer.products in coupon_code.promo.applies_to.products():
+                #         invoice.global_discount = (order_item.offer.current_price() * coupon_code.promo.applies_to.current_price() / 100)  # Use the price.cost as a % value
+                #         invoice.global_discount -= coupon_code.promo.applies_to.current_price()  # Subtract the price.cost from the discount so it is not subtracted from the total
+                #         break
+            # else:  # If no applies_to.products are selecte we assume that the discount if on the total of the Invoice
+            #     invoice.global_discount = (invoice.subtotal * coupon_code.promo.applies_to.current_price()) / 100
+            #     invoice.update_totals()
+            #     invoice.save()
+                
+        messages.success(request, _("Promo Code Applied"))
+        return HttpResponse(_("Promo Code Applied"))
