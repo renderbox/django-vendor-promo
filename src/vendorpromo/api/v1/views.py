@@ -121,6 +121,10 @@ class ValidateLinkCodeAPIView(AddToCartView):
         # return super().post(request, args, kwargs)
 
 
+def does_coupon_apply_to_order_item(coupon_code, order_item_products):
+    return next((product for product in coupon_code.promo.applies_to.products.all() if product in order_item_products), False)
+
+
 class ValidateCouponCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
     """
     When a customer is applying a code during the checkout process
@@ -153,24 +157,28 @@ class ValidateCouponCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
 
         coupon_order_item = invoice.order_items.get(offer=coupon_code.promo.applies_to)
         if coupon_code.promo.applies_to.products.count():  # Calculate discount independently 
+            invoice_order_items = invoice.order_items.all().exclude(offer=coupon_code.promo.applies_to)
+            
             if coupon_code.promo.is_percent_off:
                 # Calculate global_discount
                 total_global_discount = 0
-                for order_item in invoice.order_items.all().exclude(offer=coupon_code.promo.applies_to):
+                for order_item in invoice_order_items:
                     order_item_products = list(order_item.offer.products.all())
-                    if next((product for product in coupon_code.promo.applies_to.products.all() if product in order_item_products), False):
+                    if does_coupon_apply_to_order_item(coupon_code, order_item_products):
                         total_global_discount += (order_item.total * coupon_code.promo.applies_to.current_price()) / 100
                 
                 invoice.global_discount = total_global_discount - coupon_code.promo.applies_to.current_price()
                 invoice.update_totals()
                 invoice.save()
+
             else:
                 coupon_count = 0
-                for order_item in invoice.order_items.all().exclude(offer=coupon_code.promo.applies_to):
+                for order_item in invoice_order_items:
                     order_item_products = list(order_item.offer.products.all())
-                    if next((product for product in coupon_code.promo.applies_to.products.all() if product in order_item_products), False):
-                        coupon_count += order_item.quantity  # order_item.quantity Should the discount be applied by number of products or by number and quantity of products?
-                coupon_order_item.quantity = coupon_count  # order_item.quantity Should the discount be applied by number of products or by number and quantity of products?
+                    if does_coupon_apply_to_order_item(coupon_code, order_item_products):
+                        coupon_count += order_item.quantity
+
+                coupon_order_item.quantity = coupon_count
                 coupon_order_item.save()
                 invoice.update_totals()
         else:

@@ -5,9 +5,10 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from vendor.models import CustomerProfile, Invoice, Receipt, Offer
 
-from vendorpromo.models import CouponCode, PromotionalCampaign
+from vendorpromo.models import CouponCode
 
 User = get_user_model()
+
 
 class ValidateCodeCheckoutProcessAPIViewTests(TestCase):
 
@@ -147,4 +148,3 @@ class ValidateCouponCodeCheckoutProcessAPIViewTest(TestCase):
         response = self.client.post(self.url, {'promo_code': single_product_coupon_fixed.code})
 
         self.assertIn("Code does not apply to any of the products in you cart", str(response.content))
-    
