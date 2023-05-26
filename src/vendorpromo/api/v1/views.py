@@ -144,25 +144,41 @@ class ValidateCouponCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
         if not processor.is_code_valid(coupon_code):
             return JsonResponse({'error': _("Invalid Code")}, status=404)
 
+        invoice_products = invoice.get_products()
+        if not next((product for product in coupon_code.promo.applies_to.products.all() if product in invoice_products), False):
+            return JsonResponse({'error': _("Code does not apply to any of the products in you cart")}, status=404)
+        
         coupon_code.invoice.add(invoice)
         invoice.add_offer(coupon_code.promo.applies_to)
-        if coupon_code.promo.is_percent_off:
-            # Calculate global_discount
-            invoice.global_discount = (invoice.subtotal * coupon_code.promo.applies_to.current_price()) / 100
-            invoice.update_totals()
-            invoice.save()
-            # TODO: Implement percent discount on specific or individual products by using MSRP
-            # if coupon_code.promo.applies_to.products.count():
-                # loop through offers in invoice to see if any match the product form the Promo.offer instance
-                # for order_item in invoice.order_items.all():
-                #     if order_item.offer.products in coupon_code.promo.applies_to.products():
-                #         invoice.global_discount = (order_item.offer.current_price() * coupon_code.promo.applies_to.current_price() / 100)  # Use the price.cost as a % value
-                #         invoice.global_discount -= coupon_code.promo.applies_to.current_price()  # Subtract the price.cost from the discount so it is not subtracted from the total
-                #         break
-            # else:  # If no applies_to.products are selecte we assume that the discount if on the total of the Invoice
-            #     invoice.global_discount = (invoice.subtotal * coupon_code.promo.applies_to.current_price()) / 100
-            #     invoice.update_totals()
-            #     invoice.save()
+
+        coupon_order_item = invoice.order_items.get(offer=coupon_code.promo.applies_to)
+        if coupon_code.promo.applies_to.products.count():  # Calculate discount independently 
+            if coupon_code.promo.is_percent_off:
+                # Calculate global_discount
+                total_global_discount = 0
+                for order_item in invoice.order_items.all().exclude(offer=coupon_code.promo.applies_to):
+                    order_item_products = list(order_item.offer.products.all())
+                    if next((product for product in coupon_code.promo.applies_to.products.all() if product in order_item_products), False):
+                        total_global_discount += (order_item.total * coupon_code.promo.applies_to.current_price()) / 100
+                
+                invoice.global_discount = total_global_discount - coupon_code.promo.applies_to.current_price()
+                invoice.update_totals()
+                invoice.save()
+            else:
+                coupon_count = 0
+                for order_item in invoice.order_items.all().exclude(offer=coupon_code.promo.applies_to):
+                    order_item_products = list(order_item.offer.products.all())
+                    if next((product for product in coupon_code.promo.applies_to.products.all() if product in order_item_products), False):
+                        coupon_count += order_item.quantity  # order_item.quantity Should the discount be applied by number of products or by number and quantity of products?
+                coupon_order_item.quantity = coupon_count  # order_item.quantity Should the discount be applied by number of products or by number and quantity of products?
+                coupon_order_item.save()
+                invoice.update_totals()
+        else:
+            if coupon_code.promo.is_percent_off:
+                # Calculate global_discount
+                invoice.global_discount = (invoice.subtotal * coupon_code.promo.applies_to.current_price()) / 100
+                invoice.update_totals()
+                invoice.save()
                 
         messages.success(request, _("Promo Code Applied"))
         return HttpResponse(_("Promo Code Applied"))

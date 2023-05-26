@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.contrib.sites.models import Site
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from django.urls import reverse
 from vendor.models import CustomerProfile
+
 from vendorpromo.models import CouponCode, PromotionalCampaign
 
 User = get_user_model()

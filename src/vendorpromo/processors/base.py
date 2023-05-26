@@ -148,7 +148,7 @@ class PromoProcessorBase(object):
         Overwrite funtion to call external promo services.
         Eg. call Vouchary.io API to see if the code entered is valid.
         """
-        raise NotImplementedError
+        return True
 
     def redeem_code(self, code):
         """
