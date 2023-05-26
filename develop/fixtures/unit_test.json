@@ -31,7 +31,9 @@
             "meta": { "msrp": { "default": "usd", "usd":19.99 }},
             "classification": [],
             "offers": [
-                1
+                1,
+                9,
+                10
             ],
             "receipts": []
         }
@@ -52,7 +54,9 @@
             "meta": {"msrp": {"default": "usd", "usd": 75.00, "jpy": 75.00}},
             "classification": [],
             "offers": [
-                2
+                2,
+                9,
+                10
             ],
             "receipts": [1]
         }
@@ -73,7 +77,9 @@
             "meta": {"msrp": {"default": "usd", "usd": 25.00 }},
             "classification": [],
             "offers": [
-                3
+                3,
+                9,
+                10
             ],
             "receipts": []
         }
@@ -96,6 +102,34 @@
             "offers": [
                 4,
                 5
+            ],
+            "receipts": []
+        }
+    },
+    {
+        "model": "core.product",
+        "pk": 5,
+        "fields": {
+            "created": "2020-06-30T02:33:35.109Z",
+            "updated": "2020-06-30T02:33:35.109Z",
+            "sku": null,
+            "uuid": "def0d4f5-fd8f-4aa5-b25a-c043a846a732",
+            "name": "Python Licence",
+            "site": 1,
+            "slug": "python-licence",
+            "available": true,
+            "description": {},
+            "meta": {
+                "msrp": {
+                    "usd": 0,
+                    "default": "usd"
+                }
+            },
+            "classification": [],
+            "offers": [
+                6,
+                11,
+                12
             ],
             "receipts": []
         }
@@ -203,7 +237,14 @@
             "start_date": "2020-06-30T00:53:23Z",
             "end_date": null,
             "terms": 200,
-            "term_details": null,
+            "term_details": {
+                "term_units": 20,
+                "trail_occurrences": 1,
+                "trial_days": 0,
+                "trial_amount": 0,
+                "period_length": 1,
+                "payment_occurrences": 12
+            },
             "term_start_date": "2020-06-30T00:53:31Z",
             "available": false,
             "bundle": false,
@@ -223,7 +264,14 @@
             "start_date": "2020-06-30T02:34:32Z",
             "end_date": null,
             "terms": 200,
-            "term_details": "{}",
+            "term_details": {
+                "term_units": 20,
+                "trail_occurrences": 1,
+                "trial_days": 0,
+                "trial_amount": 0,
+                "period_length": 1,
+                "payment_occurrences": 12
+            },
             "term_start_date": null,
             "available": false,
             "bundle": false,
@@ -243,7 +291,14 @@
             "start_date": "2020-06-30T02:38:16Z",
             "end_date": null,
             "terms": 200,
-            "term_details": "{}",
+            "term_details": {
+                "term_units": 20,
+                "trail_occurrences": 1,
+                "trial_days": 0,
+                "trial_amount": 0,
+                "period_length": 1,
+                "payment_occurrences": 12
+            },
             "term_start_date": null,
             "available": false,
             "bundle": false,
@@ -264,8 +319,12 @@
             "end_date": null,
             "terms": 100,
             "term_details": {
+                "term_units": 20,
+                "trail_occurrences": 1,
+                "trial_days": 0,
+                "trial_amount": 0,
                 "period_length": 1,
-                "payment_occurrences": 3
+                "payment_occurrences": 12
             },
             "term_start_date": null,
             "available": false,
@@ -287,13 +346,50 @@
             "end_date": null,
             "terms": 100,
             "term_details": {
+                "term_units": 20,
+                "trail_occurrences": 1,
+                "trial_days": 0,
+                "trial_amount": 0,
                 "period_length": 1,
-                "payment_occurrences": 3
+                "payment_occurrences": 12
             },
             "term_start_date": null,
             "available": true,
             "bundle": false,
             "offer_description": "Free Hulk Mug"
+        }
+    },
+    {
+        "model": "vendor.offer",
+        "pk": 6,
+        "fields": {
+            "created": "2020-06-30T02:38:17.762Z",
+            "updated": "2020-06-30T02:38:35.045Z",
+            "deleted": false,
+            "uuid": "ceda0d8a-0ddf-440b-8804-eddc28204991",
+            "slug": "python-year-10-off",
+            "site": 1,
+            "name": "Python Year Subscription - 10% off",
+            "start_date": "2020-06-30T02:38:16Z",
+            "end_date": null,
+            "terms": 112,
+            "term_details": {
+                "term_units": 20,
+                "trail_occurrences": 1,
+                "trial_days": 0,
+                "trial_amount": 0,
+                "period_length": 1,
+                "payment_occurrences": 12
+            },
+            "term_start_date": null,
+            "billing_start_date": null,
+            "available": true,
+            "bundle": false,
+            "offer_description": "",
+            "list_bundle_items": false,
+            "allow_multiple": false,
+            "is_promotional": false,
+            "meta": {}
         }
     },
     {
@@ -341,6 +437,138 @@
             "site": 1,
             "name": "Jimmy Page Summer Rock Sales",
             "start_date": "2023-05-17T16:49:37.575Z",
+            "end_date": null,
+            "terms": 0,
+            "term_details": {
+                "term_units": 20,
+                "trial_days": 0,
+                "trial_amount": 0,
+                "period_length": 1,
+                "trial_occurrences": 0,
+                "payment_occurrences": 12
+            },
+            "term_start_date": null,
+            "billing_start_date": null,
+            "available": false,
+            "bundle": false,
+            "offer_description": null,
+            "list_bundle_items": false,
+            "allow_multiple": false,
+            "is_promotional": true,
+            "meta": {}
+        }
+    },
+    {
+        "model": "vendor.offer",
+        "pk": 9,
+        "fields": {
+            "created": "2023-05-24T22:26:46.046Z",
+            "updated": "2023-05-24T22:26:46.046Z",
+            "deleted": false,
+            "uuid": "6f0dbdda-ae87-44f9-8142-e6e23638fb7d",
+            "slug": "hammouwhee",
+            "site": 1,
+            "name": "HamMouWhee %",
+            "start_date": "2023-05-24T22:26:46.046Z",
+            "end_date": null,
+            "terms": 0,
+            "term_details": {
+                "term_units": 20,
+                "trial_days": 0,
+                "trial_amount": 0,
+                "period_length": 1,
+                "trial_occurrences": 0,
+                "payment_occurrences": 12
+            },
+            "term_start_date": null,
+            "billing_start_date": null,
+            "available": false,
+            "bundle": false,
+            "offer_description": null,
+            "list_bundle_items": false,
+            "allow_multiple": false,
+            "is_promotional": true,
+            "meta": {}
+        }
+    },
+    {
+        "model": "vendor.offer",
+        "pk": 10,
+        "fields": {
+            "created": "2023-05-24T22:28:38.324Z",
+            "updated": "2023-05-24T22:28:38.324Z",
+            "deleted": false,
+            "uuid": "3bdce461-ece4-4098-9645-877f1a884121",
+            "slug": "hammouwhee-fixed",
+            "site": 1,
+            "name": "HamMouWhee Fixed",
+            "start_date": "2023-05-24T22:28:38.324Z",
+            "end_date": null,
+            "terms": 0,
+            "term_details": {
+                "term_units": 20,
+                "trial_days": 0,
+                "trial_amount": 0,
+                "period_length": 1,
+                "trial_occurrences": 0,
+                "payment_occurrences": 12
+            },
+            "term_start_date": null,
+            "billing_start_date": null,
+            "available": false,
+            "bundle": false,
+            "offer_description": null,
+            "list_bundle_items": false,
+            "allow_multiple": false,
+            "is_promotional": true,
+            "meta": {}
+        }
+    },
+    {
+        "model": "vendor.offer",
+        "pk": 11,
+        "fields": {
+            "created": "2023-05-24T22:40:26.498Z",
+            "updated": "2023-05-24T22:40:26.498Z",
+            "deleted": false,
+            "uuid": "63f34943-4d56-4e89-9ad9-56da7bc1a64c",
+            "slug": "vendoroff",
+            "site": 1,
+            "name": "Vendor%OFF",
+            "start_date": "2023-05-24T22:40:26.497Z",
+            "end_date": null,
+            "terms": 0,
+            "term_details": {
+                "term_units": 20,
+                "trial_days": 0,
+                "trial_amount": 0,
+                "period_length": 1,
+                "trial_occurrences": 0,
+                "payment_occurrences": 12
+            },
+            "term_start_date": null,
+            "billing_start_date": null,
+            "available": false,
+            "bundle": false,
+            "offer_description": null,
+            "list_bundle_items": false,
+            "allow_multiple": false,
+            "is_promotional": true,
+            "meta": {}
+        }
+    },
+    {
+        "model": "vendor.offer",
+        "pk": 12,
+        "fields": {
+            "created": "2023-05-24T22:40:53.892Z",
+            "updated": "2023-05-24T22:40:53.892Z",
+            "deleted": false,
+            "uuid": "22aac2c2-4631-4006-afd5-f57c12836cf0",
+            "slug": "vendorfixed",
+            "site": 1,
+            "name": "VendorFIXED",
+            "start_date": "2023-05-24T22:40:53.891Z",
             "end_date": null,
             "terms": 0,
             "term_details": {
@@ -477,6 +705,66 @@
         }
     },
     {
+        "model": "vendor.price",
+        "pk": 8,
+        "fields": {
+            "offer": 9,
+            "cost": 10.0,
+            "currency": "usd",
+            "start_date": "2023-05-24T22:26:46.046Z",
+            "end_date": null,
+            "priority": 0
+        }
+    },
+    {
+        "model": "vendor.price",
+        "pk": 9,
+        "fields": {
+            "offer": 10,
+            "cost": -3.0,
+            "currency": "usd",
+            "start_date": "2023-05-24T22:28:38.324Z",
+            "end_date": null,
+            "priority": 0
+        }
+    },
+    {
+        "model": "vendor.price",
+        "pk": 10,
+        "fields": {
+            "offer": 11,
+            "cost": 10.0,
+            "currency": "usd",
+            "start_date": "2023-05-24T22:40:26.497Z",
+            "end_date": null,
+            "priority": 0
+        }
+    },
+    {
+        "model": "vendor.price",
+        "pk": 11,
+        "fields": {
+            "offer": 12,
+            "cost": -1.0,
+            "currency": "usd",
+            "start_date": "2023-05-24T22:40:53.891Z",
+            "end_date": null,
+            "priority": 0
+        }
+    },
+    {
+        "model": "vendor.price",
+        "pk": 12,
+        "fields": {
+            "offer": 6,
+            "cost": 108.0,
+            "currency": "usd",
+            "start_date": "2020-06-30T02:38:30Z",
+            "end_date": null,
+            "priority": 0
+        }
+    },
+    {
         "model": "vendor.receipt",
         "pk": 1,
         "fields": {
@@ -577,6 +865,81 @@
         "site": 1,
         "meta": {}
     }
+},{
+    "model": "vendorpromo.promotionalcampaign",
+    "pk": 3,
+    "fields": {
+        "created": "2023-05-24T22:26:46.091Z",
+        "updated": "2023-05-24T22:26:46.091Z",
+        "uuid": "dd2bfcbf-9c90-45e7-8389-e3254993e24c",
+        "campaign_id": null,
+        "name": "HamMouWhee %",
+        "description": "",
+        "start_date": null,
+        "end_date": null,
+        "is_percent_off": true,
+        "max_redemptions": null,
+        "applies_to": 9,
+        "site": 1,
+        "meta": {}
+    }
+},
+{
+    "model": "vendorpromo.promotionalcampaign",
+    "pk": 4,
+    "fields": {
+        "created": "2023-05-24T22:28:38.368Z",
+        "updated": "2023-05-24T22:28:38.368Z",
+        "uuid": "14a66c04-3d72-442a-8e0e-91a62404ca48",
+        "campaign_id": null,
+        "name": "HamMouWhee Fixed",
+        "description": "",
+        "start_date": null,
+        "end_date": null,
+        "is_percent_off": false,
+        "max_redemptions": null,
+        "applies_to": 10,
+        "site": 1,
+        "meta": {}
+    }
+},
+{
+    "model": "vendorpromo.promotionalcampaign",
+    "pk": 5,
+    "fields": {
+        "created": "2023-05-24T22:40:26.535Z",
+        "updated": "2023-05-24T22:40:26.535Z",
+        "uuid": "1049fd6a-44e8-489e-9a3a-c3242b20fc31",
+        "campaign_id": null,
+        "name": "Vendor%OFF",
+        "description": "",
+        "start_date": null,
+        "end_date": null,
+        "is_percent_off": true,
+        "max_redemptions": null,
+        "applies_to": 11,
+        "site": 1,
+        "meta": {}
+    }
+},
+{
+    "model": "vendorpromo.promotionalcampaign",
+    "pk": 6,
+    "fields": {
+        "created": "2023-05-24T22:40:53.925Z",
+        "updated": "2023-05-24T22:40:53.925Z",
+        "uuid": "bbfe6207-19d7-42e0-8af5-f93e24eb1da1",
+        "campaign_id": null,
+        "name": "VendorFIXED",
+        "description": "",
+        "start_date": null,
+        "end_date": null,
+        "is_percent_off": false,
+        "max_redemptions": null,
+        "applies_to": 12,
+        "site": 1,
+        "meta": {}
+    }
 },
 {
     "model": "vendorpromo.couponcode",
@@ -604,6 +967,70 @@
         "end_date": null,
         "meta": {},
         "promo": 1
+    }
+},
+{
+    "model": "vendorpromo.couponcode",
+    "pk": 3,
+    "fields": {
+        "created": "2023-05-24T22:36:07.298Z",
+        "updated": "2023-05-24T22:36:07.298Z",
+        "uuid": "bfe3b3bf-9668-4fb6-b1d1-24e26070ac13",
+        "active": true,
+        "code": "ham3",
+        "max_redemptions": null,
+        "end_date": null,
+        "meta": {},
+        "promo": 4,
+        "invoice": []
+    }
+},
+{
+    "model": "vendorpromo.couponcode",
+    "pk": 4,
+    "fields": {
+        "created": "2023-05-24T22:36:31.504Z",
+        "updated": "2023-05-24T22:36:31.504Z",
+        "uuid": "d7c4810d-e908-4be7-9248-959ba6924c31",
+        "active": true,
+        "code": "ham10",
+        "max_redemptions": null,
+        "end_date": null,
+        "meta": {},
+        "promo": 3,
+        "invoice": []
+    }
+},
+{
+    "model": "vendorpromo.couponcode",
+    "pk": 5,
+    "fields": {
+        "created": "2023-05-24T22:41:23.429Z",
+        "updated": "2023-05-24T22:41:23.429Z",
+        "uuid": "7121ab8e-f819-4be1-9c2e-942bc9a4365a",
+        "active": true,
+        "code": "vendorper",
+        "max_redemptions": null,
+        "end_date": null,
+        "meta": {},
+        "promo": 5,
+        "invoice": []
+    }
+},
+{
+    "model": "vendorpromo.couponcode",
+    "pk": 6,
+    "fields": {
+        "created": "2023-05-24T22:41:34.729Z",
+        "updated": "2023-05-24T22:41:34.729Z",
+        "uuid": "1f217e11-a0a8-46b2-a8d2-971a4bb4e621",
+        "active": true,
+        "code": "vendorfix",
+        "max_redemptions": null,
+        "end_date": null,
+        "meta": {},
+        "promo": 6,
+        "invoice": []
     }
 }
 ]

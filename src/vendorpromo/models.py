@@ -1,13 +1,11 @@
 import uuid
 
 from autoslug import AutoSlugField
-
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
-from vendor.models import CustomerProfile, Offer, Invoice
+from vendor.models import CustomerProfile, Invoice, Offer
 
 
 #######################################
@@ -87,7 +85,7 @@ class PromotionalCampaign(CreateUpdateModelBase):
     class Meta:
         verbose_name = "Promotional Campaign"
         verbose_name_plural = "Promotional Campaigns"
-
+    
 
 class CouponCode(CreateUpdateModelBase):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -156,35 +154,3 @@ class Affiliate(CreateUpdateModelBase):
             return self.company
         
         return self.uuid
-
-"""
-Stripe Structure
-{
-    "coupon": {
-        "amount_off": offer.current_price(),
-        "percent_off": offer.current_price(),
-        "currency": offer.currency(),
-        "duration": 'once' if offer.term_details['trial_occurrences'] <= 1 else 'repeating',
-        "duration_in_months": offer.term_details['trial_occurrences'],
-        "name": promo.campaign_name and offer.name,
-        "applies_to": promo.offer.products,
-        "max_redemptions": promo.max_redemptions,
-        "redeem_by": promo.end_date,
-        "promo": {
-            "code": PromoCode.code,
-            "metadata": {
-                "site": id,
-                "promo_id": promo.id,
-                "offer_id": offer.id
-            },
-            "expires_at": offer.end_date,
-            "max_redemptions": promo.meta['max_redemptions'],
-            "restrictions": {
-                "first_time_transaction": promo.meta["first_time_transaction"],
-                "minimum_amount": promo.meta["minimum_amount"],
-                ""
-            }
-        }
-    }
-}
-"""
