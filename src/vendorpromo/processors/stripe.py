@@ -117,7 +117,7 @@ class StripePromoProcessor(PromoProcessorBase):
         stripe_id = promo_campaign.meta.get('stripe_id')
         
         if stripe_id:
-            self.stripe_builder.stripe_delete_object(self.stripe.Coupon, stripe_id)
+            self.stripe_builder.stripe_delete_object(self.stripe_builder.stripe.Coupon, stripe_id)
         
         super().delete_promo(promo_campaign)
 
