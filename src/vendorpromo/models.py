@@ -116,6 +116,8 @@ class Affiliate(CreateUpdateModelBase):
     '''
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     slug = AutoSlugField(unique_with=('customer_profile__site'), editable=True, blank=True, null=True, verbose_name=_("Affiliate Code"))
+    name = models.CharField(max_length=120, blank=True, null=True, verbose_name=_("Name"))
+    type = models.CharField(max_length=80, blank=True, null=True, verbose_name=_("Type"))
     contact_name = models.CharField(max_length=120, blank=True, null=True, verbose_name=_("Contact Name"))
     email = models.EmailField(blank=True, null=True, verbose_name=_("Email"))
     company = models.CharField(max_length=120, blank=True, null=True, verbose_name=_("Company"))
