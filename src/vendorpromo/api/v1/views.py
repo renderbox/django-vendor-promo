@@ -1,3 +1,5 @@
+import math
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -152,6 +154,9 @@ class ValidateCouponCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
         if not next((product for product in coupon_code.promo.applies_to.products.all() if product in invoice_products), False):
             return JsonResponse({'error': _("Code does not apply to any of the products in you cart")}, status=404)
         
+        if invoice.profile.has_owned_product(coupon_code.promo.applies_to.products.all()):
+            return JsonResponse({'error': _("Code only applies to first time purchases")}, status=404)
+        
         coupon_code.invoice.add(invoice)
         invoice.add_offer(coupon_code.promo.applies_to)
 
@@ -164,10 +169,12 @@ class ValidateCouponCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
                 total_global_discount = 0
                 for order_item in invoice_order_items:
                     order_item_products = list(order_item.offer.products.all())
+                    coupon_code_discount_value = math.fabs(coupon_code.promo.applies_to.current_price())
                     if does_coupon_apply_to_order_item(coupon_code, order_item_products):
-                        total_global_discount += (order_item.total * coupon_code.promo.applies_to.current_price()) / 100
+                        total_global_discount += (order_item.total * coupon_code_discount_value) / 100
                 
-                invoice.global_discount = total_global_discount - coupon_code.promo.applies_to.current_price()
+                # invoice.global_discount = total_global_discount - coupon_code_discount_value
+                invoice.global_discount = total_global_discount
                 invoice.update_totals()
                 invoice.save()
 
