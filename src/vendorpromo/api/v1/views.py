@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.generic import DeleteView, View
 from vendor.api.v1.views import AddToCartView
@@ -138,11 +139,18 @@ class ValidateCouponCodeCheckoutProcessAPIView(LoginRequiredMixin, View):
     """
     def post(self, request, *args, **kwargs):
         try:
+            now = timezone.now()
             invoice = get_object_or_404(Invoice, uuid=kwargs['invoice_uuid'])
             coupon_code = get_object_or_404(CouponCode, code__iexact=request.POST['promo_code'], promo__site=invoice.site)
         except Http404 as error:
             return JsonResponse({'error': _("Invalid Code")}, status=404)
         
+        if coupon_code.promo.start_date and now < coupon_code.promo.start_date:
+            return JsonResponse({'error': "Code has not been released"}, status=404)
+
+        if coupon_code.promo.end_date and now > coupon_code.promo.end_date:
+            return JsonResponse({'error': "Code has expired"}, status=404)
+
         if invoice.order_items.filter(offer__is_promotional=True).exists():
             return JsonResponse({'error': "You can only apply one promo code per checkout session"}, status=404)
 
