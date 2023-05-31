@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from vendor.models import CustomerProfile, Invoice, Offer
-
+from vendor.models.choice import InvoiceStatus
 
 #######################################
 # ABSTRACT MODELS
@@ -108,6 +108,9 @@ class CouponCode(CreateUpdateModelBase):
 
     def get_display_code(self):
         return str(self.code).upper()
+    
+    def redemptions(self):
+        return self.invoice.filter(status=InvoiceStatus.COMPLETE)
 
 
 class Affiliate(CreateUpdateModelBase):
