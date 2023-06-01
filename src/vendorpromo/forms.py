@@ -114,7 +114,7 @@ class PromotionalCampaignForm(forms.ModelForm):
     def clean_end_date(self):
         end_date = self.cleaned_data['end_date']
 
-        if end_date < timezone.now():
+        if end_date and end_date < timezone.now():
             raise forms.ValidationError(_("The End Date must be a future date"))
 
         return end_date
