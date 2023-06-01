@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.sites.models import Site
 from django.db.models import TextChoices
 from django.forms import modelformset_factory
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from integrations.models import Credential
 from vendor.models import CustomerProfile
@@ -98,7 +99,6 @@ class PromotionalCampaignForm(forms.ModelForm):
             self.fields['is_percent_off'].initial = (True, "Percent Off") if self.instance.is_percent_off else (False, "Fixed Amount")
             self.fields['discount_value'].initial = self.instance.applies_to.current_price()
 
-
     def clean_discount_value(self):
         discount_value = self.cleaned_data.get('discount_value', 0)
 
@@ -110,7 +110,14 @@ class PromotionalCampaignForm(forms.ModelForm):
                 raise forms.ValidationError(_("Must be a number between 1 and 99"))
         
         return discount_value
+    
+    def clean_end_date(self):
+        end_date = self.cleaned_data['end_date']
 
+        if end_date and end_date < timezone.now():
+            raise forms.ValidationError(_("The End Date must be a future date"))
+
+        return end_date
 
 class StripePromotionalCampaignForm(PromotionalCampaignForm):
 
