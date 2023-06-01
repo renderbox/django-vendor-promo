@@ -90,7 +90,7 @@ class PromotionalCampaign(CreateUpdateModelBase):
 class CouponCode(CreateUpdateModelBase):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     active = models.BooleanField(_("Active"), default=True)
-    code = AutoSlugField(unique_with=('promo__site'), editable=True, blank=True, null=True, verbose_name=_("Affiliate Code"))
+    code = AutoSlugField(unique_with=('promo__site'), editable=True, blank=True, null=True, sep="copy", verbose_name=_("Affiliate Code"))
     max_redemptions = models.IntegerField(_("Max Redemptions"), blank=True, null=True)
     end_date = models.DateTimeField(_("End Date"), blank=True, null=True, help_text=_("When will the code be unavailable"))
     meta = models.JSONField(blank=True, null=True, default=dict)
