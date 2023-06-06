@@ -135,8 +135,8 @@ class Affiliate(CreateUpdateModelBase):
         verbose_name_plural = "Affiliates"
 
     def clean(self):
-        if (self.customer_profile is None) and (self.contact_name is None and self.email is None and self.company is None):
-            raise ValidationError(_("You at least need to assign a Customer Profile or enter a Full Name, Email or Company for the Affiliate"))
+        if (self.customer_profile is None) and (self.contact_name is None and self.email is None and self.company is None and self.name is None):
+            raise ValidationError(_("You at least need to assign a Customer Profile or enter a Name, Full Name, Email or Company for the Affiliate"))
         
         if self.customer_profile is not None and Affiliate.objects.filter(customer_profile=self.customer_profile).exists():
             raise ValidationError(_("The selected Customer Profile is already linked to an existing Affiliate."))
@@ -148,6 +148,9 @@ class Affiliate(CreateUpdateModelBase):
     def __str__(self):
         if self.customer_profile:
             return str(self.customer_profile)
+        
+        if self.name:
+            return self.name
         
         if self.contact_name:
             return self.contact_name
