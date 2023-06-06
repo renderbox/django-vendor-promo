@@ -127,7 +127,7 @@ class AffiliateViewTests(TestCase):
         view_url = reverse('affiliate-create')
         
         response = self.client.post(view_url, {})
-        self.assertIn("You at least need to assign a Customer Profile or enter a Full Name, Email or Company for the Affiliate", str(response.content))
+        self.assertIn("You at least need to assign a Customer Profile or enter a Name, Full Name, Email or Company for the Affiliate", str(response.content))
 
     def test_affiliate_create_post_error_customer_profile_link(self):
         view_url = reverse('affiliate-create')
