@@ -141,6 +141,10 @@ class PromoProcessorBase(object):
     def delete_coupon_code(self, coupon_code):
         coupon_code.delete()
 
+    def set_active_coupon_code(self, coupon_code, is_active):
+        coupon_code.active = is_active
+        coupon_code.save()
+
     ################
     # Processor Functions
     def is_code_valid(self, code):

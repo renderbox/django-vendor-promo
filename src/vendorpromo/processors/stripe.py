@@ -87,6 +87,20 @@ class StripePromoProcessor(PromoProcessorBase):
         if not stripe_coupon:
             return None  # Think about returning an error
 
+    def set_active_stripe_promotion_code(self, coupon_code, is_active):
+        promotion_code_data = self.build_promotion_code(coupon_code)
+        promotion_code_data['active'] = is_active
+        del(promotion_code_data['coupon'])
+        del(promotion_code_data['code'])
+        del(promotion_code_data['metadata'])
+        del(promotion_code_data['expires_at'])
+        del(promotion_code_data['max_redemptions'])
+
+        stripe_coupon = self.stripe_builder.stripe_update_object(self.stripe_builder.stripe.PromotionCode, coupon_code.meta['stripe_id'], promotion_code_data)
+
+        if not stripe_coupon:
+            return None  # Think about returning an error
+
     ################
     # Promotion Management
     def create_promo(self, promo_form):
@@ -132,6 +146,12 @@ class StripePromoProcessor(PromoProcessorBase):
     def update_coupon_code(self, coupon_form):
         coupon_code = super().update_coupon_code(coupon_form)
         self.update_stripe_promotion_code(coupon_code)
+
+        return coupon_code
+
+    def set_active_coupon_code(self, coupon_code, is_active):
+        super().set_active_coupon_code(coupon_code, is_active)
+        self.set_active_stripe_promotion_code(coupon_code, is_active)
 
         return coupon_code
 
