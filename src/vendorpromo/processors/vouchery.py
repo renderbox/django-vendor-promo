@@ -54,7 +54,7 @@ class VoucheryProcessor(PromoProcessorBase):
     credentials = None
 
     def __init__(self, site, invoice=None):
-        super().__init__(site=site, invoice=invoice)
+        super().__init__(site, invoice)
         self.set_credentials(site)
 
 
