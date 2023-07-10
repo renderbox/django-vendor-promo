@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=dev --no-emit-index-url --output-file=requirements.dev.txt pyproject.toml
 #
-asgiref==3.6.0
+asgiref==3.7.2
     # via django
 authorizenet==1.1.4
     # via django-vendor-promo (pyproject.toml)
@@ -18,15 +18,15 @@ certifi==2023.5.7
     # via requests
 cffi==1.15.1
     # via cryptography
-charset-normalizer==3.1.0
+charset-normalizer==3.2.0
     # via requests
-click==8.1.3
+click==8.1.4
     # via black
 crispy-bootstrap4==2022.1
     # via django-vendor-promo (pyproject.toml)
 crispy-bootstrap5==0.7
     # via django-vendor-promo (pyproject.toml)
-cryptography==40.0.2
+cryptography==41.0.1
     # via
     #   django-fernet-fields
     #   pyjwt
@@ -34,7 +34,7 @@ defusedxml==0.7.1
     # via python3-openid
 dj-database-url==2.0.0
     # via django-vendor-promo (pyproject.toml)
-django==3.2.19
+django==3.2.20
     # via
     #   crispy-bootstrap4
     #   crispy-bootstrap5
@@ -59,7 +59,7 @@ django-crispy-forms==2.0
     #   crispy-bootstrap4
     #   crispy-bootstrap5
     #   django-vendor-promo (pyproject.toml)
-django-extensions==3.2.1
+django-extensions==3.2.3
     # via
     #   django-vendor
     #   django-vendor-promo (pyproject.toml)
@@ -69,7 +69,7 @@ django-integrations==0.1.4
     # via django-vendor-promo (pyproject.toml)
 django-site-configs==0.1.6
     # via django-vendor-promo (pyproject.toml)
-django-vendor==0.4.3
+django-vendor==0.4.4
     # via django-vendor-promo (pyproject.toml)
 djangorestframework==3.14.0
     # via django-site-configs
@@ -91,15 +91,15 @@ iso4217==1.11.20220401
     #   django-vendor-promo (pyproject.toml)
 isort==5.12.0
     # via django-vendor-promo (pyproject.toml)
-lxml==4.9.2
+lxml==4.9.3
     # via authorizenet
-markdown-it-py==2.2.0
+markdown-it-py==3.0.0
     # via rich
 mccabe==0.7.0
     # via flake8
 mdurl==0.1.2
     # via markdown-it-py
-mypy==1.3.0
+mypy==1.4.1
     # via django-vendor-promo (pyproject.toml)
 mypy-extensions==1.0.0
     # via
@@ -113,7 +113,7 @@ pathspec==0.11.1
     # via black
 pbr==5.11.1
     # via stevedore
-platformdirs==3.5.0
+platformdirs==3.8.1
     # via black
 psycopg2-binary==2.9.6
     # via django-vendor-promo (pyproject.toml)
@@ -137,7 +137,7 @@ pyxb==1.2.5
     # via authorizenet
 pyyaml==6.0
     # via bandit
-requests==2.30.0
+requests==2.31.0
     # via
     #   authorizenet
     #   django-allauth
@@ -145,13 +145,13 @@ requests==2.30.0
     #   stripe
 requests-oauthlib==1.3.1
     # via django-allauth
-rich==13.3.5
+rich==13.4.2
     # via bandit
 smmap==5.0.0
     # via gitdb
 sqlparse==0.4.4
     # via django
-stevedore==5.0.0
+stevedore==5.1.0
     # via bandit
 stripe==5.4.0
     # via django-vendor-promo (pyproject.toml)
@@ -162,10 +162,11 @@ tomli==2.0.1
     #   black
     #   flake8-black
     #   mypy
-typing-extensions==4.5.0
+typing-extensions==4.7.1
     # via
+    #   asgiref
     #   black
     #   dj-database-url
     #   mypy
-urllib3==2.0.2
+urllib3==2.0.3
     # via requests

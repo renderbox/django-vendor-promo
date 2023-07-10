@@ -4,7 +4,7 @@
 #
 #    pip-compile --no-emit-index-url --output-file=requirements.txt pyproject.toml
 #
-asgiref==3.6.0
+asgiref==3.7.2
     # via django
 authorizenet==1.1.4
     # via django-vendor-promo (pyproject.toml)
@@ -12,11 +12,11 @@ certifi==2023.5.7
     # via requests
 cffi==1.15.1
     # via cryptography
-charset-normalizer==3.1.0
+charset-normalizer==3.2.0
     # via requests
-cryptography==40.0.2
+cryptography==41.0.1
     # via django-fernet-fields
-django==3.2.19
+django==3.2.20
     # via
     #   django-extensions
     #   django-fernet-fields
@@ -29,7 +29,7 @@ django-autoslug==1.9.9
     # via
     #   django-vendor
     #   django-vendor-promo (pyproject.toml)
-django-extensions==3.2.1
+django-extensions==3.2.3
     # via
     #   django-vendor
     #   django-vendor-promo (pyproject.toml)
@@ -39,7 +39,7 @@ django-integrations==0.1.4
     # via django-vendor-promo (pyproject.toml)
 django-site-configs==0.1.6
     # via django-vendor-promo (pyproject.toml)
-django-vendor==0.4.3
+django-vendor==0.4.4
     # via django-vendor-promo (pyproject.toml)
 djangorestframework==3.14.0
     # via django-site-configs
@@ -49,7 +49,7 @@ iso4217==1.11.20220401
     # via
     #   django-vendor
     #   django-vendor-promo (pyproject.toml)
-lxml==4.9.2
+lxml==4.9.3
     # via authorizenet
 pycparser==2.21
     # via cffi
@@ -59,7 +59,7 @@ pytz==2023.3
     #   djangorestframework
 pyxb==1.2.5
     # via authorizenet
-requests==2.30.0
+requests==2.31.0
     # via
     #   authorizenet
     #   stripe
@@ -67,5 +67,7 @@ sqlparse==0.4.4
     # via django
 stripe==5.4.0
     # via django-vendor-promo (pyproject.toml)
-urllib3==2.0.2
+typing-extensions==4.7.1
+    # via asgiref
+urllib3==2.0.3
     # via requests
