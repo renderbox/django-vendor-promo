@@ -1,7 +1,7 @@
 import math
 from vendor.config import DEFAULT_CURRENCY
 from vendorpromo.processors.base import PromoProcessorBase
-from vendor.processors.stripe_processor import StripeProcessor as StripeBuilder
+from vendor.processors.stripe import StripeProcessor as StripeBuilder
 
 
 class StripePromoProcessor(PromoProcessorBase):
