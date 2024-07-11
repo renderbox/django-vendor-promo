@@ -114,12 +114,35 @@ class CouponCode(CreateUpdateModelBase):
         return self.invoice.filter(status=InvoiceStatus.COMPLETE)
 
     def does_offer_apply(self, offer):
-        if self.promo.applies_to.products.filter(pk__in=offer.products.all().values_list('pk', flat=True)).count():
+        if self.promo.applies_to.products.filter(pk__in=offer.products.all().values_list('pk', flat=True)):
             return True
 
         return False
 
-    def get_offer_discount(self, offer):
+    def get_discounted_amount(self, offer):
+        """returns the discounted amount releated to the offer.
+
+        Checks if the offer is related to the coupon_code. If it is,
+        it returns the discounted amount from the the offer current_price.
+
+        eg
+        a):
+            offer.current_price() = 80
+            coupon_code.is_percent_off = True
+            coupon_discount = 5%
+            return (80 * 5) / 100
+        b):
+            offer.current_price() = 80
+            coupon_code.is_percent_off = False
+            coupon_discount = $5.00
+            return 5.00
+
+        Args:
+            offer (Offer): Offer Model in django-vendo
+
+        Returns:
+            Decimal: The amount discounted
+        """
         coupon_discount = 0
 
         if self.does_offer_apply(offer):
@@ -128,7 +151,7 @@ class CouponCode(CreateUpdateModelBase):
             if self.promo.is_percent_off:
                 return (offer.current_price() * coupon_discount) / 100
             else:
-                return offer.current_price() - coupon_discount
+                return coupon_discount
 
         return 0
 
